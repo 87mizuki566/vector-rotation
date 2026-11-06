@@ -1,0 +1,5655 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>ベクトル場の回転 可視化教材｜レスポンシブ試作版</title>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        
+        #CSConsole {
+            background-color: #FAFAFA;
+            border-top: 1px solid #333333;
+            bottom: 0px;
+            height: 200px;
+            overflow-y: scroll;
+            position: fixed;
+            width: 100%;
+        }
+
+/* ===== Responsive shell; original CindyScript remains unchanged. ===== */
+:root { color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; }
+body { min-width: 280px; margin: 0; background: #f1f5f9; color: #14263e;
+       font-family: "Noto Sans JP", "Yu Gothic", Meiryo, system-ui, sans-serif; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+.page { max-width: 1690px; margin: auto; padding: 16px clamp(8px, 2vw, 24px) 32px; }
+.page-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+               margin-bottom: 12px; flex-wrap: wrap; }
+.page-title { font-size: clamp(17px, 2vw, 24px); font-weight: 750; line-height: 1.4; }
+.page-subtitle { color: #526177; font-size: 13px; }
+.viewer-panel, .mobile-panel { background: white; border: 1px solid #ccd7e5;
+                                border-radius: 13px; overflow: hidden; box-shadow: 0 2px 12px #22334812; }
+.viewer-toolbar { padding: 9px 12px; display: flex; align-items: center; justify-content: space-between;
+                  gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #dfe7f0; background: #f9fbfe; }
+.viewer-hint { font-size: 13px; color: #53657a; }
+.tool-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.tool-btn { min-height: 36px; background: white; color: #13365e; border: 1px solid #a8bdd5;
+            border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 650; }
+.tool-btn[aria-pressed="true"] { background: #164b90; border-color: #164b90; color: white; }
+.canvas-viewport { overflow-x: auto; overflow-y: hidden; width: 100%; -webkit-overflow-scrolling: touch;
+                  overscroll-behavior-x: contain; background: rgb(247,247,247); }
+.canvas-stage { position: relative; width: 1600px; height: 663px; }
+#CSCanvas { width: 1600px; height: 663px; position: relative; transform-origin: top left; }
+.viewer-footer { font-size: 12px; padding: 9px 12px; color: #55667d; border-top: 1px solid #dfe7f0; }
+.mobile-panel { display: none; margin-top: 14px; padding: clamp(12px, 2vw, 22px); }
+.panel-heading { font-weight: 750; font-size: 18px; margin: 0 0 4px; }
+.panel-caption { font-size: 13px; color: #52657b; margin-bottom: 16px; }
+.mode-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.mode-row label { display: flex; gap: 7px; align-items: center; font-weight: 650; cursor: pointer; }
+.mode-row input[type="checkbox"], .toggle-grid input[type="checkbox"] { width: 20px; height: 20px; accent-color: #1354a1; }
+.fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field label { font-weight: 700; font-size: 14px; }
+.field input { width: 100%; min-width: 0; background: white; border: 1px solid #9daec3;
+               border-radius: 8px; padding: 10px 12px; min-height: 45px; font-size: 16px; }
+.field-p2 label { color: #7039ab; } .field-p3 label { color: #b06505; }
+.hidden { display: none !important; }
+.buttons { display: flex; flex-wrap: wrap; gap: 9px; margin: 13px 0 0; }
+.action-btn { min-height: 44px; border-radius: 9px; border: 1px solid #9baec6;
+              padding: 9px 15px; background: white; color: #15345c; font-weight: 700; }
+.action-btn.primary { background: #1553a3; color: white; border-color: #1553a3; }
+.action-btn.secondary { background: #ebf5ff; border-color: #9cc1ea; }
+.action-btn:active, .tool-btn:active { filter: brightness(.94); }
+.section-title { margin: 19px 0 8px; font-size: 14px; font-weight: 750; }
+.toggle-grid { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.toggle-grid label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+.status { white-space: pre-wrap; line-height: 1.5; font-size: 14px; padding: 9px 12px;
+          margin-top: 15px; min-height: 40px; border: 1px solid #b8c8dc; background: #f6f9fd;
+          color: #263950; border-radius: 8px; }
+.status.error { color: #9c2020; border-color: #f0b3b3; background: #fff4f4; font-weight: 650; }
+.result-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+.result-grid > div { min-width:0; padding: 10px; border: 1px solid #dae3ed; border-radius: 8px; background: #fbfdff; }
+.result-grid span { display: block; font-size: 12px; color: #506780; }
+.result-grid strong { display: block; font-size: 14px; font-weight: 650; overflow-wrap: anywhere; padding-top: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+           overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 1100px) { .mobile-panel { display: block; } }
+@media (max-width: 620px) {
+  .page { padding: 10px 6px 24px; }
+  .page-subtitle { width: 100%; }
+  .viewer-toolbar { padding: 8px; }
+  .viewer-hint { width: 100%; }
+  .tool-actions { width: 100%; }
+  .tool-btn { padding: 7px 9px; }
+  .fields, .result-grid { grid-template-columns: minmax(0,1fr); }
+  .action-btn { flex: 1 0 auto; }
+}
+
+    </style>
+    <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8.8/CindyJS.css">
+    <script type="text/javascript" src="https://cindyjs.org/dist/v0.8.8/Cindy.js"></script>
+
+<script id="csinit" type="text/x-cindyscript">
+Invert(x):=reverse(x);
+Start3d():=Start3d([],[]); 
+Start3d(Arg):=( //190503from
+  regional(tmp);
+  tmp=select(Arg,isstring(#)); //190822
+  tmp=select(tmp,indexof(#,"=")>0);
+  if(length(tmp)==0,
+    Start3d(Arg,[]);
+  ,
+    Start3d([],Arg);
+  );
+);
+Start3d(ptexception,optionjs):=(//190503to
+  regional(xPos,yTh,yPh,xmn,xMx,ymn,yMx,pt,pt3,pt2,theta,phi,
+    Eps,tmp,tmp1,tmp2,tmp3,tmp4);
+  PTEXCEPTION=["LB"];
+  SLIDEFLG="Y";
+  forall(optionjs,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(tmp1=="S",
+      SLIDEFLG=Toupper(substring(tmp_2,0,1));
+    );
+    if(tmp1=="R",
+      tmp2=tmp_2;
+      if(substring(tmp2,0,1)=="[",tmp2=substring(tmp2,1,length(tmp2)-1));
+      tmp2=tokenize(tmp2,",");
+      REMOVEPTJS=concat(REMOVEPTJS,tmp2);
+    );
+  );
+  GCLIST=[];
+  SEG3dlist=[];
+  KETJSOP=[]; //190129
+  REMOVEPTJS=[]; SLIDEFLG="Y"; //190504
+  KetcindyjsDataList=[]; //190511
+  ArrowlineNumber=1;  // 16.01.31
+  ArrowheadNumber=1;
+  BezierNumber=1; //16.01.31
+  BezierNumber3=1; //16.08.19
+  Setwindow("Msg=no"); // 16.06.20from
+  tmp=round(4*SW.y)/4;
+  xPos=-5; yTh=tmp-0.5; yPh=tmp-1; //220126
+  Putpoint("LB",[xPos-0.5,yPh]); //220215[2lines]
+  inspect(LB,"ptsize",0);
+  inspect(LB,"labeled",false);
+  if(SLIDEFLG=="Y", // 
+    Slider("TH",[xPos,yTh],[xPos+9,yTh],["Color=green"]); //190209
+    Slider("FI",[xPos,yPh],[xPos+9,yPh],["Color=green"]); //190209
+    THETA=(TH.x-xPos)*20*pi/180;
+    PHI=(FI.x-xPos)*40*pi/180; // 16.06.20until
+    drawtext([xPos-0.8,yTh-0.1],Sprintf(THETA*180/pi,2),align->"right");
+    drawtext([xPos-0.8,yPh-0.1],Sprintf(PHI*180/pi,2),align->"right");  //220208to
+  ); // 
+  if(Ptselected(TH) % Ptselected(FI), //190505
+    if(length(Ch)>0,
+      ChNum=Ch_(length(Ch));
+      if(ChNum==0, ChNum=1);
+    ,
+      ChNum=1;
+    );
+    Ch=[0];
+  );
+  tmp=ptexception; //181106
+  if(!islist(tmp),tmp=[tmp]);  //190209
+  PTEXCEPTION=concat(PTEXCEPTION,tmp); //190209 
+  Ptseg3data(PTEXCEPTION);//16.08.23
+  FuncListC=[]; //220126[2lines]
+  SurfList=[];
+  LenAddSurf=0; //220202
+);
+Strsplit(strorg,key):=( // 210422 renewed
+  regional(str,ctr,tmp,tmp1,out);
+  str=strorg+key; 
+  out=[];
+  tmp=indexof(str,key);
+  while(tmp>0,
+    tmp1=substring(str,0,tmp-1);
+    out=append(out,tmp1);
+    str=substring(str,tmp-1+length(key),length(str));
+    tmp=indexof(str,key);
+  );
+  out;
+);
+Toupper(str):=(
+  regional(alphabet,out,tmp,tmp1);
+  alphabet="abcdefghijklmnopqrstuvwxyz";
+  out="";
+  forall(1..(length(str)),
+    tmp=substring(str,#-1,#);
+    tmp1=indexof(alphabet,tmp);
+    if(tmp1>0,
+      out=out+unicode(text(tmp1+64),base->10);
+    ,
+      out=out+tmp;
+    );
+  );
+  out;
+);
+Setwindow():=Setwindow("Msg=y");
+Setwindow(str):=(
+  regional(tmp,tmp1,tmp2,msg);
+  msg="Y";
+  tmp=indexof(str,"="); // 16.02.10
+  msg=Toupper(substring(str,tmp,tmp+1));
+  Strictmove("SW"); Strictmove("NE");//190927
+  if((ispoint(SW)) & (ispoint(NE)),
+    tmp1=LLcrd(Ptpos(SW));//190912[2lines]
+    tmp2=LLcrd(Ptpos(NE));
+    XMIN=tmp1_1; XMAX=tmp2_1;
+    YMIN=tmp1_2; YMAX=tmp2_2;
+  ,
+    if(!ispoint(SW), //191005from
+      Putpoint("SW",Pcrd([-5,-5]));
+      XMIN=-5; YMIN=-5;
+      Ptpos(SW,SW.xy);
+    );
+    if(!ispoint(NE),
+      Putpoint("NE", Pcrd([5,5]));
+      XMAX=5; YMAX=5;
+      Ptpos(NE,NE.xy);
+    ); //191005to
+  );
+);
+Setwindow(xrange,yrange):=Setwindow(xrange,yrange,"Msg=y");
+Setwindow(xrange,yrange,msg):=(
+  XMIN=xrange_1;
+  XMAX=xrange_2;
+  YMIN=yrange_1;
+  YMAX=yrange_2;
+  Ptpos(SW,Pcrd([XMIN,YMIN])); //190927from
+  Ptpos(NE,Pcrd([XMAX,YMAX]));
+  Strictmove("SW"); Strictmove("NE");
+);
+LLcrd(pt):=(
+  regional(tmp);
+  if(ispoint(pt),
+    tmp=pt.xy
+  ,
+    tmp=pt;
+  );
+  tmp=[tmp_1/SCALEX,tmp_2/SCALEY];
+  re(tmp); //191231
+);
+Putpoint(name,Pt):=Putpoint(name,Pt,Pt);
+Putpoint(name,Ptinit,Pt):=(
+  regional(ptstr); 
+    ptstr=name+".xy="+Textformat(Pcrd(Pt),10)+";";
+    parse(ptstr);
+    Ptpos(name,Pcrd([Pt_1,Pt_2])); //200529
+);
+Textformat(value,dig):=(
+  regional(vv,tmp,tmp1);
+  if(islist(value),
+    tmp1="[";
+    forall(value,
+      tmp1=tmp1+Textformat(#,dig)+",";
+    );
+    if(length(tmp1)>1, //18.01.29from
+      tmp1=substring(tmp1,0,length(tmp1)-1);
+    );
+    tmp1=tmp1+"]"; //18.01.29until
+  ,
+    if(ispoint(value) % isstring(value),
+      if(isstring(value),tmp1=Dq+value+Dq,tmp1=text(value)); // 15.10.02
+    ,
+      tmp1=format(value,dig);
+    );
+  );
+  tmp1;
+);
+Ptpos(pt):=Ptpos(pt,[]);
+Ptpos(ptorg,pos):=(
+  regional(pt,out,tmp);
+  if(ispoint(ptorg),pt=ptorg,pt=parse(ptorg));
+  if(length(pos)==0,
+    tmp=pt.name+"position";
+    out=parse(tmp);
+    if(!islist(out),
+      tmp=tmp+"="+Textformat(pt.xy,12)+";";  //200108 6->12
+      parse(tmp);
+    );
+  ,
+    pt.xy=pos;
+    tmp=pt.name+"position="+Textformat(pt.xy,12)+";"; //200108 6->12
+    parse(tmp);
+    out=pt.xy;
+  );
+  out;
+);
+Pcrd(pt):=(
+  regional(tmp);
+  if(ispoint(pt),
+    tmp=pt.xy;
+  ,
+    tmp=[pt_1*SCALEX,pt_2*SCALEY];
+  );
+ re(tmp); //191231
+);
+Strictmove(pC):=Strictmove(pC,StrictSep); //190831
+Strictmove(pCorg,sep):=(
+  regional(pC,tmp,tmp1,tmp2);
+  pC=pCorg;
+  if(ispoint(pC),pC=pC.name);
+  tmp1=pC+"position";
+  if(!islist(parse(tmp1)),
+    tmp=tmp1+"="+Textformat(parse(pC).xy,12)+";"; //200112
+    parse(tmp);
+  ,
+   tmp=parse(pC).xy;
+    tmp2=mouse().xy;
+    if(|tmp-tmp2|>sep,
+      tmp=pC+".xy="+pC+"position";
+      parse(pC).xy=parse(pC+"position");
+    ,
+      tmp=tmp1+"="+Textformat(parse(pC).xy,12)+";"; //200112
+      parse(tmp);
+    );
+  );
+);
+Slider(ptstr,p1,p2):=Slider(ptstr,p1,p2,[]);
+Slider(ptstr,p1,p2,optionsorg):=(//220903
+  regional(pA,pB,pC,options,color,thick,sep,
+        tmp,tmp1,tmp2);
+  options=optionsorg;
+  color="Color=0.6*[0,0,1]"; //190120from
+  thick="size->2";
+  sep=0.3; //190824
+  forall(options,
+    tmp=Toupper(substring(#,0,1));
+    if(tmp=="C",
+      color=#;
+      options=remove(options,[tmp]);//220903
+    );
+    if(tmp=="T",
+      tmp=Strsplit(#,"=");
+      thick="size->"+tmp_2;
+      options=remove(options,[tmp]);//220903
+    );
+    if(tmp=="S",//190824from
+      tmp=Strsplit(#,"=");
+      sep=parse(tmp_2);
+      options=remove(options,[tmp]);//220903
+    ); //190824to
+  );
+  tmp=Indexall(ptstr,"-");
+  if(length(tmp)>0,
+    pA=substring(ptstr,0,tmp_1-1); //190824from
+    pC=substring(ptstr,tmp_1,tmp_2-1);
+    pB=substring(ptstr,tmp_2,length(ptstr));
+    parse(pA).xy=p1;
+    parse(pB).xy=p2; //190824to
+    tmp1=pC+"position"; //190827from
+    if(!islist(parse(tmp1)),
+      tmp2=parse(pC).xy;
+      if(|tmp2-p1|<0.1,tmp2=p1+0.1*(p2-p1)/|p2-p1|);
+      if(|tmp2-p2|<0.1,tmp2=p2+0.1*(p1-p2)/|p1-p2|);
+      tmp=tmp1+"="+textformat(tmp2,10)+";";
+      parse(tmp);
+      parse(pC).xy=tmp2;
+    ); //190827to
+    PTEXCEPTION=concat(TEXCEPTION,[pA,pC,pB]);
+  ,
+    pC=ptstr; pA=pC+"l"; pB=pC+"r"; 
+    PTEXCEPTION=concat(PTEXCEPTION,[pC]);
+  );
+  options=concat(options,["Msg=n",color,thick]); //220903[2lines]
+  if(!contains(options,"nodisp"),options=append(options,"notex"));
+  Listplot(pA+pB,[p1,p2],options);
+  Putonseg(pC,parse("sg"+pA+pB));
+);
+Indexall(str,key):=(
+  regional(rest,out,flg,tmp,tmp1,);
+  out=[];
+  rest=str;
+  flg=0;
+  forall(1..(length(str)),
+    if(flg==0,
+      tmp=indexof(rest,key);
+      if(tmp>0,
+        tmp1=tmp+length(str)-length(rest);
+        out=append(out,tmp1);
+        rest=substring(rest,tmp,length(rest));
+      ,
+        flg=1;
+      );
+    );
+  );
+  out;
+);
+Listplot(list):=Listplot(list,[]);
+Listplot(Arg1,Arg2):=(
+  regional(name,list,options,str);
+  if(isstring(Arg1),
+    name=Arg1;
+    list=Arg2;
+    Listplot(name,list,[]);
+  ,
+    list=Arg1;
+    options=Arg2;
+    name="";
+    forall(list, // 16.10.07from
+       name=name+#.name;
+    );// 16.10.07until
+    Listplot(name,list,options);
+  );
+);
+Listplot(nm,list,options):=(
+  regional(name,cutend,tmp,tmp1,tmp2,ptlist,Ltype,opcindy,Noflg,eqL,Msg,color,color4);
+  if(substring(nm,0,1)=="-",  // 16.01.27 from
+    name=substring(nm,1,length(nm));
+  ,
+    name="sg"+nm;
+  ); // upto
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  color=tmp_(length(tmp)-2); color4=Colorrgb2cmyk(color); //200618
+  opcindy=tmp_(length(tmp));
+  Msg="Y";  //190206
+ Msg="N"; //
+  cutend=[0,0];//180719
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(tmp1=="M",
+      Msg=Toupper(substring(tmp_2,0,1));
+    );
+    if(tmp1=="C",//180719from
+      tmp2=replace(tmp_2,"[","");
+      tmp2=replace(tmp2,"]","");
+      cutend=tokenize(tmp2,",");
+      if(length(cutend)==1,cutend=[cutend_1,cutend_1]);     
+    );//180719to
+  );
+  if(Noflg<3,
+    if(Msg=="Y", //190206
+      println("generate Listplot "+name);
+    );
+    if(isstring(list_1),tmp=apply(list,parse(#)),tmp=list); // 15.03.24
+    ptlist=apply(tmp,Pcrd(#));
+    if(|cutend|>0,//180719from
+      tmp=ptlist_(length(ptlist))-ptlist_1;
+      tmp=tmp/|tmp|;
+      ptlist_1=ptlist_1+tmp*cutend_1;
+      ptlist_(length(ptlist))=ptlist_(length(ptlist))-tmp*cutend_2;
+    );//180719to
+    tmp=name+"="+Textformat(ptlist,5)+";"; //190415
+    parse(tmp);
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+    ,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+  );
+  tmp1=apply(list,Lcrd(#));
+  tmp1;
+);
+Divoptions(options):=(
+  regional(Ltype,Noflg,Inflg,Outflg,eqL,realL,strL,
+      color,opstr,opcindy,flg,tmp,tmp1,tmp2);
+  Ltype="dr";  // 2015.01.13
+  Noflg=0;
+  Inflg=0;
+  Outflg=0;
+  eqL=[];
+  realL=[];
+  strL=[];
+  color=Colorcmyk2rgb(KCOLOR); //200513
+  opstr="";
+  opcindy="";
+  forall(options,
+    flg=0;
+    if(flg==0,
+      if(isreal(#) % ispoint(#) % islist(#),
+        realL=append(realL,#);
+        opstr=opstr+","+text(#);
+        flg=1;
+      );
+    );
+    if(flg==0,
+      if(indexof(#,"=")>0,
+        tmp=Strsplit(#,"="); //180602from
+        tmp1=Toupper(tmp_1);
+        tmp2=tmp_2;
+        if(tmp1=="COLOR",
+          if(indexof(tmp2,"[")>0, //180928
+            tmp1=parse(tmp2);
+            color=tmp1;
+            if(length(tmp1)==4,
+              tmp1=Colorcmyk2rgb(tmp1);
+            );
+          ,
+            color=Colorname2cmyk(tmp2);//200425
+            tmp1=Colorcmyk2rgb(color); ;//200425
+          );
+          tmp="color->"+text(tmp1);
+          opcindy=opcindy+","+tmp;
+        ,
+          eqL=append(eqL,#);
+        );//180602to
+        flg=1; 
+      );
+    );
+    if(flg==0,
+      if(indexof(#,"no")+indexof(#,"No")>0,
+        if(indexof(#,"tex")>0,Noflg=1);
+        if(indexof(#,"disp")>0,Noflg=2);
+        if(indexof(#,"data")>0,Noflg=3);
+        flg=1;
+      );
+    );
+    if(flg==0,
+      if(indexof(#,"->")>0,
+        opcindy=opcindy+","+#;
+        flg=1; 
+      );
+    );
+    if(flg==0,
+      if(indexof(#,"out")+indexof(#,"Out")>0,
+        if(indexof(#,"-")==0,
+          Outflg=1;
+        ,
+          Outflg=2;
+        );
+        flg=1;
+      );
+    );
+    if(flg==0,
+      if(indexof(#,"in")+indexof(#,"In")>0,
+        if(indexof(#,"-")==0,
+          Inflg=1;
+        ,
+          Inflg=2;
+        );
+        flg=1;
+      );
+    );
+    if(flg==0,
+      tmp=substring(#,0,2);
+      tmp1=indexof(tmp,"dr")+indexof(tmp,"Dr");
+      tmp1=tmp1+indexof(tmp,"da")+indexof(tmp,"Da");
+      tmp1=tmp1+indexof(tmp,"id")+indexof(tmp,"Id");
+      tmp1=tmp1+indexof(tmp,"do")+indexof(tmp,"Do");
+      tmp1=tmp1+indexof(tmp,"dp")+indexof(tmp,"Dp");
+      if(tmp1>0,
+        Ltype=#;
+        flg=1;
+      );
+      if(flg==0,
+        if(length(#)>0, //180408
+          strL=append(strL,#);
+          opstr=opstr+","+Dq+#+Dq;
+        );
+      );
+    );
+  );
+  if(indexof(opcindy,"color->")==0,// 16.10.07from
+    tmp=Colorcmyk2rgb(KCOLOR); //200513[2lines]
+    opcindy=opcindy+",color->"+text(tmp);
+  );
+  [Ltype,Noflg,Inflg,Outflg,eqL,realL,strL,color,opstr,opcindy];
+);
+Colorname2cmyk(name):=( //181212
+  regional(dL,code,tmp);
+  dL=[
+    ["greenyellow",[0.15,0,0.69,0]],["yellow",[0,0,1,0]],
+    ["goldenrod",[0,0.1,0.84,0]],["dandelion",[0,0.29,0.84,0]],
+    ["apricot",[0,0.32,0.52,0]],["peach",[0,0.5,0.7,0]],
+    ["melon",[0,0.46,0.5,0]],["yelloworange",[0,0.42,1,0]],
+    ["orange",[0,0.61,0.87,0]],["burntorange",[0,0.51,1,0]],
+    ["bittersweet",[0,0.75,1,0.24]],["redorange",[0,0.77,0.87,0]],
+    ["mahogany",[0,0.85,0.87,0.35]],["maroon",[0,0.87,0.68,0.32]],
+    ["brickred",[0,0.89,0.94,0.28]],["red",[0,1,1,0]],
+    ["orangered",[0,1,0.5,0]],["rubinered",[0,1,0.13,0]],
+    ["wildstrawberry",[0,0.96,0.39,0]],["salmon",[0,0.53,0.38,0]],
+    ["carnationpink",[0,0.63,0,0]],["magenta",[0,1,0,0]],
+    ["violetred",[0,0.81,0,0]],["rhodamine",[0,0.82,0,0]],
+    ["mulberry",[0.34,0.9,0,0.02]],["redviolet",[0.07,0.9,0,0.34]],
+    ["fuchsia",[0.47,0.91,0,0.08]],["lavender",[0,0.48,0,0]],
+    ["thistle",[0.12,0.59,0,0]],["orchid",[0.32,0.64,0,0]],
+    ["darkorchid",[0.4,0.8,0.2,0]],["purple",[0.45,0.86,0,0]],
+    ["plum",[0.5,1,0,0]],["violet",[0.79,0.88,0,0]],
+    ["royalpurple",[0.75,0.9,0,0]],["blueviolet",[0.86,0.91,0,0.04]],
+    ["periwinkle",[0.57,0.55,0,0]], ["cadetblue",[0.62,0.57,0.23,0]],
+    ["cornflowerblue",[0.65,0.13,0,0]],
+    ["midnightblue",[0.98,0.13,0,0.43]],
+    ["navyblue",[0.94,0.54,0,0]],["royalblue",[1,0.5,0,0]],
+    ["blue",[1,1,0,0]],["cerulean",[0.94,0.11,0,0]],
+    ["cyan",[1,0,0,0]],["processblue",[0.96,0,0,0]],
+    ["skyblue",[0.62,0,0.12,0]],["turquoise",[0.85,0,0.2,0]],
+    ["tealblue",[0.86,0,0.34,0.02]],["aquamarine",[0.82,0,0.3,0]],
+    ["bluegreen",[0.85,0,0.33,0]],["emerald",[1,0,0.5,0]],
+    ["junglegreen",[0.99,0,0.52,0]],["seagreen",[0.69,0,0.5,0]],
+    ["green",[1,0,1,0]],["forestgreen",[0.91,0,0.88,0.12]],
+    ["pinegreen",[0.92,0,0.59,0.25]],["limegreen",[0.5,0,1,0]],
+    ["yellowgreen",[0.44,0,0.74,0]],["springgreen",[0.26,0,0.76,0]],
+    ["olivegreen",[0.64,0,0.95,0.4]],["rawsienna",[0,0.72,1,0.45]],
+    ["sepia",[0,0.83,1,0.7]],["brown",[0,0.81,1,0.6]],
+    ["tan",[0.14,0.42,0.56,0]],["gray",[0,0,0,0.5]],
+    ["lightgray",[0,0,0,0.15]], //190429,0809
+    ["cindycolor",[0.125,0.083,0,0.247]], //201027
+    ["black",[0,0,0,1]],["white",[0,0,0,0]],
+    ["offwhite",[0,0,0,0.03]] //190809
+  ];
+  tmp=select(dL,#_1==name);
+  if(length(tmp)>0,
+    tmp=tmp_1;
+    code=tmp_2;
+  ,
+    println("    "+name+" not found");
+    code=Assign(name); //190323
+  );
+);
+Assign(str):=( //190125from
+  regional(tmp);
+  tmp=[];
+  forall(VLIST,tmp=concat(tmp,[#_1,#_2]));
+  Assign(str,tmp);
+); //190125to
+Assign(funstr,vrL):=Assign(funstr,vrL,6);
+Assign(funstr,Arg1,Arg2):=( //190813from
+  regional(vrL,precise,nn,out,tmp);
+  if(islist(Arg1),
+    vrL=Arg1; precise=Arg2;
+    nn=length(vrL)/2;
+    out=funstr;
+    forall(1..nn,
+      out=Assign(out,vrL_(2*#-1),vrL_(2*#),precise);
+    );
+  , 
+    out=Assign(funstr,Arg1,Arg2,6);
+  );
+  out;
+); //190813to
+Assign(funstr,varname,rep,precision):=(
+  regional(repstr,ii,jj,tmp,tmp1,tmp2,Notvar,Flg);
+  if(isstring(rep),repstr=rep,repstr="("+Textformat(rep,precise)+")"); //190811to
+  tmp=[46];  // 12.20
+  tmp=concat(tmp,48..57);
+  tmp=concat(tmp,65..90);
+  tmp=concat(tmp,97..122);
+  Notvar=apply(tmp,unicode(text(#),base->10));
+  tmp2="";
+  forall(1..100,
+    ii=indexof(funstr,varname);
+    if(ii>0,
+      Flg=0;
+      if(ii>1,
+        tmp=substring(funstr,ii-2,ii-1);
+        if(contains(Notvar,tmp),
+          tmp2=tmp2+substring(funstr,0,ii);
+          funstr=substring(funstr,ii,length(funstr));
+          Flg=1;
+        );
+      );
+      if(Flg==0,
+        jj=ii-1+length(varname);
+        if(jj<length(funstr),
+          tmp=substring(funstr,jj,jj+1));
+          if(contains(Notvar,tmp),
+          tmp2=tmp2+substring(funstr,0,jj);
+          funstr=substring(funstr,jj,length(funstr));
+          Flg=1;
+        );
+      );
+      if(Flg==0,
+        tmp2=tmp2+substring(funstr,0,ii-1)+repstr;
+        funstr=substring(funstr,jj,length(funstr));
+      );
+    );
+  );
+  funstr=tmp2+funstr;
+  funstr;
+);
+Colorcmyk2rgb(clr):=(
+  regional(clrnew,tmp,black);
+  if(length(clr)==4,  //200618
+    black=clr_4;
+    tmp=apply(clr,1-min(1,#*(1-black)+black));
+    clrnew=tmp_(1..3);
+  ,
+    clrnew=clr;  //200618
+  );
+  clrnew;
+);
+Colorrgb2cmyk(clr):=(
+  regional(clrnew,tmp,black);
+  if(length(clr)==3, //200618
+    tmp=apply(clr,1-#);
+    black=min(tmp);
+    if(black!=1, //181112from
+      tmp=apply(clr,(1-#-black)/(1-black));
+      clrnew=append(tmp,black);
+    ,
+      clrnew=[0,0,0,1];  //200618
+    ); //181112to
+  ,
+    clrnew=clr;
+  );
+  clrnew;
+);
+Getlinestyle(str,name):=(
+  regional(noflg,tmp,tmp1,tmp2,Dop,Ltype,subflg);
+  Ltype=-1;
+  Dop="";
+  tmp1=indexof(str,",");
+  if(tmp1>0,
+    Dop=","+substring(str,tmp1,length(str));
+  );
+  noflg=parse(substring(str,0,1));
+  if(substring(name,0,3)=="sub",subflg=1,subflg=0);  // 16.02.29
+  if(noflg<=1, //1900818from
+    tmp1=Toupper(substring(str,1,3));
+  ,
+    tmp1="NO";
+  ); //1900818to
+  tmp2=""; //190119from
+  tmp=indexof(str,",");
+  if(tmp>0,
+    tmp2=substring(str,tmp,length(str));
+  ); //190119to
+  if(tmp1=="DR",
+    if(length(tmp2)==0,tmp2="1"); //190125
+    Ltype=[0,tmp2];  //190119
+    if(noflg==0 & subflg==0, // 16.02.29
+    );
+  );
+  if(tmp1=="DA",
+    if(length(tmp2)==0,tmp2="1,1"); //190125
+    if(indexof(tmp2,",")==0,tmp2=tmp2+",1"); //200911
+    Ltype=[1,tmp2];  //190119
+    if(noflg==0 & subflg==0, // 16.02.29
+    );
+  );
+  if(tmp1=="ID",
+    if(length(tmp2)==0,tmp2="1,1"); //190125
+    if(indexof(tmp2,",")==0,tmp2=tmp2+",1"); //200911
+    Ltype=[2,tmp2];  //190119
+    if(noflg==0 & subflg==0, // 16.02.29
+    );
+  );
+  if(tmp1=="DO",
+    if(length(tmp2)==0,tmp2="1,1"); //190125
+    if(indexof(tmp2,",")==0,tmp2=tmp2+",1"); //200911
+    Ltype=[3,tmp2];  //190119
+    if(noflg==0 & subflg==0, // 16.02.29
+    );
+  );
+  if(tmp1=="DP",
+    if(length(tmp2)==0,tmp2="1"); //190125
+    Ltype=[0,tmp2];  //190119
+    tmp1=parse(name);
+    tmp2="";
+    forall(tmp1,
+      tmp2=tmp2+Textformat(#_1,5)+",";
+    );
+    tmp2=substring(tmp2,0,length(tmp2)-1);
+    if(noflg==0,
+    );
+  );
+  if(tmp1=="NO", //190818from
+    Ltype=[-1,"0"];
+  );  //190818to
+  Ltype;
+);
+Lcrd(pt):=(
+  regional(tmp);
+  if(ispoint(pt),
+    tmp=[pt.x/SCALEX,pt.y/SCALEY];
+  ,
+    tmp=pt;
+  );
+  re(tmp); //191231
+);
+Putonseg(name,sgstr):=(
+  regional(seg,p1,p2);
+  if(isstring(sgstr),seg=parse(sgstr),seg=sgstr);
+  Putonseg(name,LLcrd(seg_1),LLcrd(seg_2));
+);
+Putonseg(name,p1,p2):=Putonseg(name,p1,p2,[]);
+Putonseg(name,p1org,p2org,options):=(
+  regional(Eps,par,p1,p2,dx,dy,p,tmp,tmp1,tmp2);
+  Eps=10^(-5);
+  par=0.5;
+  tmp=Divoptions(options);
+  if(length(tmp_6)>0,
+    par=tmp_6_1;
+  );
+  p1=Lcrd(p1org);//16.10.11from
+  p2=Lcrd(p2org);
+  p1=Pcrd(p1); p2=Pcrd(p2); //190120
+  dx=p2_1-p1_1;
+  dy=p2_2-p1_2;
+  p=parse(name+".xy");
+  if(abs(dx)>abs(dy), //190120from
+    if(p1_1>p2_1,tmp=p1;p1=p2;p2=tmp);
+    if(p_1<p1_1,parse(name+".xy="+Textformat(p1,10));p=p1);
+    if(p_1>p2_1,parse(name+".xy="+Textformat(p2,10));p=p2);
+    tmp=(p2_2-p1_2)/(p2_1-p1_1)*(p_1-p1_1)+p1_2;
+    parse(name+".y="+tmp+";"); //190415
+  ,
+    if(p1_2>p2_2,tmp=p1;p1=p2;p2=tmp);
+    if(p_2<p1_2,parse(name+".xy="+Textformat(p1,10));p=p1);
+    if(p_2>p2_2,parse(name+".xy="+Textformat(p2,10));p=p2);
+    tmp=(p2_1-p1_1)/(p2_2-p1_2)*(p_2-p1_2)+p1_1;
+    parse(name+".x="+tmp+";"); //190415
+  ); //190120to
+);
+Sprintf(value,dig):=(
+  regional(vv,tmp,tmp1);
+  if(!islist(value),  // 17.03.12from
+    if(isstring(value),
+      vv=value;
+    ,
+      vv=Textformat(value,dig);
+    );  // 17.03.12from
+    if(indexof(vv,".")==0,vv=vv+".");
+    vv=vv+"0000000000000000";
+    tmp=indexof(vv,".")+dig;
+    vv=substring(vv,0,tmp);
+  ,
+    vv=apply(value,Sprintf(#,dig));
+  );
+  vv;
+);
+Ptselected():=Ptselected(allpoints()); //190805
+Ptselected(ptlistorg):=(
+ regional(ptlist,flg,Eps);
+ Eps=StrictSep;//(XMAX-XMIN)/10; //190505,221003
+ flg=0;
+ ptlist=ptlistorg; //190505[2lines]
+ if(!islist(ptlist),ptlist=[ptlist]);
+ forall(ptlist,
+  if(flg==0,
+    if(|mouse().xy-#.xy|<Eps,flg=1); // 
+  );
+ );
+ if(flg==0,false,true);
+);
+Ptseg3data():=Ptseg3data([]);
+Ptseg3data(options):=(
+  regional(pt,ptz,pt3,plist,plistz,tmp,tmp1,tmp2);
+  tmp=remove(allpoints(),options);
+  tmp=remove(tmp,[SW,NE,TH,FI]);
+  plist=select(tmp,indexof(#.name,"z")==0);
+  plistz=select(tmp,indexof(#.name,"z")>0);
+  if(Ptselected(TH) % Ptselected(FI),
+    forall(plist,pt,
+      tmp=select(plistz,#.name==pt.name+"z");
+      if(length(tmp)>0,
+        ptz=tmp_1;
+      ,
+        ptz=[];
+      );
+      tmp=select(VLIST,#_1==pt.name+"3d"); //190506
+      if(length(tmp)>0,
+        pt3=tmp_1_2;
+        pt.xy=Parapt(pt3);
+        ptz.xy=Parasubpt(pt3);
+      ,
+        pt3=Mainsubpt3d(pt.xy,ptz.xy); //181107[2lines]
+        Defvar(pt+"3d",pt3);
+      );
+    );
+  ,
+    Mkpointlist(options); // 16.12.18
+  );
+);
+Parapt(pt):=(
+  regional(Xz,Yz);
+  Xz=-pt_1*sin(PHI)+pt_2*cos(PHI);
+  Yz=-pt_1*cos(PHI)*cos(THETA)-pt_2*sin(PHI)*cos(THETA)+pt_3*sin(THETA);
+  [Xz,Yz];
+);
+Parasubpt(pt):=( //181027
+  regional(mv,dp,xs);
+  mv=NE.x-SW.x;
+  dp=pi/24;
+  xs=-pt_1*sin(PHI+dp)+pt_2*cos(PHI+dp);
+  [xs+mv,pt_3];
+);
+Mainsubpt3d(pm,psv):=( //181027
+  regional(Eps,mv,dp,v,x,y,z);
+  Eps=10^(-4);
+  mv=NE.x-SW.x;
+  dp=pi/24;
+  if(abs(cos(THETA))>Eps,
+    if(length(psv)>1,v=psv_2, v=psv);
+    x=(v*cos(PHI)*sin(THETA)-pm_1*sin(PHI)*cos(THETA)-pm_2*cos(PHI))/cos(THETA);
+    y=(v*sin(PHI)*sin(THETA)+pm_1*cos(PHI)*cos(THETA)-pm_2*sin(PHI))/cos(THETA);
+    z=v;
+  ,
+    if(length(psv)>1,v=psv_1, v=psv);
+    x=(pm_1*cos(PHI+dp)-(v-mv)*cos(PHI))/sin(dp);
+	y=(pm_1*sin(PHI+dp)-(v-mv)*sin(PHI))/sin(dp);
+    z=pm_2;
+  );
+  [x,y,z];
+);
+Defvar(varstr):=(
+  regional(name,value,tmp,tmp1);
+  if(isstring(varstr),
+    parse(varstr+";");
+    tmp=indexof(varstr,"=");
+    name=substring(varstr,0,tmp-1);
+    value=substring(varstr,tmp,length(varstr));
+    value=parse(value);
+    tmp1=select(1..length(VLIST),VLIST_#_1==name);
+    if(length(tmp1)>0,
+      tmp=tmp1_1;
+      VLIST_tmp=[name,value];
+    ,
+      VLIST=prepend([name,value],VLIST);
+    );
+  ,
+    forall(1..(length(varstr)/2), // 16.11.16from
+      name=varstr_(2*#-1);
+      value=varstr_(2*#);
+      Defvar(name,value);
+    ); // 16.11.16until
+  );
+);
+Defvar(name,value):=(
+  regional(tmp,tmp1);
+  if(islist(value),
+    tmp1="[";
+    forall(value,
+      if(isstring(#), // 16.11.14
+        tmp1=tmp1+Dq+#+Dq+","; // 16.11.14
+      ,
+        tmp1=tmp1+format(#,16)+","; //190918
+      );
+    );
+    tmp1=substring(tmp1,0,length(tmp1)-1)+"]";
+  ,
+    tmp1=format(value,10);
+  );
+  tmp=name+"="+tmp1+";"; // 15.02.06//190415
+  parse(tmp);
+  VLIST=select(VLIST,#_1!=name); // 15.02.08
+  VLIST=prepend([name,value],VLIST);
+);
+Mkpointlist():=Mkpointlist([]); //16.11.12
+Mkpointlist(options):=( //181030
+  regional(Eps,dp,mv,pos,worklist,plist,pt,ptstr,pt3,ptz,par,
+     tmp,tmp1,tmp2,tmp3,tmp4,p1,p2,flg);
+  dp=pi/24;
+  mv=NE.x-SW.x;
+  Eps=10^(-4);
+  pos=[NE.x+1,NE.y+0.1];
+  worklist=Workprocess(); //181030
+  plist=select(worklist,length(#_3)!=2);
+  plist=apply(plist,#_1);
+  plist=remove(plist,PTEXCEPTION);
+  tmp=apply(VLIST,#_1);//181029from
+  tmp=select(tmp,indexof(#,"3d")>0);
+  tmp2=apply(tmp,replace(#,"3d",""));
+  forall(tmp2,ptstr,
+    if(!contains(plist,ptstr),
+      tmp=select(VLIST,
+            (#_1==pt+"3d")%(#_1==pt+"2d")%(#_1==pt+"fix"));
+      VLIST=remove(VLIST,tmp);
+    );
+  ); //181029to
+  if(SUBSCR==0,plist=[]);
+  forall(plist,ptstr,
+    pt=parse(ptstr);
+    inspect(pt,"ptsize",3);
+    inspect(pt,"color",2);
+    inspect(pt,"textsize",TSIZE);
+    ptz=pt.name+"z";  //190505
+    tmp=Finddef(pt);
+    tmp=select(VLIST,#_1==pt.name+"3d"); //190505
+    if(length(tmp)==0,
+      tmp=parse(ptz); //181108from
+      if(ispoint(tmp),
+        pt3=Mainsubpt3d(pt.xy,tmp.xy); //181108to
+      ,
+        if(abs(cos(THETA))>Eps,//181028from
+          tmp1=Mainsubpt3d(pt.xy,0); 
+          tmp=Parasubpt(tmp1);
+          Putpoint(ptz,tmp,[tmp_1,parse(ptz+".y")]);
+          pt3=Mainsubpt3d(pt.xy,parse(ptz+".xy"));
+        ,
+          if(abs(sin(PHI))>abs(cos(PHI)), //181029from
+            tmp=Parasubpt([-pt.x/sin(PHI),0,pt.y]);
+          ,
+            tmp=Parasubpt([0,pt.x/cos(PHI),pt.y]);
+          );
+          Putpoint(ptz,tmp,[parse(ptz+".x"),pt.y]);//181029
+          pt3=Mainsubpt3d(pt.xy,parse(ptz+".xy"));
+        );
+      ); //181028to
+      Defvar(pt.name+"3d",pt3); //190505
+      Defvar(pt.name+"fix",0); //190505
+    );
+    flg=0;
+    if(isstring(ptz),ptz=parse(ptz));//181029from
+    inspect(ptz,"ptsize",3);
+    inspect(ptz,"color",3);
+    inspect(ptz,"textsize",TSIZEZ);//181029to
+    if(Ptselected(pt),
+      if(parse(pt.name+"fix")!=1, //190505
+        tmp=select(VLIST,#_1==pt.name+"3d"); //190505
+        tmp1=tmp_1_2;
+        pt3=Mainsubpt3d(pt.xy,ptz.xy); //181029
+        Putpoint(ptz.name,Parasubpt(pt3));
+        if(Norm(tmp1-pt3)>Eps,
+           Defvar(pt.name+"3d",pt3); //190505
+        );
+        flg=1;
+      );
+    );
+    if(Ptselected(ptz),//181108from
+      tmp=select(VLIST,#_1==pt.name+"3d");  //190505
+      tmp1=tmp_1_2;
+      tmp=Parasubpt(tmp1); //181108from
+      if(abs(cos(THETA))>Eps,
+        tmp=ptz.name+".x="+format(tmp_1,10)+";"; //210112
+        parse(tmp);
+        tmp=Parapt([tmp1_1,tmp1_2,ptz.y]);
+        Putpoint(pt.name,tmp); //190505
+     ,
+        tmp=ptz.name+".y="+format(tmp_2,10)+";";  //190505
+        parse(tmp);
+        if(abs(sin(PHI+dp))>abs(cos(PHI+dp)), //181108
+          tmp=-(ptz.x-mv-tmp1_2*cos(PHI+dp))/sin(PHI+dp);
+          tmp=Parapt([tmp,tmp1_2,tmp1_3]);
+        ,
+          tmp=(ptz.x-mv+tmp1_1*sin(PHI+dp))/cos(PHI+dp); //181109pm
+          tmp=Parapt([tmp1_1,tmp,tmp1_3]);
+        );
+        Putpoint(pt.name,tmp); //190505
+      );
+      pt3=Mainsubpt3d(pt.xy,ptz.xy); 
+      Defvar(pt.name+"3d",pt3); //190505
+      flg=2;
+    );
+    if(Ptselected(TH) % Ptselected(FI), //181029
+      tmp=select(VLIST,#_1==pt.name+"3d"); //190505
+      if(length(tmp)>0, //17.10.07
+        tmp1=Parapt(tmp_1_2);
+        Putpoint(pt.name,tmp1);  //190505
+        tmp2=Parasubpt(tmp_1_2);//181027[2lines]
+        Putpoint(ptz.name,tmp2);  //190505
+        flg=3;
+      ); //17.10.07
+    );
+    if(flg==0, //181030from
+      pt3=Mainsubpt3d(pt.xy,ptz.xy);
+      Defvar(pt.name+"3d",pt3); //190505
+    ); //181030to
+    if(Ptselected(pt) % Ptselected(ptz),
+    );
+    if(!contains(["p","q"],pt.name), //190505
+      ptL=append(ptL,pt);
+    );
+  );
+);
+Workprocess():=Drawprocess(300,["Disp=n"]); //181030
+Workprocess(nn):=(
+  Drawprocess(nn,["Disp=n"]); 
+);
+Drawprocess():=Drawprocess(300,["Disp=y"]);
+Drawprocess(nn):=Drawprocess(nn,["Disp=y"]);
+Drawprocess(nn,options):=(
+  regional(All,added,remain,out,flg,dispflg,eqL,tmp,tmp1,tmp2);
+  tmp=Divoptions(options); //181030from
+  eqL=tmp_5;
+  dispflg="Y";
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    tmp2=Toupper(substring(tmp_2,0,1));
+    if(tmp1=="D",dispflg=tmp2);
+  ); //181030to
+  tmp=remove(allpoints(),[NE,SW,TH,FI]);
+  tmp1=select(tmp,
+    substring(#.name,length(#.name)-1,length(#.name))!="z"); //190505
+  tmp1=concat(tmp1,alllines());
+  All=apply(tmp1,Dependgeo(#));
+  added=select(All,length(#_3)==0);
+  out=sort(apply(added,#_1));
+  remain=remove(All,added);
+  flg=0;
+  repeat(nn,
+    if(flg==0,
+      tmp1=select(remain,remove(#_3,out)==[]);
+      tmp2=sort(apply(tmp1,#_1));
+      out=concat(out,tmp2);
+      remain=remove(remain,tmp1);
+      if(length(remain)==0,flg=1);
+    );
+  );
+  if(dispflg=="Y",
+    println("Process of drawing");
+  );
+  tmp1=[];//181030from
+  forall(out,
+    tmp=Dependgeo(parse(#));
+    tmp1=append(tmp1,tmp);
+    if(dispflg=="Y",
+      println(Dependgeo(parse(#)));
+    );
+  );
+  tmp1;//181030to
+);
+Dependgeo(geo):=(
+  regional(tmp,tmp1,tmp2,out);
+  tmp=Finddef(geo);
+  if(!iscircle(geo),
+    out=[geo.name]; //190505
+  ,
+    out=[geo];
+  );
+  if(length(tmp)<3,
+    out=concat(out,[tmp_1,[]]);
+  ,
+    out=concat(out,[tmp_1]);
+    tmp1=[tmp_2,tmp_3];
+    tmp=parse(tmp1_2);
+    if(islist(tmp) % isreal(tmp),
+      tmp1=[tmp1_1];
+    );
+    out=append(out,tmp1);
+  );
+  out;
+);
+Finddef(G):=(
+  regional(def,tmp,tmp1,tmp2,tmp3);
+  if(isstring(G),tmp=parse(G),tmp=G);
+  def=text(inspect(tmp,"definition"));
+  tmp1=indexof(def,"(");
+  tmp2=indexof(def,";");
+  tmp3=indexof(def,")");
+  tmp=[substring(def,0,tmp1-1)];
+  if(tmp2>0,
+    tmp=append(tmp,substring(def,tmp1,tmp2-1));
+    if(indexof(def,")",tmp3+1)==0,
+      tmp=append(tmp,substring(def,tmp2,tmp3-1));
+    ,
+      tmp=append(tmp,substring(def,tmp2,tmp3));
+    );
+  ,
+    tmp=append(tmp,substring(def,tmp1-1,tmp3));
+  );
+  tmp;
+);
+Norm(v1):=(  // 16.09.01
+  regional(out,tmp,tmp1,tmp2);
+  out=0;
+  forall(1..(length(v1)),
+    out=out+(v1_#)^2;
+  );
+  out=sqrt(out);
+  out;
+);
+Norm(v1,v2):=(
+  Norm(v2-v1);
+);
+Xyzax3data(nm,Xrange,Yrange,Zrange):=
+          Xyzax3data(nm,Xrange,Yrange,Zrange,[]);
+Xyzax3data(nm,Xrange,Yrange,Zrange,optionorg):=(
+  regional(name2,name3,Out,tmp,tmp1,tmp2,ops,eqL,reL,strL,msgflg,
+    options,opstr,opcindy,Ltype,Noflg,Axname,Arrow,Origin,color,color4);
+  name2="ax2d"+nm;
+  name3="ax3d"+nm;
+  options=optionorg;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  reL=tmp_6;
+  strL=tmp_7;
+  color=tmp_(length(tmp)-2);color4=Colorrgb2cmyk(color); //200626
+  opcindy=tmp_(length(tmp));
+  Axname=1;
+  Arrow=[];  // 190505
+  Origin=""; // 16.08.14
+  if(length(reL)>0,
+    Axname=reL_1;
+  );
+  forall(strL,  // 16.08.14from
+    tmp1=Toupper(substring(#,0,1));
+    if(tmp1=="A",
+      tmp=substring(#,1,length(#));
+      if(length(tmp)>0,
+        Arrow=tokenize(tmp,","); //190505
+        if(length(Arrow)==1,Arrow=append(Arrow,18));
+      );
+    );
+    if(tmp1=="O",
+      tmp=indexof(#,",");
+      if(tmp>0,
+        Origin=substring(#,tmp,length(#));
+      ,
+        tmp=substring(#,1,length(#));
+        if(length(tmp)>0,
+          Origin=tmp;
+        ,
+          Origin="sw";
+        );
+      );
+    );
+  ); // 16.08.14to
+  options=remove(options,reL);
+  options=remove(options,strL);
+  msgflg="Y";  //190506from
+msgflg="N";  //
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(tmp1=="M",
+      msgflg=Toupper(substring(tmp_2,0,1));
+      options=remove(options,[#]);
+    );
+  ); //190506to
+  tmp1=indexof(Xrange,"=");
+  tmp=parse(substring(Xrange,tmp1,length(Xrange)));
+  Px=[tmp_1,0,0]; Qx=[tmp_2,0,0];
+  tmp1=indexof(Yrange,"=");
+  tmp=parse(substring(Yrange,tmp1,length(Yrange)));
+  Py=[0,tmp_1,0]; Qy=[0,tmp_2,0];
+  tmp1=indexof(Zrange,"=");
+  tmp=parse(substring(Zrange,tmp1,length(Zrange)));
+  Pz=[0,0,tmp_1]; Qz=[0,0,tmp_2];
+  tmp=["nodisp","Msg=n"];
+  Spaceline("-axx3d"+nm,[Px,Qx],tmp);
+  Spaceline("-axy3d"+nm,[Py,Qy],tmp);
+  Spaceline("-axz3d"+nm,[Pz,Qz],tmp);
+  Out=[[Px,Qx],[Py,Qy],[Pz,Qz]];
+  if(Axname>0,
+    Xyzaxparaname(Xrange,Yrange,Zrange,[Axname]);
+  );
+  if(Noflg<3,
+    if(msgflg=="Y",
+      tmp="generate axes "+name3;
+      tmp=tmp+" : axx3d"+nm+",axy3d"+nm+",axz3d"+nm;
+      println(tmp);
+    );
+    tmp="["+"axx3d"+nm+","+"axy3d"+nm+",";
+    tmp=tmp+"axz3d"+nm+"]";
+    tmp=name3+"="+tmp;
+    parse(tmp);
+    tmp1=Projpara([name3],["nodata"]);
+    tmp=name2+"="+textformat(tmp1,10)+";"; //190415
+    parse(tmp);
+    tmp=name3+"=Xyzax3data("+
+	  Dq+Xrange+Dq+","+Dq+Yrange+Dq+","+Dq+Zrange+Dq+")";
+    GLIST=append(GLIST,tmp);
+    tmp=name2+"=Projpara("+name3+")";
+    GLIST=append(GLIST,tmp);
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      if(color4!=KCOLOR, //180904
+        Texcom("{");Com2nd("Setcolor("+color4+")");//180722
+      );
+	  Ltype=Getlinestyle(text(Noflg)+Ltype,name2);
+      if(color4!=KCOLOR, //180904
+        Texcom("}");//180722
+      );
+	,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name2,Ltype,opcindy]);
+    if(Noflg<1,  // 16.08.14from
+      if(length(Arrow)==2, //190505from
+        tmp1=Parapt(Px); tmp2=Parapt(Qx);
+        ops=[Arrow_1,Arrow_2,"Line=n"];
+        Arrowhead("ax1",tmp2,tmp2-tmp1,ops); //210521
+        tmp1=Parapt(Py); tmp2=Parapt(Qy);
+        Arrowhead("ax2",tmp2,tmp2-tmp1,ops); //210521
+        tmp1=Parapt(Pz); tmp2=Parapt(Qz);
+        Arrowhead("ax3",tmp2,tmp2-tmp1,ops); //210521
+      ); //190505to
+      if(length(Origin)>0,
+        Letter([Parapt([0,0,0]),Origin,"O"]);
+      );
+    );  // 16.08.14until
+    if(SUBSCR==1, //  15.02.11
+      Subgraph(name3,opcindy); //181029
+    );
+  );
+  Out;
+);
+Spaceline(ptlist):=Spaceline(ptlist,[]); // 16.02.22 from
+Spaceline(Arg1,Arg2):=(
+  regional(name,tmp,tmp1,tmp2);
+  if(isstring(Arg1),
+    Spaceline(Arg1,Arg2,[]);
+  ,
+    tmp=Arg1.name; //190505
+    tmp=substring(tmp,1,length(tmp)-1);
+    name="-"+replace(tmp,",","");
+    Spaceline(name,Arg1,Arg2);
+  );
+); // 16.02.22 to
+Spaceline(nm,ptlistorg,optionorg):=(
+  regional(name2,name3,options,Out,tmp,tmp1,tmp2,
+        opstr,opcindy,Ltype,Noflg,eqL,ptlist, Msg,color,color4);
+  ptlist=apply(ptlistorg,if(ispoint(#),parse(#.name+"3d"),#)); // 190505
+  ptlist=apply(ptlist,if(isstring(#),parse(#),#)); //190330
+  if(substring(nm,0,2)=="bz",
+    name2=replace(nm,"bz","bz2d");
+    name3=replace(nm,"bz","bz3d");
+  ,
+    if(substring(nm,0,1)=="-",
+      tmp=substring(nm,1,length(nm));
+      if(indexof(tmp,"3d")>0,name3=tmp,name3=tmp+"3d");
+      name2=replace(name3,"3d","2d");
+    ,
+      name2="sl2d"+nm;
+      name3="sl3d"+nm;
+    );
+  );
+  options=select(optionorg,length(#)>0);  // 160415
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  color=tmp_(length(tmp)-2);color4=Colorrgb2cmyk(color); //200626
+  opcindy=tmp_(length(tmp));
+  Msg=1;
+Msg=0; // 
+  forall(eqL,
+    tmp=substring(#,0,1);
+    if(Toupper(tmp)=="M",
+      tmp=indexof(#,"=");
+      tmp1=substring(#,tmp,tmp+1);
+      if(Toupper(tmp1)=="N",
+        Msg=0;
+      );
+    );
+  );
+  if(Noflg<3,
+    if(Msg==1,
+      println("generate Spaceline "+name3);
+    );
+    tmp=name3+"="+Textformat(ptlist,10)+";"; //190330//190415
+    parse(tmp);
+    tmp1=Projpara(name3,["nodata"]);
+    tmp=name2+"="+Textformat(tmp1,10)+";"; //190415
+    parse(tmp);
+    tmp="[";
+    forall(ptlist, //17.07.13from
+      if(isstring(#),
+        tmp=tmp+#+",";
+      ,
+        tmp=tmp+Textformat(#,10)+",";
+      );
+    );
+    tmp=substring(tmp,0,length(tmp)-1)+"]";
+    tmp=name3+"=Spaceline("+tmp+")"; //17.07.13to
+    GLIST=append(GLIST,tmp);
+    tmp=name2+"=Projpara("+name3+")";
+    GLIST=append(GLIST,tmp);
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      if(color4!=KCOLOR, //180904
+        Texcom("{");Com2nd("Setcolor("+color4+")");//180722
+      );
+	  Ltype=Getlinestyle(text(Noflg)+Ltype,name2);
+      if(color4!=KCOLOR, //180904
+        Texcom("}");//180722
+      );
+	,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name2,Ltype,opcindy]);
+  );
+  ptlist;
+);
+Projpara(ptdata):=Projpara(ptdata,[]);
+Projpara(ptdata,optionsorg):=(
+  regional(options,name2,name3,Ltype,Noflg,eqL,opcindy,
+     dtL,ptL,tmp,tmp1,Out,color,color4,msg);
+  options=optionsorg;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  color=tmp_(length(tmp)-2);color4=Colorrgb2cmyk(color); //200626
+  opcindy=tmp_(length(tmp));
+  msg="Y"; //180602from
+msg="N"; //
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1)); //181111
+    if(tmp1=="M",
+      tmp=substring(tmp_2,0,1);
+      msg=Toupper(tmp);
+      options=remove(options,[#]);
+    );
+  );//180602to
+  Out=[];
+  if(isstring(ptdata),tmp=parse(ptdata),tmp=ptdata);
+  if(Measuredepth(tmp)<1,dtL=ptdata,dtL=[ptdata]);
+  forall(dtL,name3,
+    if(indexof(name3,"3d")>0, //17.05.24
+      name2=replace(name3,"3d","2d");
+    ,
+      name2="para"+name3;
+    );  
+    ptL=Projcurve(name3);
+    ptL=select(ptL,length(#)>1);//17.06.02
+    if(length(ptL)==1,
+      ptL=ptL_1;
+    );
+    if(Noflg<3,
+      if(msg=="Y", //220206
+        println("generate projparadata  "+name2);
+      );//180602to
+      tmp=name2+"="+Textformat(ptL,6)+";"; //220206
+      parse(tmp);
+      tmp=name2+"=Projpara("+name3+")";
+      GLIST=append(GLIST,tmp);
+    );
+    if(Noflg<3, //190818
+      if(isstring(Ltype),
+        if(color4!=KCOLOR, //180904
+          Texcom("{");Com2nd("Setcolor("+color4+")");//180722
+        );
+		Ltype=Getlinestyle(text(Noflg)+Ltype,name2);
+        if(color4!=KCOLOR, //180904
+          Texcom("}");//180722
+        );
+	  ,
+        if(Noflg==1,Ltype=0);
+      );
+     GCLIST=append(GCLIST,[name2,Ltype,opcindy]);
+    );
+    Out=append(Out,ptL);
+  );
+  if(length(Out)==1,Out=Out_1);
+  if(length(Out)==1,Out=Out_1); // 15.02.24
+  tmp=[];
+  forall(Out,
+    if(length(#)>0,tmp=append(tmp,#));
+  );
+  Out=tmp;
+  Out;
+);
+Measuredepth(list):=( //190423
+  regional(str,nn,tmp,tmp1,tmp2);
+  str=text(list);
+  tmp1=Indexall(str,"[");
+  tmp2=select(tmp1,!contains(tmp1,#+1));
+  nn=tmp2_1;
+  tmp1=substring(str,nn,length(str));
+  tmp=indexof(tmp1,",");
+  tmp1=substring(tmp1,0,tmp-1);
+  if(!ispoint(parse(tmp1)),
+    nn=nn-1;
+  );
+  nn;
+);
+Projcurve(crv):=(
+  regional(CurveL,Curve,Eps,AnsL,Out,sp,cp,st,,ct,ii,pt,
+       Xz,Yz,tmp,tmp1,tmp2);
+  Eps=10^(-6);
+  sp=sin(PHI); cp=cos(PHI);
+  st=sin(THETA); ct=cos(THETA);
+  if(isstring(crv),CurveL=parse(crv),CurveL=crv);
+  if(Measuredepth(CurveL)==1,CurveL=[CurveL]);
+  Out=[];
+  forall(CurveL,Curve,
+    AnsL=[];
+    forall(1..length(Curve),ii,
+      pt=Curve_ii;
+      if(pt_1!="inf",
+        Xz=-pt_1*sp+pt_2*cp;
+        Yz=-pt_1*cp*ct-pt_2*sp*ct+pt_3*st;
+        tmp=[Xz,Yz];
+        if(ii==1,
+           AnsL=[tmp];
+        ,
+          tmp1=AnsL_(length(AnsL));
+          if(tmp1_1=="inf" % |tmp-tmp1|>Eps,
+            AnsL=append(AnsL,tmp);
+          );
+        );
+      ,
+        AnsL=append(AnsL,["inf"]);
+      );
+    );
+    tmp1=[];
+    tmp2=select(1..length(AnsL),AnsL_#==["inf"]);
+    tmp=1;
+    forall(tmp2,
+      if(#>tmp,
+        tmp1=concat(tmp1,[AnsL_(tmp..(#-1))])
+      );
+      tmp=#+1;
+    );
+    if(tmp<length(AnsL),
+      tmp1=concat(tmp1,[AnsL_(tmp..length(AnsL))]);
+    );
+    AnsL=tmp1;
+    if(length(AnsL)==1,AnsL=AnsL_1);
+    Out=append(Out,AnsL);
+  );
+  if(length(Out)==1,
+    Out=Out_1;
+  );
+  Out;
+);
+Xyzaxparaname(Xrange,Yrange,Zrange):=
+   Xyzaxparaname(Xrange,Yrange,Zrange,[]);
+Xyzaxparaname(Xrange,Yrange,Zrange,options):=(
+ regional(tmp,tmp1,tmp2,Eps,Dr,Noflg,Xname,Yname,Zname,
+     px,qx,py,qy,pz,qz,ph,qh,rr,ch);
+  Eps=10.0^(-6);
+  Dr=0.19*1000/2.54/MilliIn;
+  Noflg=0;
+  forall(options,
+    if(isreal(#),Dr=Dr*#);
+  );
+  tmp1=Strsplit(Xrange,"=");
+  Xname=tmp1_1;
+  tmp=parse(tmp1_2);
+  px=[tmp_1,0,0]; qx=[tmp_2,0,0];
+  tmp1=Strsplit(Yrange,"=");
+  Yname=tmp1_1;
+  tmp=parse(tmp1_2);
+  py=[0,tmp_1,0]; qy=[0,tmp_2,0];
+  tmp1=Strsplit(Zrange,"=");
+  Zname=tmp1_1;
+  tmp=parse(tmp1_2);
+  pz=[0,0,tmp_1]; qz=[0,0,tmp_2];
+  COM2ndlist=select(COM2ndlist,indexof(#,Dqq("$"+Xname+"$"))==0);//180608[3lines]
+  COM2ndlist=select(COM2ndlist,indexof(#,Dqq("$"+Yname+"$"))==0);
+  COM2ndlist=select(COM2ndlist,indexof(#,Dqq("$"+Zname+"$"))==0);
+  ph=Parapt(px); qh=Parapt(qx); rr=|ph-qh|;
+  if(rr>Eps,
+    ch=qh+Dr/rr*(qh-ph);
+    Expr(ch,"c",Xname);
+  );
+  ph=Parapt(py); qh=Parapt(qy); rr=|ph-qh|;
+  if(rr>Eps,
+    ch=qh+Dr/rr*(qh-ph);
+    Expr(ch,"c",Yname);
+  );
+  ph=Parapt(pz); qh=Parapt(qz); rr=|ph-qh|;
+  if(rr>Eps,
+    ch=qh+Dr/rr*(qh-ph);
+    Expr(ch,"c",Zname);
+  );
+);
+Dq=unicode("0022");//250404
+Dqq(str):=DqDq(str); //18.02.11
+DqDq(str):=(
+  Dq+str+Dq;
+);
+Expr(Pt,Dr,St):=Expr([Pt,Dr,St]);
+Expr(list):=Expr(list,[]);
+Expr(Pt,Dr,St,options):=Expr([Pt,Dr,St],options); //190409
+Expr(listorg,options):=( //16.10.09
+  regional(list,str,tmp,tmp1,tmp2);
+  list=listorg;
+  forall(1..round(length(list)/3),
+    str=list_(3*#);
+    if(isstring(str), //200526from
+      if(!iswindows(),
+        str=replace(str,"¥","\");
+      ); 
+    ,
+      str=format(str,10)
+    ); //200526to
+    str="$"+str+"$"; //200526
+    list_(3*#)=str;
+  );
+  Letter(list,options);
+);
+Letter(Pt,Dr,St):=Letter([Pt,Dr,St]);
+Letter(list):=Letter(list,[]);
+Letter(Pt,Dr,St,options):=Letter([Pt,Dr,St],options);//181218
+Letter(list,options):=(
+  regional(Nj,Pos,Dir,Str,Off,Xmv,Ymv,Noflg,opcindy,
+      opL,aln,sz,clr,bld,ita,tmp,tmp1,tmp2,color,color4,eqL);
+  tmp=Divoptions(options);
+  eqL=tmp_5; //190209
+  Noflg=tmp_2;
+  color=tmp_(length(tmp)-2); color4=Colorrgb2cmyk(color); //200618
+  opL=select(options,indexof(#,"->")>0); //16.10.09from
+  tmp=select(opL,indexof(#,"color"));
+  sz=16; //210516
+  bld=false;
+  ita=false;
+  aln="left";
+  forall(opL,
+    tmp=indexof(#,"->");
+    tmp1=Removespace(substring(#,0,tmp-1));
+    tmp2=substring(#,tmp+1,length(#));
+    if(tmp1=="size",sz=parse(tmp2));
+    if(tmp1=="color",clr=parse(tmp2));
+    if(tmp1=="bold",bld=parse(tmp2));
+    if(tmp1=="ita",ita=parse(tmp2));
+  );//16.10.09to
+  forall(eqL, //190209from
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(tmp1=="S",
+      sz=round(parse(tmp_2)*16); //210516
+    );
+  ); //190209to
+  Nj=1;
+  if(Ketcindyjsfigure>0,sz=round(sz*Ketcindyjsscale) ); // 
+  while(Nj+2<=length(list),
+    Pos=Lcrd(list_Nj);  //220814
+    Dir=list_(Nj+1);
+    Str=list_(Nj+2);
+    if(!isstring(Str),Str=format(Str,10)); // 16.09.30,10.09
+    tmp=replace(Str,".xy","");
+    tmp=replace(tmp,".x","(1)");
+    Str=replace(tmp,".y","(2)");
+    Str=RSslash(Str); // 17.09.24
+    Str=replace(Str,"`","'");//180303
+    tmp=Dq+","+Dq+Str+Dq+")";
+    if(Noflg<2,
+      Off=[0,0];
+      Xmv=0; Ymv=0;
+      aln="mid"; //200530from
+      if(indexof(Dir,"c")>0, Off_2=-0.3*sz);
+      if(indexof(Dir,"n")>0,Off_2=0;Ymv=Lettermove("n",Dir)); //210601
+      if(indexof(Dir,"s")>0, Off_2=-0.85*sz;Ymv=-Lettermove("s",Dir));
+      if(indexof(Dir,"e")>0,
+        aln="left";
+        if(indexof(Dir,"n")+indexof(Dir,"s")==0,Off=[0,-0.3*sz]);
+        Xmv=Lettermove("e",Dir);
+      );
+      if(indexof(Dir,"w")>0,
+        aln="right";
+        if(indexof(Dir,"n")+indexof(Dir,"s")==0,Off=[0,-0.4*sz]);
+        Xmv=-Lettermove("w",Dir);
+      );
+      Str=list_(Nj+2);  //17.10.17
+      Pos=Pos+[Xmv,Ymv]*MARKLEN;//210530to
+      if(length(color)==4,color=Colorcmyk2rgb(color)); //200523
+      tmp="drawtext("+format(Pcrd(Pos),10)+",offset->"+text(Off)+","+Dqq(Str)+","; 
+      tmp1="size->sz,color->colornow,align->"+Dqq(aln)+",bold->"+bld+",italics->"+ita; //210601
+      tmp1=Assign(tmp1,["sz",text(sz),"colornow",text(color),"aln",Dqq(aln),"bld",text(bld),"ita",text(ita)]);
+      tmp=tmp+tmp1+");";
+      GCLIST=append(GCLIST,[tmp,[6,0]]); //201004to
+    );
+    Nj=Nj+3;
+  );
+);
+Removespace(str):=(
+  regional(tmp,flg,out);
+  tmp=length(str)+1;
+  flg=0;
+  forall(1..(length(str)),
+    if(flg==0,
+      if((str_#)!=" ",
+        tmp=#;
+        flg=1;
+      );
+    );
+  );
+  out=substring(str,tmp-1,length(str));
+  flg=0;
+  tmp=0;
+  forall(reverse(1..(length(out))),
+    if(flg==0,
+      if((out_#)!=" ",
+        tmp=#;
+        flg=1;
+      );
+    );
+  );
+  out=substring(out,0,tmp);
+);
+Lettermove(dir,str):=(
+  regional(Suu,tmp,tmp1,out,nn);
+  Suu="+-.0123456789";
+  tmp=indexof(str,dir);
+  tmp1=substring(str,tmp,length(str));
+  out="";
+  nn=1;
+  while(nn<=length(tmp1),
+    tmp=substring(tmp1,nn-1,nn);
+    if(indexof(Suu,tmp)>0,
+      out=out+tmp;
+    ,
+      nn=length(str);
+    );
+    nn=nn+1;
+  );
+  if(length(out)==0,out=0,out=parse(out));
+  out;
+);
+Arrowhead(point,Houkou):=Arrowhead(point,Houkou,[]); //181018from
+Arrowhead(Arg1,Arg2,Arg3):=(
+  if(isstring(Arg1),
+    Arrowhead(Arg1,Arg2,Arg3,[]);
+  ,
+    Arrowhead(text(ArrowheadNumber),Arg1,Arg2,Arg3);
+  );
+);
+Arrowhead(nm,pointorg,directionorg,optionsorg):=(//191129remade
+   regional(Eps,name,Ltype,Noflg,opstr,opcindy,color,eqL,line,direction,
+         point,options,pP,Houkou,ptstr,hostr,tmp,tmp1,tmp2,list);
+  Eps=10^(-4);
+  name="arh"+nm; //181018
+  ArrowheadNumber=ArrowheadNumber+1;
+  point=Lcrd(pointorg); //210216
+  direction=directionorg; //211217from
+  if(isstring(direction),
+    if(indexof(direction,"Invert")>0,
+      tmp=parse(direction);
+      direction=replace(direction,[["(",""],[")",""]]);
+      Listplot("-"+direction,tmp,["nodisp"]);
+    );
+  ); //211217to
+  options=optionsorg;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  color=tmp_(length(tmp)-2);
+  eqL=tmp_5;
+  line="N";
+  forall(eqL,
+     tmp=Strsplit(#,"=");
+     tmp1=substring(tmp_1,0,1);
+     tmp2=substring(tmp_2,0,1);
+     if(Toupper(tmp1)=="L",
+       line=Toupper(tmp2);
+       options=remove(options,[#]);
+     );
+  );
+   list=Arrowheaddata(point,direction,options);
+  if(length(point)>1, //210724from
+    if(!Inwindow(point),Noflg=2);
+    if(isstring(direction),
+      if(|Ptend(direction)-point|<Eps,point=1);
+    );
+  ); //210724to
+  if(Noflg<3,
+    tmp=name+"="+Textformat(list,10)+";"; //210311
+    parse(tmp);
+    if(isstring(Ltype),
+      if(line=="N",
+        fillpoly(apply(list,Pcrd(#)),color->color);
+        if(Noflg==0,
+          if(isstring(direction), //210215,210724
+            if(ispoint(point) % islist(point), //201214from
+              if(|point-Ptend(direction)|<Eps,point=1);
+            );  //201214to
+            if(point==1, //191202from
+              if(Norm(Ptend(direction)-Ptstart(direction))>Eps,
+                tmp=select(GCLIST,#_1==direction); //201106from
+                tmp1=tmp_1;
+                tmp2=Nearestpt(list_4,direction);
+                tmp2=tmp2_1; //201214[2lines]
+                Partcrv("-"+direction,Ptstart(direction),tmp2,direction,["nodisp","Msg=n"]);
+              ); //201106
+            );
+          );  //210215
+          Listplot("-arh"+nm,list,["dr,0.1","Color="+text(color),"Msg=n"]);//191202
+          Shade(["arh"+nm],["Color="+text(color)]);
+        );
+      ,
+        Listplot("-arh"+nm,list_(1..3),concat(options,["Msg=n"]));
+      );
+   );
+  );
+  list; //191202
+);
+Arrowheaddata(point,direction):=
+   Arrowheaddata(point,direction,[YaSize,YaAngle,YaPosition,YaCut]);
+Arrowheaddata(pointorg,directionorg,options):=( //191127remade
+  regional(point,direction,scaley,Eps,size,angle,segpos,cut, 
+            Houkou,hflg,Str,Ev,Nv,reL,pP,vec,
+            pA,pB,pC,par,out,tmp,tmp1,tmp2);
+  point=Pcrd(pointorg); //230830from
+  tmp=directionorg;
+  if(isstring(tmp),
+    tmp=parse(tmp);
+    direction=apply(tmp,Pcrd(#)); //230830to 
+  ,
+    direction=Pcrd(tmp);
+  );
+  Eps=10^(-4);
+  tmp=Divoptions(options);
+  reL=tmp_6;
+  size=0.2*YaSize*1/2.54*1000/MilliIn; 
+  angle=YaAngle*pi/180;
+  segpos=YaPosition;
+  cut=YaCut;
+  if(length(reL)>=1,
+    size=0.2*reL_1*1/2.54*1000/MilliIn; 
+  );
+  if(length(reL)>=2,
+    if(reL_2<2.5,angle=reL_2*YaAngle,angle=reL_2);
+    angle=angle*pi/180;
+  );
+  if(length(reL)>=3,
+    segpos=reL_3;
+  );
+  if(length(reL)>=4,
+    cut=reL_4;
+  );
+  if(ispoint(point),pP=Lcrd(point),pP=point);
+  hflg=0; 
+  out=[];
+  if(ispoint(direction),
+    Houkou=direction.xy;
+    hflg=2;
+  );
+  if(hflg==0, //191203from
+    if(!isstring(direction), //191207
+      if(Measuredepth(direction)==0,
+        Houkou=direction;
+        hflg=2;
+      );
+    );  //191207to
+  ); //191203to
+  scaley=SCALEY;
+  SCALEY=1; //200114
+  if(hflg==0,
+    if(isstring(direction),Houkou=parse(direction),Houkou=direction);
+    if(!islist(pP),
+      par=1+(length(Houkou)-1)*pP; //191207
+      pP=Ptcrv(par,Houkou);
+      tmp=floor(tmp); //191203from
+    ,
+      tmp=Nearestpt(pP,Houkou);
+      pP=tmp_1;
+      par=tmp_2;
+      tmp=floor(par); //191203to
+    );
+    if(tmp<length(Houkou),
+      tmp1=Houkou_tmp;
+      tmp2=Houkou_(tmp+1);
+    ,
+      tmp1=Houkou_(tmp-1);
+      tmp2=Houkou_tmp;
+    );
+    vec=(tmp2-tmp1)/|tmp2-tmp1|;
+    gG=Circledata("",[pP,size*cos(angle)],["Num=10","nodata"]);
+    tmp1=Intersectcrvspp(Houkou,gG);
+    if(length(tmp1)==0,
+      println("Arrowhead may be too large (no intersect)");
+    ,
+      tmp=select(tmp1,#_2<par); //191208from
+      if(length(tmp)>0,
+        tmp=sort(tmp,[-#_2]);
+        pC=tmp_1_1;
+      ,
+        if(Norm(Ptend(direction)-Ptstart(direction))>Eps,
+          tmp=sort(tmp1,[#_2]);
+          pC=2*pP-tmp_1_1;
+        ,
+          tmp=sort(tmp1,[-#_2]);
+          pC=tmp_1_1;
+        );
+      ); //191208to
+      Houkou=pP-pC;
+      hflg=1;
+    );
+  );
+  if(hflg>=1,
+    Ev=-Houkou/|Houkou|;
+    Nv=[-Ev_2, Ev_1];    
+    pA=pP+size*cos(angle)*Ev+size*sin(angle)*Nv;
+    pB=pP+size*cos(angle)*Ev-size*sin(angle)*Nv;
+    if(hflg==2,
+      pC=(pA+pB)/2;
+    );
+    pC=pC+cut*(pP-pC);
+    tmp=(pP-(pA+pB)/2);
+    tmp=(1-segpos)*tmp;
+    pP=Translatepoint(pP,tmp);
+    pA=Translatepoint(pA,tmp);
+    pB=Translatepoint(pB,tmp);
+    pC=Translatepoint(pC,tmp);
+    SCALEY=scaley;
+    out=apply([pA,pP,pB,pC,pA],LLcrd(#));
+  );
+  out;
+);
+Ptcrv(Num,Fig):=(
+  regional(tmp);
+  if(isstring(Fig),tmp=parse(Fig),tmp=Fig);
+  tmp_Num;
+);
+Nearestpt(pt,plotstr):=(
+  regional(ptL,Eps,dtL,dt,nn,pt1,pt2,dv,nv,tmp,tmp1,tmp2);
+  if(isstring(plotstr),ptL=parse(plotstr),ptL=plotstr);
+  Eps=10^(-6);
+  dtL=[];
+  forall(1..(length(ptL)-1),nn,
+    pt1=ptL_nn;
+    pt2=ptL_(nn+1);
+    if(|pt2-pt1|<Eps,
+      dt=[pt1,nn,|pt1-pt|];
+    ,
+      dv=pt2-pt1;
+      nv=[-dv_2,dv_1];
+      tmp1=Intersectline(pt1,dv,pt,nv);
+      if(length(tmp1)>1, //210319from
+        if((tmp1_2>=0)&(tmp1_2<=1),
+          dt=[tmp1_1,nn+tmp1_2,|tmp1_1-pt|];
+        ,
+          if(tmp1_2<0,
+            dt=[pt1,nn,|pt1-pt|];
+          ,
+            dt=[pt2,nn+1,|pt2-pt|];
+          );
+        );
+      ,
+      ); //210319to
+    );
+    dtL=append(dtL,dt);
+  );
+  dtL=select(dtL,length(#)>=3); //220115
+  dtL=sort(dtL,[#_3,#_2]);
+  dtL_1;
+);
+Intersectline(p1,v1,p2,v2):=(
+  regional(Eps,d,dt,ds,t,s,pt,out,tmp,tmp1,tmp2,tmp3);
+  Eps=10^(-5);
+  out=[];
+  tmp=Dotprod(v1,v2);
+  tmp1=[tmp,|v1|^2];
+  tmp2=[-|v2|^2,-tmp];
+  tmp3=[Dotprod(p2-p1,v2),Dotprod(p2-p1,v1)];
+  d=Crossprod(tmp1,tmp2);
+  tmp=abs(Crossprod(v1,v2));
+  if(tmp>Eps,
+    dt=Crossprod(tmp3,tmp2);
+    ds=Crossprod(tmp1,tmp3);
+    t=dt/d;
+    s=ds/d;
+    pt=p1+v1*t;
+    out=[pt,t,s];
+  ,
+    tmp1=Crossprod(p2-p1,v1)/|v1|; //18.01.05
+    out=[abs(tmp1)]; //18.01.05
+  );
+  out;
+);
+Dotprod(vec1,vec2):=(
+  regional(v1,v2,tmp);
+  if(ispoint(vec1),v1=vec1.xy,v1=vec1);
+  if(ispoint(vec2),v2=vec2.xy,v2=vec2);
+  v1*v2;
+);
+Crossprod(a,b):=(
+  regional(tmp1,tmp2,tmp3,Out);
+  if(length(a)==3,
+    tmp1=a_2*b_3-a_3*b_2;
+    tmp2=a_3*b_1-a_1*b_3;
+    tmp3=a_1*b_2-a_2*b_1;
+    Out=[tmp1,tmp2,tmp3];
+  ,
+    Out=a_1*b_2-a_2*b_1;
+  );
+  Out;
+);
+Circledata(cenrad):=Circledata(cenrad,[]);
+Circledata(para1,para2):=(
+  regional(name,cenrad,options,str,n); 
+  if(isstring(para1), 
+    name=para1;
+    cenrad=para2;
+    options=[];
+    ,
+    cenrad=para1;
+    options=para2;
+    name="";// 16.10.07from
+    forall(cenrad, 
+       name=name+#.name;
+    );// 16.10.07until
+  );
+  Circledata(name,cenrad,options);
+);
+Circledata(nm,cenrad,options):=(
+  regional(name,Out,Ctr,Ptcir,ra,Num,Rg,opstr,opcindy,color,color4,Msg,
+      tmp,tmp1,tmp2,Th,Ltype,Noflg,eqL,pA,pB,pC,d1,d2,Eps);  
+  name="cr"+nm;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  color=tmp_(length(tmp)-2); color4=Colorrgb2cmyk(color); //200618
+  opstr=tmp_(length(tmp)-1);
+  opcindy=tmp_(length(tmp));
+  Num=50;
+  Rg=[0,2*pi];
+  Msg="Y";
+ Msg="N"; //
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(substring(#,0,1)=="N",
+      Num=parse(tmp_2);
+     opstr=opstr+",'"+#+"'";
+    );
+    if(substring(#,0,1)=="R",
+      Rg=parse(tmp_2);
+      opstr=opstr+",'"+#+"'";
+    );
+    if(tmp1=="M", //190206from
+      Msg=Toupper(substring(tmp_2,0,1));
+    ); //190206to
+  );
+  if(length(cenrad)==2,
+    Ctr=Lcrd(cenrad_1);
+    Ptcir=Lcrd(cenrad_2);
+    if(!islist(Ptcir),  //190323from
+      Ptcir=Ctr+[Ptcir,0];
+    );  //190323to
+    ra=dist(Ctr,Ptcir);
+  ,
+    Eps=10^(-1);
+    pA=Lcrd(cenrad_1);
+    pB=Lcrd(cenrad_2);
+    pC=Lcrd(cenrad_3);
+    tmp=pB-pA;
+    tmp1=(tmp_2,-tmp_1);
+    tmp=pC-pB;
+    tmp2=(tmp_2,-tmp_1);
+    d1=det([tmp1,tmp2]);
+    d2=det([pC-pA,tmp2]);
+    if(abs(d1)<Eps & abs(d2)>10*Eps,
+      println("points are in a line");
+      ra=0;
+    ,
+      Ctr=1/2*(pA+pB)+1/2*d2/d1*tmp1;
+      ra=|pA-Ctr|;
+      tmp=name+"center="+Textformat(Ctr,5)+";";
+      parse(tmp);
+    );
+  );
+  if(ra>0,
+    Out=[];
+    forall(0..Num,
+      Th=Rg_1+#*(Rg_2-Rg_1)/Num;
+      Out=append(Out,Ctr+ra*[cos(Th),sin(Th)]);
+    );
+  ,
+    tmp=100/dist(pA,pB)*(pB-pA);
+    Out=Listplot("1",[pA-tmp,pB+tmp],["nodata"]);
+  );
+  if(Noflg<3,
+    if(Msg=="Y", //190206
+      println("generate Circledata "+name);
+    );
+    tmp1=apply(Out,Pcrd(#));
+    tmp=name+"="+Textformat(tmp1,10)+";"; //190415,210311
+    parse(tmp);
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+    ,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+  );
+  Out;
+);
+Intersectcrvspp(Gr1,Gr2):=Intersectcrvspp(Gr1,Gr2,[]);
+Intersectcrvspp(Gr1,Gr2,options):=(
+  regional(Out,Eps,Eps2,Eps0,Flg,Data1,Data2,
+    Tmp1,Tmp2,Tmp3,Tmp,KL1,KL2,pA,pB,Ni,Nj,
+    pP,pQ,rT,Flg,eqL,realL,opstr,Dif);
+  Eps=10^(-6); //210730
+  Eps2=0.1;
+  Dif=0.05; // 2015.05.31
+  Flg=0;
+  Tmp1=Divoptions(options); // 
+  eqL=Tmp1_5;
+  realL=Tmp1_6;
+  opstr=Tmp1_(length(Tmp1));
+  forall(eqL,
+    if(substring(#,0,1)=="D",
+      Tmp1=indexof(#,"=");
+      Dif=parse(substring(#,Tmp1,length(#)));
+    );
+  );
+  Tmp1=length(realL);
+  if(Tmp1>0,
+    Eps=realL_1;
+    if(Tmp1>1,
+      Eps2=realL_2;
+    );
+  );
+  Flg=0;
+  if(isstring(Gr1),Data1=parse(Gr1),Data1=Gr1);
+  if(isstring(Gr2),Data2=parse(Gr2),Data2=Gr2);
+  if(Measuredepth(Data1)==2,Data1=Data1_1);
+  if(Measuredepth(Data2)==2,Data2=Data2_1);
+  Data1=apply(Data1,LLcrd(#));
+  Data2=apply(Data2,LLcrd(#));
+  if(length(Data1)==length(Data2),
+    Tmp1=reverse(Data2); 
+    Eps0=10^(-6);
+    Tmp2=0;
+    forall(1..(length(Data1)),
+      Tmp2=Tmp2+abs(Data1_#-Data2_#);
+    );
+    Tmp3=0;
+    forall(1..(length(Data1)),
+      Tmp3=Tmp3+abs(Data1_#-Tmp1_#);
+    );
+    if(Tmp2<Eps0 % Tmp3<Eps0,
+      Out=[];
+      Flg=1;
+    );
+  );
+  if(Flg==0,
+    KL1=[];
+    KL2=[];
+    forall(1..(length(Data1)-1),Ni,
+      pA=Data1_Ni;
+      pB=Data1_(Ni+1);
+      forall(1..(length(Data2)-1),
+        pP=Data2_#; pQ=Data2_(#+1);
+        Tmp=Koutenseg(pA,pB,pP,pQ,[Eps,Eps2]);
+        if(Tmp!=["inf","inf"],
+          if(Tmp_3==0,
+            Tmp1=[Tmp_1,Tmp_2,Ni,#];
+            KL1=concat(KL1,[Tmp1]);
+          ,
+            Tmp2=[Tmp_1,Tmp_2,Ni,#];
+            KL2=concat(KL2,[Tmp2]);
+          );
+        );
+      );
+    );
+    Out=[];
+    if(length(KL1)>0,
+      Tmp=KL1_1;
+      pP=Tmp_1;
+      rT=Tmp_2;
+      Ni=Tmp_3;
+      Nj=Tmp_4;
+      Tmp=[pP,Ni+rT,Nj];
+      Out=[Tmp];
+    );
+    forall(2..(length(KL1)),Ni, 
+      Tmp=KL1_Ni; 
+      pP=Tmp_1;
+      Tmp2=0;
+      Flg=0;
+      forall(1..(length(Out)),Nj,
+        if(Flg==0,
+          Tmp=Out_Nj;
+          if(|pP-Tmp_1|<Eps,
+            Tmp2=1;
+            Flg=1;
+          );
+        );
+      );
+      if(Tmp2==0,
+        Tmp=KL1_Ni; 
+        pP=Tmp_1;
+        rT=Tmp_2;
+        Tmp1=Tmp_3;
+        Tmp2=Tmp_4;
+        Tmp=[pP,Tmp1+rT,Tmp2];
+        Out=concat(Out,[Tmp]);
+      );
+    );
+    forall(1..(length(KL2)),Ni,
+      Tmp=KL2_Ni;  // 15.11.21 Usui
+      pP=Tmp_1; 
+      Tmp2=0;
+      Flg=0;
+      forall(1..(length(Out)),Nj,
+        if(Flg==0,
+          Tmp=Out_Nj;
+          if(|pP-Tmp_1|<Eps,
+            Tmp2=1;
+            Flg=1;
+          );
+        );
+      );
+      if(Tmp2==0,
+        Tmp=KL2_Ni;
+        rT=Tmp_2;
+        rT=min([max([rT,0]),1]);  // 15.11.21 Usui
+        Tmp=[pP,Tmp_3+rT,Tmp_4];
+        Out=concat(Out,[Tmp]);
+      );
+    );
+  );
+  Tmp1=Out;  // 15.04.06 from
+  Out=[];
+  forall(Tmp1,Tmp2,
+    Tmp3=select(1..(length(Out)),//16.11.27,
+        |Out_#_1-Tmp2_1|<Dif & |Out_#_2-Tmp2_2|<=1& |Out_#_3-Tmp2_3|<=1);
+    if(length(Tmp3)==0,
+      Out=append(Out,Tmp2);
+    ,
+      forall(Tmp3, //16.11.27
+        Out_#_1=(Out_#_1+Tmp2_1)/2;//17.04.14
+      );
+    );
+  ); // 15.04.06 until
+  Out;
+);
+Koutenseg(pA,pB,pC,pD):=Koutenseg(pA,pB,pC,pD,[]);
+Koutenseg(pA,pB,pC,pD,options):=(
+  regional(Eps0,Eps,Eps2,pV,Sv2,Out,pP,pQ,Flg,p1,p2,q1,q2,
+          em1,eM1,em2,eM2,rT,Tmp1,Tmp2);
+  Eps0=10^(-4);
+  pV=pB-pA;
+  Sv2=|pV|;
+  pP=pC-pA; pQ=pD-pA;
+  Eps=10^(-3);
+  Eps2=0.2;
+  Tmp1=0;
+  forall(options,
+    if(Tmp1==0,
+      Eps=#;
+      Tmp1=1;
+    ,
+      Eps2=#;
+    );
+  );
+  Flg=0;
+  if(Sv2<10^(-3),
+     Out=["inf","inf"];
+     Flg=1;
+  );
+  if(Flg==0,
+    Eps=min([Eps2,Eps/Sv2]);
+    p1=pP*pV/Sv2^2;
+    p2=[pP_2,-pP_1]*pV/Sv2^2;
+    q1=pQ*pV/Sv2^2;
+    q2=[pQ_2,-pQ_1]*pV/Sv2^2;
+    em1=-Eps; eM1=1+Eps;
+    em2=-Eps; eM2=Eps;
+    if(max([p1,q1])<em1 % min([p1,q1])>eM1,
+      Out=["inf","inf"];
+      Flg=1;
+    );
+    if(max([p2,q2])<em2 % min([p2,q2])>eM2,
+      Out=["inf","inf"];
+      Flg=1;
+    );
+  );
+  if(Flg==0 & p2*q2<0,
+    rT=p1-(q1-p1)/(q2-p2)*p2;
+    if(rT>em1 & rT<eM1,
+      if(rT>-Eps0 & rT<1+Eps0,
+        Tmp1=pA+rT*pV;
+        Tmp2=min([max([rT,0]),1]);
+        Out=[Tmp1,Tmp2,0];
+      ,
+        Tmp1=pA+rT*pV;
+        Tmp2=min([max([rT,0]),1]);
+        Out=[Tmp1,Tmp2,1];
+      );
+      Flg=1;
+    );
+    if(Flg==0 & (p1<em1 % p1>eM1 % p2<em2 % p2>eM2),
+      if(q1<em1 % q1>eM1 % q2<em2 % q2>eM2,
+         Out=["inf","inf"];
+         Flg=1;
+      );
+      if(Flg==0,
+        rT=min([max([p1,0]),1]);
+        Tmp1=pA+rT*pV;
+        Out=[Tmp1,rT,1];
+        Flg=1;
+      );
+    );
+  );
+  if(Flg==0 & (p1 > -Eps0 & p1 < 1 + Eps0 & p2 > -Eps0 & p2 < Eps0),
+    rT= p1;
+    Tmp1=pA+rT*pV;
+    Out= [Tmp1, rT, 0];
+    Flg=1;
+  );
+  if(Flg==0 & (q1 > -Eps0 & q1 < 1 + Eps0 & q2 > -Eps0 & q2 < Eps0),
+    rT= q1;
+    Tmp1=pA+rT*pV;
+    Out=[Tmp1,rT,0];
+    Flg=1;
+  );
+  if(Flg==0 & (p1<em1 %  p1>eM1 % p2<em2 % p2>eM2),
+    if(q1<em1 % q1>eM1 % q2<em2 % q2>eM2,
+      Out=["inf","inf"];      
+      Flg=1;
+    );
+    if(Flg==0,
+      rT=min([max([q1,0]),1]);
+      Tmp1=pA+rT*pV;
+      Out=[Tmp1,rT,1];
+      Flg=1;
+    );
+  );
+  if(Flg==0 & (q1<em1 %  q1>eM1% q2<em2 % q2>eM2),
+    rT=min([max([p1,0]),1]);
+    Tmp1=pA+rT*pV;
+    Out=[Tmp1,rT,1];
+    Flg=1;
+  );
+  if(Flg==0,
+    if(abs(p2)<abs(q2),
+      rT=min([max([p1,0]),1]);
+    ,
+      rT=min([max([q1,0]),1]);
+    );
+    Tmp1=pA+rT*pV;
+    Out=[Tmp1,rT,1];
+  );
+  if(!isstring(Out_1),Out=apply(Out,re(#))); //190802
+  Out;
+);
+Ptend(Fig):=(
+  regional(tmp);
+  if(isstring(Fig),tmp=parse(Fig),tmp=Fig);
+  tmp_(length(tmp)); // 15.04.12
+);
+Ptstart(Fig):=(
+  regional(tmp);
+  if(isstring(Fig),tmp=parse(Fig),tmp=Fig);  // 16.01.21
+  tmp_1;
+);
+Translatepoint(point,mov):=(
+  regional(X1,X2,Y1,Y2,Cx,Cy,tmp);
+  tmp=Lcrd(point);
+  X1=tmp_1; Y1=tmp_2;
+  tmp=Lcrd(mov);
+  Cx=tmp_1; Cy=tmp_2;
+  X2=X1+Cx;
+  Y2=Y1+Cy; 
+  [X2,Y2];
+);
+Inwindow(point):=Inwindow(point,[XMIN,XMAX],[YMIN,YMAX]);
+Inwindow(point,xrng,yrng):=(
+  regional(Eps,pt,x,y,xmin,xmax,ymin,ymax,tmp);
+  Eps=10.0^(-6);
+  if(ispoint(point),pt=point.xy,pt=point);
+  x=pt_1; y=pt_2;
+  xmin=xrng_1; xmax=xrng_2;
+  ymin=yrng_1; ymax=yrng_2;
+  tmp=(x>xmin-Eps)&(x<xmax+Eps)&(y>ymin-Eps)&(y<ymax+Eps);
+  if(tmp,true,false);
+);
+Partcrv(nm,pA,pB,PkLstr):=Partcrv(nm,pA,pB,PkLstr,[]);
+Partcrv(nm,pAorg,pBorg,PkLstr,options):=(
+  regional(pA,pB,PkL,PkLL,Ans,Eps,Npt,Out1,Out2,tmp,tmp1,tmp2,Flg,nS,nE,
+        PPL,pP,opcindy,Ta,Tb,name,Ltype,Noflg,eqL,msg,DepthFlg,color,color4);
+  if(substring(nm,0,1)=="-", //201106from
+    name=substring(nm,1,length(nm));
+  ,
+    name="part"+nm;
+  ); //201106to
+  pA=pAorg; pB=pBorg; //201031
+  if(isstring(PkLstr),PkL=parse(PkLstr),PkL=PkLstr);
+  DepthFlg=0;
+  if(Measuredepth(PkL)==2,
+    PkL=PkL_1;
+    DepthFlg=1;
+  );
+  PkLL=apply(PkL,LLcrd(#)); //201031
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  color=tmp_(length(tmp)-2);color4=Colorrgb2cmyk(color); //200626
+  opcindy=tmp_(length(tmp));
+  msg="Y";
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    tmp2=Toupper(substring(tmp_2,0,1));
+    if(tmp1=="M",
+      msg=tmp2;
+    );
+  );
+  Eps=10^(-4);
+  Flg=0;
+  if(isreal(pA),
+    if(pA>pB+Eps,
+      Npt=Numptcrv(PkL);
+      Out1=Partcrv("",pA,Npt,PkLstr,["nodata"]);
+      Out2=Partcrv("",1,pB,PkLstr,["nodata"]);
+      tmp=Ptstart(PkL)-Ptend(PkL);
+      if(|tmp|<Eps,
+        Ans=Joincrvs("",[Out1,Out2],["nodata"]);
+      ,
+        Ans=[apply(Out1,Pcrd(#)),apply(Out2,Pcrd(#))];
+      );
+      Flg=1;
+    );
+    if(Flg==0,
+      nS=ceil(pA);
+      nE=floor(pB);
+      PPL=[];
+      if(pA<nS-Eps,
+        pP=(nS-pA)*PkL_(nS-1)+(1-nS+pA)*PkL_nS;
+        PPL=[pP];
+      );
+      PPL=concat(PPL,PkL_(nS..nE));
+      if(pB>nE+Eps,
+        pP=(1-pB+nE)*PkL_nE+(pB-nE)*PkL_(nE+1);
+        PPL=concat(PPL,[pP]);
+      );
+      Ans=PPL;
+      Flg=1;
+    );
+  );
+  if(Flg==0,
+    pA=Pcrd(pA); //201031from
+    pB=Pcrd(pB); 
+    tmp=Nearestpt(LLcrd(pA),PkLL); //201031to
+    Ta=tmp_2;
+    tmp=Nearestpt(LLcrd(pB),PkLL); // 15.09.12
+    Tb=tmp_2;
+    Ans=Partcrv("",Ta,Tb,PkL,["nodata"] );
+  );
+  if(Noflg<3,
+    tmp1=apply(Ans,Pcrd(#)); //201030
+    tmp=name+"="+Textformat(Ans,5)+";"; //190415
+    parse(tmp);
+    if(DepthFlg==0,
+      tmp=PkLstr;
+    ,
+      tmp=PkLstr+"(1)";
+    );
+    tmp1=name+"=Partcrv("+Textformat(Lcrd(pA),5)
+         +","+Textformat(Lcrd(pB),5)+","+tmp+")"; // 16.04.03
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+    ,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+  );
+  Ans;
+);
+Numptcrv(Fig):=(
+  regional(tmp);
+  if(isstring(Fig),tmp=parse(Fig),tmp=Fig);  // 15.12.23
+  length(tmp);
+);
+Joincrvs(nm,plotstrL):=Joincrvs(nm,plotstrL,[]);
+Joincrvs(nm,plotstrL,options):=(
+  regional(plotlist,PtL,Eps,QdL,Flg,Ni,Qd,pP,pS,pQ,pR,rMN,
+        opcindy,tmp,tmp1,tmp2,str,name,Ltype,Noflg,color,color4);
+  name="join"+nm;
+  plotlist=[];
+  forall(plotstrL,str,
+    if(isstring(str),
+      tmp=parse(str);
+      tmp=apply(tmp,LLcrd(#));
+    ,
+      tmp=str;
+    );
+    plotlist=append(plotlist,tmp);
+  );
+  Eps=10^(-4);
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  color=tmp_(length(tmp)-2);color4=Colorrgb2cmyk(color); //200629
+  opcindy=tmp_(length(tmp));
+  tmp1=tmp_6;
+  if(length(tmp1)>0,Eps=tmp1_1);
+  QdL=[];
+  forall(plotlist,Qd,
+    if(ispoint(Qd_1) % !islist(Qd_1_1),
+      QdL=concat(QdL,[Qd]);
+    ,
+      forall(Qd,
+        QdL=concat(QdL,[#]);
+      );
+    );
+  );
+  Flg=0;
+  if(length(QdL)==0,
+    PtL=[];
+    Flg=1;
+  );
+  if(Flg==0,
+    PtL=QdL_1;
+    forall(2..(length(QdL)),Ni,
+      Qd=QdL_Ni;
+      if(Numptcrv(Qd)>1,
+        pP=Ptend(PtL);
+        pS=Ptstart(PtL);
+        pQ=Ptstart(Qd);
+        pR=Ptend(Qd);
+        rMN=min([|pP-pQ|,|pP-pR|,|pS-pQ|,|pS-pR|]);
+        if(rMN==|pP-pR|,
+          Qd=reverse(Qd);
+        ,
+          if(rMN==|pS-pQ|,
+            PtL=reverse(PtL);
+          ,
+            if(rMN==|pS-pR|,
+              PtL=reverse(PtL);
+              Qd=reverse(Qd);
+            );
+          );
+        );
+      );
+      if(rMN>Eps,
+        PtL=concat(PtL,Qd);
+      ,
+        PtL=concat(PtL,Qd_(2..(length(Qd))));
+      );
+    );
+  );
+  if(Noflg<3,
+    println("generate joincurve "+name);
+    tmp1=apply(PtL,Pcrd(#));
+    tmp=name+"="+Textformat(tmp1,5)+";";
+    parse(tmp);
+    tmp1="";
+    forall(plotstrL,
+        tmp1=tmp1+#+",";
+    );
+    tmp1=substring(tmp1,0,length(tmp1)-1);
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+    ,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+  );
+  PtL;
+);
+Shade(plist):=Shade(plist,[]); 
+Shade(Arg1,Arg2):=(
+  if(!isstring(Arg1),
+    Shade(text(SHADECTR),Arg1,Arg2); //190222
+  ,
+    Shade(Arg1,Arg2,[]);
+  );
+);
+Shade(nm,plistorg,options):=(
+  regional(name,plist,jj,nn,trim,first,tmp,tmp1,tmp2,Noflg,
+     opstr,opcindy,eqL,reL,Str,G2,flg,encflg,startpt,color,color4,ctr,ptshade);
+  if(substring(nm,0,1)=="-", //200513from
+    name=substring(nm,1,length(nm));
+  ,
+    name="shade"+nm;
+  ); //200513to
+  plist=plistorg;
+  tmp=Divoptions(options);
+  Noflg=tmp_2; //200512
+  eqL=tmp_5; 
+  reL=tmp_6;
+  color=tmp_(length(tmp)-2); color4=Colorrgb2cmyk(color); //200618
+  opstr=tmp_(length(tmp)-1);
+  opcindy=tmp_(length(tmp));
+  encflg=0; //201029
+  tmp=select(plist,indexof(#,"Invert")>0); //180929from
+  trim="N";
+  first="N"; //191007
+  ptshade="N"; //200513
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(tmp_1);
+    tmp2=Toupper(tmp_2);
+    if(substring(tmp1,0,1)=="E",
+      if(substring(tmp2,0,1)=="Y",
+        encflg=1;
+      );
+    );
+    if(substring(tmp1,0,1)=="T",
+      trim=substring(tmp2,0,1);
+    );
+    if(substring(tmp1,0,1)=="F",
+      first=substring(tmp2,0,1);
+    );
+    if(substring(tmp1,0,1)=="P", //200513[3lines]
+      ptshade=Toupper(substring(tmp2,0,1));
+    );
+  );
+  startpt=[];
+  forall(reL,
+    if(islist(#),
+      startpt=#;
+    );
+  ); //180929to
+  flg=0; ctr=1;
+  if(encflg==1, //180929from
+    if(length(startpt)==2,
+      Enclosing(nm,plist,[startpt,"nodisp"]);
+    ,
+      Enclosing(nm,plist,["nodisp"]);
+    );
+    plist=["en"+nm];
+  ); //180929to
+  if((length(plist)==1)&(trim=="Y"), //190220from,109224
+    plist=[Shadein(plist)];
+  ); //190220to
+  forall(1..(length(plist)),jj, //180613from
+    if(flg==0,
+      tmp1=plist_jj;
+      if(isstring(tmp1),tmp=parse(tmp1),tmp=tmp1);
+      if(!islist(tmp),
+         flg=1;
+      ,
+        if(!isstring(tmp1),
+          tmp2=[];
+          forall(tmp1,if(ispoint(#),tmp=#.xy,tmp=#);
+            tmp2=append(tmp2,tmp);
+          );
+          Listplot("-"+name+text(ctr),tmp2,["nodisp"]); //190520
+          plist_jj=name+text(ctr);
+          ctr=ctr+1;
+        );
+      ); 
+    );
+  );//180613to
+  if(flg==1,
+    println("    Shade : some data not defined properly");
+ ,
+    if(Noflg<2, //200512
+      G2=Joincrvs("1",plist,["nodata"]);
+      G2=apply(G2,Pcrd(#));
+      tmp1="fillpoly("+Textformat(G2,10)+opcindy+");";
+      if(ptshade=="N", //200513from
+        tmp=select(1..(length(GCLIST)),contains(plist,GCLIST_#_1)); //200715from
+        if(length(tmp)>0,
+          nn=min(tmp);
+        ,
+          nn=length(GCLIST)+1;
+        );
+        tmp2=GCLIST_(1..(nn-1));
+        tmp2=append(tmp2,[tmp1,[5,0]]);
+        GCLIST=concat(tmp2,GCLIST_(nn..(length(GCLIST))));
+      ,
+        PTSHADElist=append(PTSHADElist,[name,tmp1]);
+      ); //200513to
+    );
+  );
+  SHADECTR=SHADECTR+1;
+);
+Enclosing(nm,plist):=Enclosing2(nm,plist,[]);//180706[2lines]
+Enclosing(nm,plistorg,options):=Enclosing2(nm,plistorg,options);
+Enclosing2(nm,plist):=Enclosing2(nm,plist,[]);
+Enclosing2(nm,plistorg,options):=(
+  regional(name,plist,AnsL,Start,Eps,Eps1,Eps2,flg,Fdata,Gdata,KL,
+      t1,t2,tst,ss,ii,nn,nxtno,Ltype,Noflg,realL,eqL,opstr,opcindy,
+      tmp,tmp1,tmp2,tmp3,tmp4,color,color4,p1,p2);
+  if(substring(nm,0,1)=="-",  //201110from
+    name=substrin(nm,1,length(nm));
+  ,
+    name="en"+nm;
+  );  //201110to
+  plist=plistorg;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  realL=tmp_6;
+  color=tmp_(length(tmp)-2);color4=Colorrgb2cmyk(color); //200629
+  opstr=tmp_(length(tmp)-1);
+  opcindy=tmp_(length(tmp));
+  Eps=10^(-5); // 16.12.05
+  Eps1=0.01;
+  Eps2=0.1;
+  Start=[];
+  flg=0;
+  forall(realL,
+    if(isList(#) % ispoint(#),
+      Start=Lcrd(#); // 18.02.02
+    ,
+      if(flg==1,Eps1=#);
+      if(flg==2,Eps2=#);
+      flg=flg+1;
+    );
+  );
+  flg=0;
+  AnsL=[];
+  if(length(plist)==1,
+    Fdata=parse(plist_1);
+    tmp1=Fdata_1;
+    tmp2=Fdata_(length(Fdata));
+    if(|tmp1-tmp2|<Eps,
+      AnsL=Fdata;
+    ,
+      AnsL=append(Fdata,tmp1);
+    );
+    flg=1;
+  );
+  if(flg==0,
+    Fdata=plist_1;
+    Gdata=plist_(length(plist));
+    KL=Intersectcurvespp(Fdata,Gdata);
+   if(length(KL)==0,
+      tmp=parse(Gdata);
+      tmp1=LLcrd(Op(length(tmp),tmp)); //18.02.02from
+      tmp=parse(Fdata);
+      tmp2=LLcrd(Op(1,tmp));
+      tmp=Listplot(name,[tmp1,tmp2],["nodisp"]);
+      plist=append(plist,"sg"+name);
+      Start=tmp2;
+      tst=1; //18.02.02to
+      p1=Start;
+    ,
+      if(length(KL)==1,
+        tst=KL_1_2;
+        Start=Pointoncurve(tst,Fdata);
+      );
+      if(length(KL)>1,
+        KL=sort(KL,[#_2]);
+        if(Start==[],
+          tst=KL_1_2;
+          Start=Pointoncurve(tst,Fdata);
+        ,
+          tmp=apply(KL,|#_1-Start|);
+          tmp=min(tmp);
+          tmp1=select(KL,|#_1-Start|<tmp+Eps1);//180718
+          tst=tmp1_1_2;
+          Start=Pointoncurve(tst,Fdata);
+        );
+      );
+    );
+  );
+  if(flg==0,
+    t1=tst;
+    p1=Pointoncurve(t1,Fdata); //180713
+    println("Start point of enclosing is "+text(Start));
+    forall(1..(length(plist)),nn,
+      Fdata=plist_nn;
+      if(nn==length(plist),nxtno=1,nxtno=nn+1);
+      Gdata=plist_nxtno;
+      tmp1=Fdata;//260209from
+      if(!islist(tmp1),tmp1=parse(tmp1));
+      tmp2=Gdata;
+      if(!islist(tmp2),tmp2=parse(tmp2));//260209to
+      if(|tmp2_1-tmp1_(-1)|<Eps,
+        if(nn<length(plist), //211217from
+          AnsL=concat(AnsL,tmp1);
+        ,
+          tmp3=Partcrv("",AnsL_(-1),tmp2_1,tmp1,["nodata"]);
+          AnsL=concat(AnsL,tmp3);
+        );  //211217fto
+      ,  //200803to
+        KL=Intersectcurvespp(Fdata,Gdata);
+        if(length(KL)==0, 
+          tmp2=Prepend(Op(length(tmp1),tmp),tmp2);
+          Gdata=replace(Gdata,"(","");
+          Gdata=replace(Gdata,")","");
+          tmp=Gdata+"="+Textformat(tmp2,10)+";"; //190415
+          parse(tmp);
+          plist_nxtno=Gdata;
+          t2=Length(tmp1);
+          p2=Pointoncurve(t2,Fdata); //180713
+          ss=1; //18.02.02to
+        ,
+          KL=sort(KL,[#_2]);//180706
+          tmp=Fdata;
+          if(!islist(tmp),tmp=parse(tmp));//260209
+          tmp1=t1+Eps;
+          tmp=select(KL,(#_2>tmp1)%((#_2>t1)&(|#_1-p1|>Eps1)));
+          if(length(tmp)>0,
+            KL=tmp;
+          ,
+            KL=KL;  //211002,1014
+          ); //210411to
+          t2=KL_1_2;
+          ss=KL_1_3;
+          if(abs(t2-t1)<Eps,//180707
+            if(length(KL)>1,
+              t2=KL_2_2;
+              ss=KL_2_3;
+            ,
+              println(text(nn)+" and "+text(nxtno)+" not intersect");
+              flg=1;
+            );
+          );
+        );
+        if(flg==0,
+          tmp=Partcrv("",t1,t2,Fdata,["nodata"]);
+          if(nn==1,
+            AnsL=tmp;
+          ,
+            AnsL=concat(AnsL,tmp_(2..(length(tmp))));
+          );
+        );
+        t1=ss;//180706
+        p1=Pointoncurve(t1,Gdata); //180713
+      );
+    );
+    if(flg==0,
+      AnsL=apply(1..(length(AnsL)),Pcrd(AnsL_#));
+    );
+  );
+  AnsL=Unscaling(AnsL); //201110
+  if(Noflg<3,
+    println("generate Enclosing "+name);
+    tmp=name+"="+Textformat(AnsL,10)+";"; //190415
+    parse(tmp);
+    tmp=parse(name); //210530[2lines]
+    tmp=apply(tmp,LLcrd(#));
+    Listplot("-"+name,tmp,["nodisp"]); //210421
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+    ,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+  );
+  AnsL; //201110
+);
+Intersectcurvespp(crv1org,crv2org):=Intersectcurvespp(crv1org,crv2org,[]);
+Intersectcurvespp(crv1org,crv2org,options):=(
+  regional(Eps,Eps1,Eps2,Dist,crv1,crv2,ii,jj,seg1,seg2,self,loopL,out,
+          flg,tmp,tmp1,tmp2);
+  Eps=10^(-4);
+  Eps1=0.01;
+  Eps2=0.1;
+  Dist=10*Eps2;
+  if(length(options)>0,
+    Eps1=options_1;
+    if(length(options)>1,
+      Eps2=options_2;
+      Dist=10*Eps2;
+      if(length(options)>2,
+        Dist=options_3;
+      );
+    );
+  );
+  if(isstring(crv1org),tmp1=parse(crv1org),tmp1=crv1org);//18.01.05from
+  if(isstring(crv2org),tmp2=parse(crv2org),tmp2=crv2org);
+  tmp1=apply(tmp1,LLcrd(#));
+  tmp2=apply(tmp2,LLcrd(#)); 
+  crv1=[tmp1_1];
+  forall(tmp1,
+    tmp=crv1_(length(crv1));
+    if(|tmp-#|>Eps,
+      crv1=append(crv1,#);
+    );
+  );
+  crv2=[tmp2_1];
+  forall(tmp2,
+    tmp=crv2_(length(crv2));
+    if(|tmp-#|>Eps,
+      crv2=append(crv2,#);
+    );
+  );//18.01.05until
+  if(crv1==crv2,
+    self=1;
+  ,
+    self=0;
+  );
+  out=[];
+  forall(1..(length(crv1)-1),ii,
+    if(self==0,
+      loopL=1..(length(crv2)-1);
+    ,
+      loopL=(ii+2)..(length(crv2)-1);
+    );
+    forall(loopL,jj,
+      tmp=Intersectpartseg(crv1,crv2,ii,jj,Eps1,Eps2,Dist);
+      if(length(tmp)>0,
+        if(length(out)==0,
+          out=[tmp];
+        ,
+          tmp1=out_(length(out));
+          if(|tmp1_1-tmp_1|>Eps1,
+            out=append(out,tmp);
+          );
+        );
+        if(self==1,
+          tmp=[tmp_1,tmp_3,tmp_2,tmp_4,tmp_5];
+          out=append(out,tmp);
+        );
+      );
+    );
+  );
+  tmp2=out;
+  out=[];
+  tmp1=tmp2;
+  flg=0;
+  forall(1..(length(tmp2)),
+    if(flg==0,
+      tmp=Collectsameseg(tmp1);
+      out=append(out,tmp_1);
+      if(length(tmp_2)==0,
+        flg=1;
+      ,
+        tmp1=tmp_2;
+      );
+    );
+  );
+  forall(1..(length(out)),ii,
+    tmp1=out_ii;
+    if(length(tmp1)==1,
+      out_ii=tmp1_1;
+    ,
+      tmp=apply(tmp1,#_4);
+      dst=min(tmp);
+      tmp1=select(tmp1,#_4<dst+Eps);
+      tmp=apply(tmp1,#_1);
+      tmp=sum(tmp)/length(tmp);
+      tmp2=[tmp];
+      tmp=Nearestpt(tmp2_1,crv1org);
+      tmp2=append(tmp2,tmp_2);
+      tmp=Nearestpt(tmp2_1,crv2org);
+      tmp2=append(tmp2,tmp_2);
+      tmp2=concat(tmp2,[dst,tmp1_1_5]);
+      out_ii=tmp2;
+    );
+  );
+  if(length(out)>0,  //190221from
+    out=sort(out,[#_2]);
+  );  //190221to
+  out;
+);
+Intersectpartseg(crv1,crv2,ii,jj,Eps1,Eps2):=(
+  Intersectpartseg(crv1,crv2,ii,jj,Eps1,Eps2,10*Eps2);
+);
+Intersectpartseg(crv1org,crv2org,ii,jj,Eps1,Eps2,Dist):=(
+  regional(crv1,crv2,Eps,dst,kk,ll,seg1,seg2,snang,
+     p0,p1,p2,p3,os1,os2,out,tmp,tmp1,tmp2,flg);
+  crv1=crv1org; crv2=crv2org;
+  if(isstring(crv1),crv1=parse(crv1));
+  if(isstring(crv2),crv2=parse(crv2));
+  Eps=10^(-4);
+  out=[];
+  seg1=[crv1_ii,crv1_(ii+1)];
+  seg2=[crv2_jj,crv2_(jj+1)];
+  tmp1=seg1_2-seg1_1;
+  tmp2=seg2_2-seg2_1;
+  snang=abs(Crossprod(tmp1,tmp2))/(Norm(tmp1)*Norm(tmp2));
+  tmp=Intersectseg(seg1,seg2,Eps1);
+  dst=tmp_1;
+  if(dst<Eps,
+    out=[tmp_2,ii+tmp_3,jj+tmp_4,dst,snang];
+  ,
+    if(dst<Eps2,
+      if((length(crv1)==2)%(|seg1_2-seg1_1|>Dist-Eps),
+        os1=seg1;
+      ,
+        p1=seg1_1; p2=seg1_2;
+        if(ii==1,
+          p3=crv1_3;
+          tmp=p2-p1;
+          tmp=(p1+p2)/2+[tmp_2,-tmp_1];
+          p0=Reflectpoint(p3,[(p1+p2)/2,tmp]);
+        ,
+          if(ii==length(crv1)-1,
+            p0=crv1_(ii-1);
+            tmp=p2-p1;
+            tmp=(p1+p2)/2+[tmp_2,-tmp_1];
+            p3=Reflectpoint(p0,[(p1+p2)/2,tmp]);
+          ,
+            p0=crv1_(ii-1); p3=crv1_(ii+2);
+          );
+        );
+        os1=Osplineseg([p0,p1,p2,p3]);
+      );
+      if((length(crv2)==2)%(|seg2_2-seg2_1|>Dist-Eps), //18.01.05
+        os2=seg2;
+      ,
+        p1=seg2_1; p2=seg2_2;
+        if(jj==1,
+          p3=crv2_3;
+          tmp=p2-p1;
+          tmp=(p1+p2)/2+[tmp_2,-tmp_1];
+          p0=Reflectpoint(p3,[(p1+p2)/2,tmp]);
+        ,
+          if(jj==length(crv2)-1,
+            p0=crv2_(jj-1);
+            tmp=p2-p1;
+            tmp=(p1+p2)/2+[tmp_2,-tmp_1];
+            p3=Reflectpoint(p0,[(p1+p2)/2,tmp]);
+          ,
+            p0=crv2_(jj-1); p3=crv2_(jj+2);
+          );
+        );
+        os2=Osplineseg([p0,p1,p2,p3]);
+      );
+      tmp2=[];
+      forall(1..(length(os1)-1),kk,
+        forall(1..(length(os2)-1),ll,
+          seg1=[os1_kk,os1_(kk+1)];
+          seg2=[os2_ll,os2_(ll+1)];
+          tmp=Intersectseg(seg1,seg2,Eps1);
+          if((tmp_1<Eps1)&(length(tmp)>1), //18.02.06
+            if(tmp_1<dst+Eps,
+              dst=tmp_1;
+              tmp2=select(tmp2,#_1<dst);
+              tmp2=append(tmp2,[dst,tmp_2]);
+            );
+          );
+        );
+      );
+      if(length(tmp2)>0,
+        tmp=apply(tmp2,#_2_1);
+        tmp1=[sum(tmp)/length(tmp2)];
+        tmp=apply(tmp2,#_2_2);
+        tmp1=append(tmp1,sum(tmp)/length(tmp2));
+        out=[tmp1];
+        p1=crv1_ii; p2=crv1_(ii+1);
+        tmp=[Op(2,p2-p1),-Op(1,p2-p1)];
+        tmp=Intersectline(out_1,tmp,p1,p2-p1);
+        tmp=min([max([tmp_3,0]),1]);
+        out=[tmp1,ii+tmp];
+        p1=crv2_jj; p2=crv2_(jj+1);
+        tmp=[Op(2,p2-p1),-Op(1,p2-p1)];
+        tmp=Intersectline(out_1,tmp,p1,p2-p1);
+        tmp=min([max([tmp_3,0]),1]);
+        out=concat(out,[jj+tmp,dst,snang]);
+      );
+    );
+  );
+  out;
+);
+Reflectpoint(point,symL):=(
+  regional(X1,X2,Y1,Y2,Us,Vs,Pt1,Pt2,Cx,Cy,flg,tmp);
+  tmp=Lcrd(point);
+  X1=tmp_1; Y1=tmp_2;
+  if(!islist(symL), //210104from
+    Pt1=Lcrd(symL);
+    Pt2=Pt1;
+  ,
+    if(length(symL)==1,
+      Pt1=Lcrd(symL_1);
+      Pt2=Pt1;
+    ,
+      if(isreal(symL_1),
+        Pt1=Lcrd(symL);
+        Pt2=Pt1;
+      ,
+        Pt1=Lcrd(symL_1);
+        Pt2=Lcrd(symL_2);
+      );
+    );
+  ); //210104to
+  Us=Pt2_1-Pt1_1;
+  Vs=Pt2_2-Pt1_2;
+  if(Pt1==Pt2,
+    X2=2*Pt1_1-X1;
+    Y2=2*Pt1_2-Y1;
+  ,
+    X2=(Us^2-Vs^2)/(Us^2+Vs^2)*X1+2*Us*Vs/(Us^2+Vs^2)*Y1
+              -2*Vs*(Us*Pt1_2-Vs*Pt1_1)/(Us^2+Vs^2);
+    Y2=2*Us*Vs/(Us^2+Vs^2)*X1-(Us^2-Vs^2)/(Us^2+Vs^2)*Y1
+              +2*Us*(Us*Pt1_2-Vs*Pt1_1)/(Us^2+Vs^2);
+  );
+  [X2,Y2];
+);
+Osplineseg(list):=Osplineseg(list,[]);
+Osplineseg(ptlist,optionsorg):=(
+  regional(tmp,tmp1,tmp2,list,ptL,ctrL,Eps,Eps0,
+      p0,p1,p2,p3,pQ,pR,cc,p01,p02,p11,p12,p21,p22,p31,p32,out);
+  Eps=10^(-2);
+  Eps0=10^(-6);
+  if(isstring(ptlist),list=parse(ptlist),list=ptlist);
+  p0=list_1; p1=list_2; p2=list_3; p3=list_4;
+  tmp=1+sqrt((1+Dotprod(p2-p0,p3-p1)/|p2-p0|/|p3-p1|)/2);
+  cc=4*|p2-p1|/3/(|p2-p0|+|p3-p1|)/tmp;
+  pQ=p1+cc*(p2-p0); // 15.09.21  // 16.08.16
+  pR=p2+cc*(p1-p3);  // 16.08.16
+  ctrL=[pQ,pR];
+  options=optionorg;
+  options=concat(options,["Num=20","nodata"]);
+  out=Bezier("",[p1,p2],ctrL,options);
+  out;
+);
+Bezier(ptctrlist):=Beziercurve(ptctrlist_3,ptctrlist_1,ptctrlist_2,[]);
+Bezier(Arg1,Arg2):=( //190202from
+  regional(nm,ptctrlist,options);
+  if(islist(Arg1),
+    ptctrlist=Arg1; options=Arg2;
+    Beziercurve(ptctrlist_3,ptctrlist_1,ptctrlist_2,options);
+  ,
+    nm=Arg1; ptctrlist=Arg2;
+    Beziercurve(nm,ptctrlist_1,ptctrlist_2,[]);
+  );
+); //190202to
+Bezier(nm,ptlist,ctrlist):=Beziercurve(nm,ptlist,ctrlist,[]);
+Bezier(nm,ptlist,ctrlist,options):=Beziercurve(nm,ptlist,ctrlist,options);
+Beziercurve(nm,ptlist,ctrlist):=Beziercurve(nm,ptlist,ctrlist,[]);
+Beziercurve(nm,ptlistorg,ctrlistorg,options):=(
+  regional(name,Ltype,Noflg,opstr,opcindy,Num,msgflg,
+    ptlist,ctrlist,tmp,tmp1,tmp2,ii,st,out,list,color,color4);
+  name="bz"+nm;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  color=tmp_(length(tmp)-2); color4=Colorrgb2cmyk(color); //200618
+  opstr=tmp_(length(tmp)-1);
+  opcindy=tmp_(length(tmp));
+  Num=10;
+  msgflg="Y";
+  tmp1=tmp_5;
+  forall(tmp1,     // 14.12.31
+    if(substring(#,0,1)=="N",
+      tmp2=indexof(#,"=");
+      Num=parse(substring(#,tmp2,length(#)));
+      opstr=opstr+","+Dq+#+Dq;
+    );
+    if(substring(#,0,1)=="M",
+      tmp2=indexof(#,"=");
+      msgflg=Toupper(substring(#,tmp2,tmp2+1));
+    );  );
+  ptlist=apply(ptlistorg,Lcrd(#)); // 16.08.16
+  ctrlist=[];  // 14.12.31
+  if(length(ctrlistorg)==length(ptlist)-1,
+    forall(1..(length(ctrlistorg)),ii, //190202
+      tmp1=apply(ctrlistorg_ii,Lcrd(#));  //190202
+      if(Measuredepth(tmp1)==0,tmp=[tmp1],tmp=tmp1);
+      ctrlist=append(ctrlist,tmp);
+    );
+  ,
+    forall(1..(length(ptlist)-1),ii,
+      tmp=ctrlistorg_((2*ii-1)..(2*ii));
+      tmp=apply(tmp,Lcrd(#)); // 16.08.16
+      ctrlist=append(ctrlist,tmp);
+    );
+  );
+  if(!islist(Num),
+    Num=apply(ctrlist,Num);
+  );
+  list=[];
+  forall(1..(length(ptlist)-1),ii,
+    tmp1=ptlist_(ii..(ii+1));
+    tmp2=ctrlist_ii;
+    if(ii==1,st=0,st=1);
+    forall(st..Num_ii,
+      tmp=Bezierpt(#/Num_ii,tmp1,tmp2);
+      list=append(list,tmp);
+    );
+  );
+  if(Noflg<3,
+    if(msgflg=="Y",println("generate Bezier "+name));
+    out=apply(list,Pcrd(#));
+    tmp=name+"="+Textformat(out,10)+";"; //190415
+    parse(tmp);
+  );
+  if(Noflg<3, //190818
+    if(isstring(Ltype),
+      Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+    ,
+      if(Noflg==1,Ltype=0);
+    );
+    GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+  );
+  BezierCtrL=ctrlist; //181001
+  list;
+);
+Bezierpt(t,ptlist,ctrlist):=(
+  regional(flg3,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
+  p0=ptlist_1;
+  p3=ptlist_2;
+  p1=ctrlist_1;
+  if(length(ctrlist)==1,
+    p2=p3;
+    flg3=0;
+  ,
+    p2=ctrlist_2;
+    flg3=1;
+  );
+  if(length(p0)<3,  // 15.02.08
+    p0=Lcrd(p0);
+    p3=Lcrd(p3);
+    p1=Lcrd(p1);
+    p2=Lcrd(p2);
+  );
+  p4=(1-t)*p0+t*p1;
+  p5=(1-t)*p1+t*p2;
+  p6=(1-t)*p2+t*p3;
+  p7=(1-t)*p4+t*p5;
+  p8=(1-t)*p5+t*p6;
+  p9=(1-t)*p7+t*p8;
+  if(flg3==0,p7,p9);
+);
+Intersectseg(seg1,seg2):=Intersectseg(seg1,seg2,0.01);
+Intersectseg(seg1org,seg2org,Eps1):=(
+  regional(Eps,seg1,seg2,p1,p2,q1,q2,t,s,pt,n,pts,out,dist,
+    tmp,tmp1,tmp2,tmp3);
+  Eps=10^(-4);
+  seg1=seg1org;
+  seg2=seg2org;
+  if(isstring(seg1),seg1=parse(seg1));
+  if(isstring(seg2),seg2=parse(seg2));
+  out=[];
+  p1=seg1_1; q1=seg1_2;
+  p2=seg2_1; q2=seg2_2;
+   if((|q1-p1|<Eps)%(|q2-p2|<Eps),
+    out=[-1];
+  ,
+    tmp=Intersectline(p1,q1-p1,p2,q2-p2);
+    if((islist(tmp))&(length(tmp)==3),
+      pt=tmp_1; t=tmp_2; s=tmp_3;
+      if((t*(t-1)<Eps)&(s*(s-1)<Eps),
+        out=[0,pt,t,s];
+      ,
+        t=min([max([t,0]),1]);
+        s=min([max([s,0]),1]);
+        tmp3=[|p1-p2|,|p1-q2|,|q1-p2|,|q1-q2|]; //18.01.30from
+        tmp1=[Op(2,q2-p2),-Op(1,q2-p2)];
+        tmp=Intersectline(p1,tmp1,p2,q2-p2);
+        if(islist(tmp_1),
+          if(tmp_3*(tmp_3-1)<Eps,
+            tmp3=append(tmp3,|tmp_1-p1|);
+          );
+        );
+        tmp=Intersectline(q1,tmp1,p2,q2-p2);
+        if(islist(tmp_1),
+          if(tmp_3*(tmp_3-1)<Eps,
+            tmp3=append(tmp3,|tmp_1-q1|);
+          );
+        );
+        tmp1=[Op(2,q1-p1),-Op(1,q1-p1)];
+        tmp=Intersectline(p2,tmp1,p1,q1-p1);
+        if(islist(tmp_1),
+          if(tmp_3*(tmp_3-1)<Eps,
+            tmp3=append(tmp3,|tmp_1-p2|);
+          );
+        );
+        tmp=Intersectline(q2,tmp1,p1,q1-p1);
+        if(islist(tmp_1),
+          if(tmp_3*(tmp_3-1)<Eps,
+            tmp3=append(tmp3,|tmp_1-q2|);
+          );
+        );
+        out=[min(tmp3),pt,t,s]; //18.01.30until
+      );
+    ,
+      dist=tmp_1;
+      tmp1=q1-p1;      
+      n=[tmp1_2,-tmp1_1]/|tmp1|;
+      pts=[];
+      tmp=Intersectline(p1,n,p2,q2-p2);
+      if(tmp_3*(tmp_3-1)<Eps,
+        tmp1=(1-tmp_3)*p2+tmp_3*q2;
+        pts=append(pts,[tmp1,0,tmp_3]);
+      );
+      tmp=Intersectline(q1,n,p2,q2-p2);
+      if(tmp_3*(tmp_3-1)<Eps,
+        tmp1=(1-tmp_3)*p2+tmp_3*q2;
+        pts=append(pts,[tmp1,1,tmp_3]);
+      );
+      tmp=Intersectline(p2,n,p1,q1-p1);
+      if(tmp_3*(tmp_3-1)<Eps,
+        tmp1=(1-tmp_3)*p1+tmp_3*q1;
+        pts=append(pts,[tmp1,tmp_3,0]);
+      );
+      tmp=Intersectline(q2,n,p1,q1-p1);
+      if(tmp_3*(tmp_3-1)<Eps,
+        tmp1=(1-tmp_3)*p1+tmp_3*q1;
+        pts=append(pts,[tmp1,tmp_3,2]);
+      );
+      if(length(pts)==0,
+        tmp1=min([|p2-p1|,|q2-p1|,|p2-q1|,|q2-q1|]);
+        out=[tmp1];
+      ,
+        if(dist>Eps1,
+          out=[dist];
+        ,
+          tmp=apply(pts,#_1_1);
+          tmp1=sum(tmp)/(length(pts));
+          tmp=apply(pts,#_1_2);
+          tmp2=sum(tmp)/(length(pts));
+          tmp3=[tmp1,tmp2];
+          tmp1=seg1_2-seg1_1;
+          tmp=Dotprod(tmp3-seg1_1,tmp1)/Norm(tmp1)^2;
+          if((tmp>0)%(tmp<1),
+            tmp=[seg1_1+tmp*tmp1,1+tmp];
+          ,
+            if(tmp<0,tmp=[seg1_1,1],tmp2=[seg1_2,2]);
+          );
+          tmp1=tmp_2;
+          tmp2=seg2_2-seg2_1;
+          tmp=Dotprod(tmp3-seg2_1,tmp2)/Norm(tmp2)^2;
+          if((tmp>0)%(tmp<1),
+            tmp=[seg2_1+tmp*tmp2,1+tmp];
+          ,
+            if(tmp<0,tmp=[seg2_1,1],tmp=[seg2_2,2]);
+          );
+          tmp2=tmp_2;
+          out=[dist,tmp3,tmp1,tmp2];
+        );
+      );
+    );
+  );
+  out;
+);
+Op(n,object):=( //  16.05.25
+  regional(out);
+  if(islist(object),
+    out=object_n;
+  ,
+    if(isstring(object),
+      out=substring(object,n-1,n);
+    );
+  );
+  out;
+);
+Collectsameseg(ptdL):=(
+  regional(Eps,gL,rL,numL,ii,jj,flg,tmp,tmp1,tmp2,tmp1md,
+       dst,kk,s1,e1,s2,e2);
+  Eps00=10^(-8);
+  if(length(ptdL)==0,
+    gL=[];rL=[];
+  ,
+    tmp1md=[ptdL_1];
+    rL=ptdL_(2..(length(ptdL)));
+    tmp1=tmp1md_1;
+    kk=floor(tmp1_2);
+    if(tmp1_2<kk+Eps00,
+      s1=kk-1-Eps00; e1=s1+2+2*Eps00;
+    ,
+      s1=kk-Eps00; e1=s1+1+2*Eps00;
+    );
+    kk=floor(tmp1_3);
+    if(tmp1_3<kk+Eps00,
+      s2=kk-1-Eps00; e2=s2+2+2*Eps00;
+    ,
+      s2=kk-Eps00; e2=s2+1+2*Eps00;
+    );
+    numL=[];
+    forall(1..(length(rL)),ii,
+      tmp=rL_ii;
+      tmp1=tmp_2;tmp2=tmp_3;
+      if((tmp1>s1)&(tmp1<e1)&(tmp2>s2)&(tmp2<e2),
+        tmp1md=append(tmp1md,tmp);
+        numL=append(numL,ii);
+      );
+    );
+    gL=[];
+    tmp=apply(tmp1md,#_4);
+    dst=min(tmp);
+    forall(tmp1md,
+      if(#_4<dst+Eps00,
+        gL=append(gL,#);
+      );
+    ); 
+    rL=remove(rL,rL_(numL));
+  );
+  [gL,rL];
+);
+Pointoncurve(tTorg,Gdata):=(
+  regional(tT,Out,Eps,nN,sS,Pa,Pb,PtL);
+  if(isstring(Gdata),PtL=parse(Gdata),PtL=Gdata);
+  if(length(PtL)==1,PtL=PtL_1);
+  tT=max([tTorg,1]); //18.01.04
+  tT=min([tT,length(PtL)]); //18.01.04
+  Eps=10^(-5); //18.01.04
+  nN=floor(tT+Eps);
+  sS=max([tT-nN,0]);
+  if(nN==length(PtL),
+    Out=PtL_nN;
+  ,
+    Pa=PtL_nN;
+    Pb=PtL_(nN+1);
+    Out=(1-sS)*Pa+sS*Pb;
+  );
+  Out;
+);
+Unscaling(pdata):=(
+  regional(Level,Out);
+  Out=[];
+  if(!islist(pdata_1),
+    Out=[pdata_1/SCALEX,pdata_2/SCALEY];
+  ,
+    forall(pdata,
+      Out=append(Out,Unscaling(#))
+    );
+  );
+  Out;
+);
+Shadein(pstrorg):=( //190220
+  regional(pstr,ptL,pL,crv,nn,
+      tmp,tmp1,tmp2,pm1,pm2,p1,p2,flg);
+  if(islist(pstrorg),pstr=pstrorg_1,pstr=pstrorg);
+  crv=[];
+  Framedata(["nodisp"]);
+  ptL=Intersectcurvespp(pstr,frwin);
+  if(length(ptL)>0,
+    pL=apply(ptL,#_2);
+    forall(1..(length(pL)),nn,
+      if(nn<length(pL),
+       tmp1=pL_nn;
+       tmp2=pL_(nn+1);
+       tmp=Pointoncrv((tmp1+tmp2)/2,pstr);
+      ,
+        tmp1=pL_nn;
+        tmp2=pL_1;
+        tmp=parse(pstr);
+        if(pL_nn==length(tmp),
+          tmp=tmp_1;
+        ,
+          tmp=tmp_(length(tmp));
+        );
+      );
+      if(Inwindow(tmp),
+        tmp=Partcrv("",tmp1,tmp2,pstr,["nodata"]);
+      ,
+        tmp1=Pointoncrv(tmp1,pstr);
+        tmp2=Pointoncrv(tmp2,pstr);
+        pm1=Paramoncrv(tmp1,frwin);
+        pm2=Paramoncrv(tmp2,frwin);
+        if(floor(pm1)==floor(pm2),
+          tmp=Listplot("",[tmp1,tmp2],["nodata"]);
+        ,
+          tmp=floor(pm1);
+          p1=Pointoncrv(tmp,"frwin");
+          p2=Pointoncrv(mod(tmp,4)+1,"frwin");
+          tmp=p1-10*(p2-p1);
+          Listplot("frwin",[p1,tmp],["nodisp","Msg=n"]);
+          tmp=Intersectcurvespp("sgfrwin",pstr);
+          if(mod(length(tmp),2)==0, //190223from
+            if(pm2<pm1,pm2=pm2+4); 
+            tmp=[tmp1];
+            pm1=floor(pm1)+1;
+            flg=0;
+            forall(1..3,
+              if(flg==0,
+                if(pm1<pm2,
+                  p1=Pointoncrv(mod(pm1-1,4)+1,"frwin");
+                  tmp=append(tmp,p1);
+                  pm1=pm1+1;
+                ,
+                  flg=1;
+                );
+              );
+            );
+            if(pm1-1<pm2,tmp=append(tmp,tmp2));
+          ,
+            if(pm2>pm1,pm2=pm2-4);
+            tmp=[tmp1];
+            pm1=floor(pm1);
+            flg=0;
+            forall(1..3,
+              if(flg==0,
+                if(pm1>pm2,
+                  p1=Pointoncrv(mod(pm1-1,4)+1,"frwin");
+                  tmp=append(tmp,p1);
+                  pm1=pm1-1;
+                ,
+                  flg=1;
+                );
+              );
+            );
+            if(pm1+1>pm2,tmp=append(tmp,tmp2));
+          ); //190223to
+        );
+      );
+      if(length(crv)==0,
+        crv=tmp;
+      ,
+        crv=Joincrvs("",[crv,tmp],["nodata"]);
+      );
+    );
+  ,
+    if(Inwindow(parse(pstr+"_1")),crv=pstr,crv=frwin);
+  );
+  crv;
+);
+Framedata():=Framedata(["dr"]);//16.10.29from
+Framedata(list):=(
+  regional(pA,pB);
+  if(Measuredepth(list)==0,
+    pA=LLcrd((SW+NE)/2); // 15.09.17
+    pB=LLcrd(NE);
+    Framedata("win",[pA,pB],list);
+  ,
+    Framedata(list,[]);
+  );
+);//16.10.29until
+Framedata(Arg1,Arg2):=(
+  regional(name,list,options,str);
+  if(isstring(Arg1),
+    name=Arg1;
+    list=Arg2;
+    Framedata(name,list,[]);
+  ,
+    list=Arg1;
+    options=Arg2;
+    name="";// 16.10.07from
+    forall(list, 
+       name=name+#.name;
+    );// 16.10.07until
+    Framedata(name,list,options);
+  );
+);
+Framedata(nm,list,optionsorg):=( //190424modified
+  regional(name,options,Out,tmp,tmp1,x1,x2,y1,y2,dx,dy,
+      Ltype,Noflg,strL,cent,dx,dy,color,strL,corner);
+  name="fr"+nm;
+  options=optionsorg;
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  strL=tmp_7; //191126
+  color=tmp_(length(tmp)-2);
+  corner=0; //191126from
+  forall(strL,
+    tmp=substring(Toupper(#),0,1);
+    if(tmp=="C",
+      tmp=Lcrd(list_1); tmp1=Lcrd(list_2); //191227
+      cent=(tmp+tmp1)/2;
+      dx=abs(tmp1_1-tmp_1)/2;
+      dy=abs(tmp1_2-tmp_2)/2;
+      corner=1;
+      options=remove(options,[#]);
+    );
+  );
+  if(corner==0,
+    if(length(list)==2,  // 15.05.12
+      cent=Lcrd(list_1); tmp=Lcrd(list_2);
+      dx=abs(tmp_1-cent_1); dy=abs(tmp_2-cent_2);
+    ,
+      cent=Lcrd(list_1);
+      dx=list_2; dy=list_3;
+    );
+  );  //191126to
+  x1=cent_1-dx; x2=cent_1+dx;
+  y1=cent_2-dy; y2=cent_2+dy;
+  Listplot("-"+name,[[x1,y1],[x2,y1],[x2,y2],[x1,y2],[x1,y1]],options);
+);
+Framedata(nm,cent,dx,dy):=Framedata(nm,[cent,dx,dy],[]);
+Framedata(nm,cent,dx,dy,options):=Framedata(nm,[cent,dx,dy],options);
+Paramoncrv(pP,Gdata):=Paramoncurve(pP,Gdata);//180723
+Paramoncurve(point,Gdata):=(
+  regional(Tmp,PtL,pP);
+  if(ispoint(point),pP=point.xy,pP=point);
+  if(isstring(Gdata),PtL=parse(Gdata),PtL=Gdata);
+  Tmp=Nearestpt(pP,PtL);
+  Tmp_2;
+);
+Paramoncurve(pP,nN,plist):=(
+  regional(PtL,Out,Pa,Pb,vV,vW,sS);
+  if(isstring(plist),PtL=parse(plist),PtL=plist);
+  PtL=apply(PtL,LLcrd(#));//16.10.16
+  if(nN==length(PtL),
+    Out=nN;
+  ,
+    Pa=PtL_nN;
+    Pb=PtL_(nN+1);
+    vV=Pb-Pa;
+    vW=pP-Pa;
+    sS=vV*vW/|vV|^2;
+    sS=min([max([sS,0]),1]);
+    Out=nN+sS;
+  );
+  Out;
+);
+Pointoncrv(tT,PtL):=Pointoncurve(tT,PtL);
+Pointdata3d(name,pt3):=Pointdata3d(name,pt3,[]);//181017from
+Pointdata3d(name,pt3,optionsorg):=( //181017from
+  regional(pt2,ptsub,options,tmp,label);
+  label=[];
+  options=append(optionsorg,"Disp=n"); //220722from
+  tmp=select(options,Toupper(substring(#,0,1))=="L");
+  if(length(tmp)>0,
+    options=remove(options,tmp);
+    label=Strsplit(tmp_1,",");
+    if(length(label)==1,label=append(label,"1"));
+    if(length(label)==2,label=append(label,"black"));
+  ); //220722to
+  pt2=Parapt(pt3);//220713from
+  if(length(label)>0, //220722from
+    tmp=select(options,indexof(#,"Size=")==0);
+    tmp=select(tmp,indexof(#,"Color=")==0);
+    tmp=concat(tmp,["Size="+label_2,"Color="+label_3]);
+    Letter(pt2,label_1,name, tmp);
+  ); //220722to
+  Pointdata("-"+name+"2d",pt2,options);
+  if(SUBSCR==1,
+    ptsub=Parasubpt(pt3);
+    tmp=append(options,"nodisp"); //220722
+    Pointdata("-"+name+"z2d",ptsub,tmp);
+  );
+  Defvar(name+"3d",pt3);//220713
+);
+Pointdata(nm,list):=Pointdata(nm,list,[]);
+Pointdata(nm,listorg,optionsorg):=(
+  regional(list,name,opstr,opcindy,Msg,options,Ltype,
+              Noflg,eqL,color,color4,dispflg,//220715
+              size,inside,incolor,ratio,tmp,tmp1,tmp2,tmp3,
+              ngc1,ngc2,ng1,ng2,nc1,nc2);
+  if(substring(nm,0,1)=="-", //200510[2lines]
+    name=substring(nm,1,length(nm));
+  ,
+    name="pt"+nm;
+  );
+  options=optionsorg; //200512
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  opstr=tmp_(length(tmp)-1);
+  color=tmp_(length(tmp)-2);
+  color4=Colorrgb2cmyk(color);
+  size="1";
+  dispflg="Y";
+  inside="Y"; //200512
+  incolor="";
+  ratio=0.95; //200708,0813
+  border="Y";
+  Msg="Y";
+ Msg="N"; //
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(tmp1=="S",
+      size=tmp_2; //190406[2lines]
+      tmp1=parse(size);
+      options=remove(options,[#]);
+    );
+    if(tmp1=="D", //181030from
+      dispflg=Toupper(substring(tmp_2,0,1));
+      options=remove(options,[#]);
+    );
+    if(tmp1=="I", //190628from
+      inside=tmp_2; //201027from
+      if(substring(inside,0,1)!="[",
+        tmp2=indexof(tmp_2,",");
+        if(tmp2>0,
+          ratio=parse(substring(tmp_2,tmp2,length(tmp_2)));
+          inside=substring(tmp_2,0,tmp2-1); //201027
+        ,
+          inside=tmp_2; 
+        ); 
+      ); //201027to
+      if(contains(["0","N","NO","1","Y","YES"],Toupper(inside)), //200519from
+        if(contains(["0","N","NO"],Toupper(inside)),inside="N",inside="Y");
+      ,
+        incolor=inside;
+        inside="N";
+      ); //200519to
+      options=remove(options,[#]);
+    );
+    if(tmp1=="M", //190206from
+      Msg=Toupper(substring(tmp_2,0,1));
+    ); //190206to
+  );
+  if(dispflg=="Y", 
+    if(Msg=="Y", //190206
+      println("generate pointdata "+name);
+    );
+  ); //181030to
+  ngc1=length(GCLIST)+1; //210422[2lines
+  ng1=length(GLIST)+1;
+  nc1=length(COM2ndlist)+1;
+  if(isstring(listorg),
+    list=parse(listorg);
+  ,
+    list=listorg;
+  ); //17.10.23
+  if(!islist(list),list=[list]); //200510from
+  list=apply(list,if(ispoint(#),Lcrd(#),#));
+  if(Measuredepth(list)==0,list=[list]);
+  tmp1=Textformat(list,6);
+  if(length(list)>1,tmp2=apply(list,[#]),tmp2=list); //200524
+  tmp2=Textformat(tmp2,6);
+  tmp=name+"="+tmp2+";"; //190415
+  parse(tmp);
+  if(Noflg<3,
+    tmp=RSform(tmp1,2);
+  );
+  if(Noflg<2, //210602
+    tmp1=parse(size)*TenSizeInit;
+    forall(1..(length(list)),
+      tmp2=text(#)+name;
+      tmp3=[list_#,tmp1*ratio];
+      Circledata(tmp2,[list_#,tmp1*ratio],["nodisp","Msg=n"]);
+      if(inside=="N", //210602from
+        Scaledata(tmp2+"i",["cr"+tmp2],1,1/SCALEY,//230423[2line]
+                     ["Color="+color,"Msg=n"]);
+        if(length(incolor)>0, //200519from
+          tmp="sc"+tmp2+"i";
+          Shade([tmp],["Color="+incolor]);
+        );
+      ,
+        tmp=[tmp3_1,"Color="+color,"Msg=n"]; //220722from
+        if(Noflg==1,tmp=prepend("notex",tmp));
+        Scaledata(tmp2,["cr"+tmp2],1,1/SCALEY,tmp);
+        tmp="sc"+tmp2;
+        Shade([tmp],options); 
+      ); //210602to
+      tmp=round(10*sqrt(parse(size))); //201027from (moved)
+      if(Noflg==0,options=[Ltype,"Color="+text(color),"Num="+text(tmp)]);
+      if(Noflg==1,options=["notex",Ltype,"Color="+text(color),"Num="+text(tmp)]);
+      if(Noflg==2,options=["nodisp"]);
+      options=concat(options,[tmp3_1,"Msg=n"]);  //201027to
+    ); 
+  );
+  ngc2=length(GCLIST); //210422[5lines]
+  ng2=length(GLIST);
+  nc2=length(COM2ndlist);
+  tmp=[name,list,GCLIST_(ngc1..ngc2),
+               GLIST_(ng1..ng2),COM2ndlist_(nc1..nc2)];  
+  PointDataList=append(PointDataList,tmp);
+  list;
+);
+Scaledata(nm,plist,ratioV):=(
+  regional(tmp);
+  tmp=ratioV; //180603from
+  if(!islist(tmp),tmp=[tmp,tmp]);
+  tmp=Lcrd(tmp);//180603to
+  Scaledata(nm,plist,tmp_1,tmp_2,[]);
+);
+Scaledata(nm,plist,Arg1,Arg2):=(
+  regional(tmp,options);
+  if(islist(Arg2),
+    tmp=Arg1;//180603[2lines]
+    if(!islist(tmp),tmp=[tmp,tmp]);
+    tmp=Lcrd(tmp);
+    options=Arg2;
+    Scaledata(nm,plist,tmp_1,tmp_2,options);
+  ,
+    Scaledata(nm,plist,Arg1,Arg2,[]);
+  );
+);
+Scaledata(nm,plist,rx,ry,optionorg):=(
+  regional(tmp,tmp1,tmp2,pdata,Theta,Pt,Cx,Cy,PdL,options,eqL,
+      opcindy,Nj,Njj,Kj,X2,Y2,Ltype,Noflg,name,color,color4,msgflg);
+  if(substring(nm,0,1)=="-", //210423from
+    name=substring(nm,1,length(nm));
+  ,
+    name="sc"+nm;
+  ); //210423to
+  options=optionorg;
+  Pt=[0,0];
+  tmp=Divoptions(options);
+  Ltype=tmp_1;
+  Noflg=tmp_2;
+  eqL=tmp_5;
+  color=tmp_(length(tmp)-2);
+  color4=Colorrgb2cmyk(color); //200618
+  opcindy=tmp_(length(tmp));
+  tmp1=tmp_6;
+  if(length(tmp1)>0,
+    Pt=Lcrd(tmp1_1);
+  );
+  msgflg="Y"; //190425from
+  forall(eqL,
+    tmp=Strsplit(#,"=");
+    tmp1=Toupper(substring(tmp_1,0,1));
+    if(tmp1=="M",
+      msgflg=Toupper(substring(tmp_2,0,1));
+      options=remove(options,[#]);
+    );
+    if(tmp1=="S", //210423from
+      options=remove(options,[#]);
+    ); //210423to
+  ); //190425to
+  pdata=plist;
+  if(isstring(pdata),pdata=[pdata]);
+  if(!isstring(pdata_1) & Measuredepth(pdata)==1,
+      pdata=[pdata];
+  );
+  Cx=Pt_1; Cy=Pt_2;
+  PdL=[];
+  forall(pdata,Njj,
+    if(isstring(Njj),Kj=parse(Njj),Kj=Njj);
+    if(Measuredepth(Kj)==1,Kj=[Kj]);
+    tmp2=[];
+    forall(Kj,Nj,
+      tmp1=[];
+      forall(Nj,
+        tmp=LLcrd(#);
+        X2=Cx+rx*(tmp_1-Cx);
+        Y2=Cy+ry*(tmp_2-Cy);
+        tmp1=concat(tmp1,[[X2,Y2]]);
+      );
+      if(length(tmp1)==1, //210423from
+        Pointdata("-"+name,tmp1,optionorg);
+      ,
+        tmp2=concat(tmp2,[tmp1]);
+        PdL=concat(PdL,tmp2);
+      );  //210423to
+    );
+  );
+  if(length(PdL)>0,
+    if(Noflg<3,
+      if(msgflg=="Y",
+        println("generate Scaledata "+name);
+      );
+      tmp1=[];
+      forall(PdL,tmp2,
+        tmp=apply(tmp2,Pcrd(#));
+        tmp1=append(tmp1,tmp);
+      );
+      if(length(tmp1)==1,tmp1=tmp1_1);
+      tmp=name+"="+Textformat(tmp1,10)+";"; //190415
+      parse(tmp);
+    );
+    if(Noflg<3, //190818
+      if(isstring(Ltype),
+        Ltype=Getlinestyle(text(Noflg)+Ltype,name);
+      ,
+        if(Noflg==1,Ltype=0);
+      );
+      GCLIST=append(GCLIST,[name,Ltype,opcindy]);
+    );
+  );
+  PdL;
+);
+Windispg():=(
+  if(ADDAXES=="1", //181215from
+    Drwxy();
+    ADDAXES="0";
+  ); //181215to
+  Windispg(GCLIST); //190125
+);
+Windispg(gcLorg):=( //190125
+  regional(gcL,Nj,Nk,Dt,Vj,tmp,tmp1,tmp2,tmp3,tmp4,typeL,opcindy,flg);
+  gcL=gcLorg; //190125from
+  if(length(gcL)>0,
+    if(!islist(gcL_1),gcL=[gcL]);
+  ); //190125to
+  gcL=select(gcL,#_2_1>=0); //190818
+  gsave();
+  layer(KETPIClAYER); // 210602[spell]
+  forall(gcL,Nj,
+    flg=0;
+    if(isstring(Nj_1),
+      if(Nj_2_1>4, //200716from
+        parse(Nj_1);
+        flg=1; 
+      ,
+        Dt=parse(Nj_1);
+      );  //200716to
+    ,
+      Dt=Nj_1
+    );  // 11.17
+    if((flg==0)&(islist(Dt))&(length(Dt)>0),  // 12.19,12.22,200716
+      tmp=Measuredepth(Dt);
+      if(tmp==1,Dt=[Dt]);
+      opcindy=Nj_3;
+      typeL=Nj_2; //200620from
+      if(isstring(typeL_2),tmp=tokenize(typeL_2,","),tmp=[typeL_2]); //200623
+      typeL=prepend(typeL_1,tmp); //200620from
+      if(typeL_1<0,typeL_1=0);
+      tmp1=typeL_1;
+      if(tmp1<10,
+        forall(Dt,Nk,
+          if(length(Nk)>1,
+            tmp3="";
+            if(indexof(opcindy,"color")==0, //190122from
+              tmp=Colorcmyk2rgb(KCOLOR); //200513[2lines]
+              tmp3=tmp3+",linecolor->"+text(tmp);
+            );
+            tmp3=tmp3+opcindy;
+            if(tmp1==0,  //190126from
+              if(indexof(opcindy,"size")==0, 
+                tmp3=tmp3+",size->"+text(typeL_2);
+              ); //190124to
+              tmp="connect("+Textformat(Nk,10)+tmp3+");";//190125
+              parse(tmp);
+            );
+            if((tmp1==1)%(tmp1==2),
+              if(length(typeL)<4,typeL=append(typeL,1)); //
+              if(typeL_(-1)!=1,
+                tmp="linesize("+text(typeL_4)+")";
+                parse(tmp);
+              );
+              tmp3=",dashtype->1"+tmp3;
+              forall(1..(length(Nk)-1),
+                tmp="draw("+Textformat([Nk_#,Nk_(#+1)],10)+tmp3+");";
+                parse(tmp);
+              );
+              if(typeL_(-1)!=1,
+                tmp="linesize(1)";
+                parse(tmp);
+              );  //
+            );
+            if(tmp1==3,
+              if(typeL_3!=1,
+                tmp="linesize("+text(typeL_3)+")";
+                parse(tmp);
+              );
+              tmp3=",dashtype->3"+tmp3;
+              forall(1..(length(Nk)-1),
+                tmp="draw("+Textformat([Nk_#,Nk_(#+1)],10)+tmp3+");";
+                parse(tmp);
+              );
+              if(typeL_3!=1,
+                tmp="linesize(1)";
+                parse(tmp);
+              );
+            );
+          ,
+            if(indexof(opcindy,"size")==0,  //190425from
+              opcindy=opcindy+",size->"+text(TenSize/TenSizeInit);
+            ); //190425to
+            tmp="draw("+text(Nk_1)+opcindy+");"; 
+            parse(tmp);
+           ); //190126to
+        );
+      );
+    );
+  );
+  forall(PTSHADElist, //200519from
+    parse(#_2);
+  ); //200519to
+
+  grestore(); 
+  layer(0);
+);
+Drwxy():=(
+  regional(org,tmp,tmp1,tmp2);
+  org=GENTEN; 
+  Listplot("-axx",[[XMIN,org_2],[XMAX,org_2]],AXSTYLE_2);
+  Listplot("-axy",[[org_1,YMIN],[org_1,YMAX]],AXSTYLE_2);
+  tmp=AXSTYLE_1;
+  if(indexof(tmp_1,"a")>0,//251123from
+    tmp1=replace(tmp_1,"a","");
+    AXSTYLE_1_1="a";
+    if(length(tmp1)>0,
+      tmp1=parse(tmp1);
+    );//251123to
+    Arrowhead([XMAX,org_2],[1,0],prepend(tmp1,AXSTYLE_2));
+    Arrowhead([org_1,YMAX],[0,1],prepend(tmp1,AXSTYLE_3));
+  );//251123to
+  Expr([XMAX,org_2],tmp_3,tmp_2,AXSTYLE_3); 
+  Expr([org_1,YMAX],tmp_5,tmp_4,AXSTYLE_3); 
+  Letter(org,tmp_7,tmp_6,AXSTYLE_3);
+);
+Ketcindyjsfigure=0;
+Ketcindyjsscale=1;
+divPResult="";
+rotPResult="";
+InputNo=0;
+HasResult=false;
+pcalc=[0,0,1];
+fcalcstr="[-y*z,x*z,0]";
+
+htmlstarted=false;
+htmlphase=0;
+htmlprevtime=0;
+htmlprevspeed=0;
+
+MotionState=1;
+
+PlayWindmill():=(
+  MotionState=1;
+  htmlprevtime=seconds();
+  mlasttime=seconds();
+  htmlprevspeed=0;
+  if(htmlmode,
+    playanimation(),
+    (Anim1.speed=1; Anim1.run=true)
+  );
+);
+
+PauseWindmill():=(
+  MotionState=2;
+  if(htmlmode,
+    pauseanimation(),
+    Anim1.run=false
+  );
+);
+
+StopWindmill():=(
+  MotionState=0;
+  htmlphase=0;
+  mphases=[0,0,0];
+  htmlprevtime=seconds();
+  mlasttime=seconds();
+  htmlprevspeed=0;
+  if(htmlmode,
+    pauseanimation(),
+    Anim1.run=false
+  );
+  T.xy=N.xy;
+);
+
+TH.xy=[-1.946875,-3.75]; 
+FI.xy=[-3.3375,-4.35]; 
+
+showWind=true;
+showField=true;
+showAxis=true;
+showInfo=true;
+showMeter=true;
+
+showMulti=false;
+mpcalc=[[0,0,1],[0,0,3.4],[2.4,0,1]];
+multistarted=false;
+mphases=[0,0,0];
+mlasttime=0;
+
+if(element("Text0").text=="",
+  element("Text0").text="[0,0,1]"
+);
+
+if(element("TextP2").text=="",
+  element("TextP2").text="[0,0,3.4]"
+);
+if(element("TextP3").text=="",
+  element("TextP3").text="[2.4,0,1]"
+);
+
+if(element("Text1").text=="",
+  element("Text1").text="[-y*z,x*z,0]"
+);
+
+PutKey(s):=(
+  regional(t,tar);
+  tar="Text0";
+  if(InputNo==1,tar="TextP2");
+  if(InputNo==2,tar="TextP3");
+  if(InputNo==3,tar="Text1");
+  t=element(tar).text;
+  if(length(t)>=2,
+    element(tar).text=substring(t,0,length(t)-1)+s+"]",
+    element(tar).text="["+s+"]"
+  );
+);
+
+ClearCurrent():=(
+  if(InputNo==0,element("Text0").text="[]");
+  if(InputNo==1,element("TextP2").text="[]");
+  if(InputNo==2,element("TextP3").text="[]");
+  if(InputNo==3,element("Text1").text="[]");
+  Calcflg=0;
+  InputErr="";
+);
+
+BackCurrent():=(
+  regional(t,tar);
+  tar="Text0";
+  if(InputNo==1,tar="TextP2");
+  if(InputNo==2,tar="TextP3");
+  if(InputNo==3,tar="Text1");
+  t=element(tar).text;
+  if(length(t)>2,
+    element(tar).text=substring(t,0,length(t)-2)+"]"
+  );
+);
+
+ResetAll():=(
+  SampleMenuOpen=false;
+  SampleActive=0;
+  SampleTitle="";
+  SampleTip="";
+  element("Text0").text="[0,0,1]";
+  element("Text1").text="[-y*z,x*z,0]";
+  element("TextP2").text="[0,0,3.4]";
+  element("TextP3").text="[2.4,0,1]";
+  showMulti=false;
+  multistarted=false;
+  mphases=[0,0,0];
+  mlasttime=0;
+  InputNo=0;
+  InputErr="";
+  divResult="";
+  rotResult="";
+  divPResult="";
+  rotPResult="";
+  HasResult=false;
+
+  htmlstarted=false;
+  htmlphase=0;
+  htmlprevtime=0;
+  htmlprevspeed=0;
+
+  MotionState=1; // RESET後の再計算は従来どおり自動再生
+
+//TH.xy=[-1.946875,-3.75]
+//FI.xy=[-3.3375,-4.35]
+
+  Anim1.run=false;
+  T.xy=N.xy;
+
+  showWind=true;
+  showField=true;
+  showAxis=true;
+  showInfo=true;
+  showMeter=true;
+
+  Calcflg=1;
+);
+
+SampleMenuOpen=false;
+SampleActive=0;
+SampleTitle="";
+SampleTip="";
+SampleIsMulti=false;
+SampleF="";
+SampleP1="";
+SampleP2="";
+SampleP3="";
+
+ApplySample(n):=(
+  if(n==1,
+    (
+      showMulti=false;
+      element("Text1").text="[-y,x,0]";
+      element("Text0").text="[0,0,1]";
+      SampleTitle="基本回転";
+      SampleTip="Z軸方向の回転とrot(P)=[0,0,2]を確認";
+    )
+  );
+  if(n==2,
+    (
+      showMulti=true;
+      element("Text1").text="[0,0.5*x^2,0]";
+      element("Text0").text="[-2,0,1]";
+      element("TextP2").text="[0,0,1]";
+      element("TextP3").text="[3,0,1]";
+      SampleTitle="回転の強さ";
+      SampleTip="P2は停止・P1とP3は逆向きの回転軸";
+    )
+  );
+  if(n==3,
+    (
+      showMulti=true;
+      element("Text1").text="[0,0,x*y]";
+      element("Text0").text="[2,0,0]";
+      element("TextP2").text="[0,2,0]";
+      element("TextP3").text="[2,2,0]";
+      SampleTitle="回転軸の向き";
+      SampleTip="X軸・-Y軸・斜め方向の回転軸を比較";
+    )
+  );
+  if(n==4,
+    (
+      showMulti=false;
+      element("Text1").text="[x,y,z]";
+      element("Text0").text="[0,0,1]";
+      SampleTitle="回転と発散";
+      SampleTip="div=3でもrot=0：風車が停止する";
+    )
+  );
+  SampleActive=n;
+  SampleIsMulti=showMulti;
+  SampleF=element("Text1").text;
+  SampleP1=element("Text0").text;
+  SampleP2=element("TextP2").text;
+  SampleP3=element("TextP3").text;
+  SampleMenuOpen=false;
+
+  InputNo=0;
+  InputErr="";
+  divResult="";
+  rotResult="";
+  divPResult="";
+  rotPResult="";
+  HasResult=false;
+
+  MotionState=1; // サンプル選択時は最初から自動再生
+
+  Anim1.run=false;
+  htmlstarted=false;
+  htmlphase=0;
+  htmlprevtime=0;
+  htmlprevspeed=0;
+  multistarted=false;
+  mphases=[0,0,0];
+  mlasttime=0;
+  T.xy=N.xy;
+
+  showWind=true;
+  showField=true;
+  showAxis=true;
+  showInfo=true;
+  showMeter=true;
+
+  Calcflg=1;
+);
+
+
+
+;
+
+</script>
+<script id="csdraw" type="text/x-cindyscript">
+
+htmlmode=false;
+htmlmode=true; 
+
+Norm3(v):=sqrt(v_1^2+v_2^2+v_3^2);
+
+Cross3(a,b):=[
+  a_2*b_3-a_3*b_2,
+  a_3*b_1-a_1*b_3,
+  a_1*b_2-a_2*b_1
+];
+
+viewtheta=55*pi/180;
+viewphi=45*pi/180;
+if(htmlmode,
+  (
+    thx=max(-4.45,min(4.45,TH.x));
+    fix=max(-4.45,min(4.45,FI.x));
+    TH.xy=[thx,-3.75];
+    FI.xy=[fix,-4.35];
+
+    viewthdegree=10+160*(thx+4.45)/8.9;
+    viewfidegree=360*(fix+4.45)/8.9;
+    viewtheta=viewthdegree*pi/180;
+    viewphi=viewfidegree*pi/180;
+  )
+);
+viewscale=0.82;
+viewshift=[5.0,-0.35];
+
+Proj3(q):=viewshift+viewscale*[
+  -q_1*sin(viewphi)+q_2*cos(viewphi),
+  -q_1*cos(viewphi)*cos(viewtheta)-q_2*sin(viewphi)*cos(viewtheta)+q_3*sin(viewtheta)
+];
+
+DrawSeg3(p,q,col,th):=draw(
+  Proj3(p),
+  Proj3(q),
+  size->th,
+  color->col
+);
+
+DrawPt3(p,col,sz):=draw(
+  Proj3(p),
+  size->sz,
+  color->col
+);
+
+EvalF(q):=(
+  regional(x,y,z);
+  x=q_1;
+  y=q_2;
+  z=q_3;
+  parse(fcalcstr)
+);
+
+InputF(q):=EvalF(q);
+
+NormalizeF(s):=(
+  regional(out,ch,prevch);
+  out="";
+  forall(1..length(s),
+    (
+      ch=substring(s,#-1,#);
+      if(#>1,
+        (
+          prevch=substring(s,#-2,#-1);
+          if((indexof("0123456789",prevch)>0) &
+             (indexof("xyz",ch)>0),
+             out=out+"*"
+          );
+        )
+      );
+      out=out+ch;
+    )
+  );
+  out
+);
+
+FullwidthChars="　！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝～、。・「」『』【】〜ー−×÷￥";
+HasFullwidth(s):=(
+  regional(found,ch);
+  found=false;
+  forall(1..length(s),
+    (
+      ch=substring(s,#-1,#);
+      if(indexof(FullwidthChars,ch)>0,found=true);
+    )
+  );
+  found
+);
+
+CurlAt(q):=(
+  regional(h,dx,dy,dz,fxp,fxm,fyp,fym,fzp,fzm);
+  h=0.0001;
+  fxp=InputF(q+[h,0,0]);
+  fxm=InputF(q+[-h,0,0]);
+  fyp=InputF(q+[0,h,0]);
+  fym=InputF(q+[0,-h,0]);
+  fzp=InputF(q+[0,0,h]);
+  fzm=InputF(q+[0,0,-h]);
+  dx=(fxp-fxm)/(2*h);
+  dy=(fyp-fym)/(2*h);
+  dz=(fzp-fzm)/(2*h);
+  [dy_3-dz_2,dz_1-dx_3,dx_2-dy_1]
+);
+
+IsFiniteReal(v):=(
+  regional(ok);
+  ok=false;
+  if(isreal(v),
+    if((v==v) & (abs(v)<10^100),ok=true)
+  );
+  ok
+);
+
+IsPoint3(q):=(
+  regional(ok);
+  ok=false;
+  if(islist(q),
+    if(length(q)==3,
+      ok=(length(select(q,IsFiniteReal(#)))==3)
+    )
+  );
+  ok
+);
+
+AllowedInputChars="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_+-*/^().,[] ";
+HasUnsupportedChars(s):=(
+  regional(found,ch);
+  found=false;
+  forall(1..length(s),
+    (
+      ch=substring(s,#-1,#);
+      if(indexof(AllowedInputChars,ch)==0,found=true);
+    )
+  );
+  found
+);
+
+HasZeroDivision(s):=(
+  regional(found,j,ch,seenDigit,seenNonZero);
+  found=false;
+  forall(1..length(s),
+    if(substring(s,#-1,#)=="/",
+      (
+        j=#+1;
+        while(j<=length(s) & substring(s,j-1,j)==" ",j=j+1);
+        if(j<=length(s),
+          if(indexof("+-",substring(s,j-1,j))>0,j=j+1)
+        );
+        seenDigit=false;
+        seenNonZero=false;
+        while(j<=length(s) & indexof("0123456789.",substring(s,j-1,j))>0,
+          (
+            ch=substring(s,j-1,j);
+            if(indexof("0123456789",ch)>0,seenDigit=true);
+            if(indexof("123456789",ch)>0,seenNonZero=true);
+            j=j+1;
+          )
+        );
+        if(seenDigit & !seenNonZero,found=true);
+      )
+    )
+  );
+  found
+);
+
+EvalInputAt(s,q):=(
+  regional(x,y,z);
+  x=q_1;
+  y=q_2;
+  z=q_3;
+  parse(s)
+);
+
+DrawMultiWheel(q,rv,ang,idx,col):=(
+  regional(mag,n,helper,e1,e2,r,b,a,c,s,tip,hook,axisend,ap1,ap2);
+  mag=Norm3(rv);
+  if(mag>0.0001,n=rv/mag,n=[0,0,1]);
+  if(abs(n_3)<0.9,helper=[0,0,1],helper=[1,0,0]);
+  e1=Cross3(helper,n);
+  e1=e1/Norm3(e1);
+  e2=Cross3(n,e1);
+  e2=e2/Norm3(e2);
+
+  if(showAxis & (mag>0.0001),
+    (
+      axisend=q+1.25*n;
+      ap1=axisend-0.19*n+0.11*e1;
+      ap2=axisend-0.19*n-0.11*e1;
+      DrawSeg3(q,axisend,[0,0,1],2.8);
+      DrawSeg3(axisend,ap1,[0,0,1],2.8);
+      DrawSeg3(axisend,ap2,[0,0,1],2.8);
+    )
+  );
+
+  if(showWind,
+    (
+      r=0.83;
+      b=0.30;
+      forall(0..3,
+        (
+        a=ang+#*pi/2;
+        c=cos(a);
+        s=sin(a);
+        tip=q+r*c*e1+r*s*e2;
+        hook=q+(r*c-b*s)*e1+(r*s+b*c)*e2;
+        DrawSeg3(q,tip,col,3.6);
+        DrawSeg3(tip,hook,col,3.6);
+        )
+      );
+    )
+  );
+  DrawPt3(q,col,6.5);
+  drawtext(Proj3(q)+[0.16,-0.24],"P"+text(idx),size->13,color->col);
+);
+
+DrawMultiField(q):=(
+  regional(ff,flen,tail,head,side,helper,base,dir);
+  forall([[-0.48,-0.48,0],[0.48,-0.48,0],[-0.48,0.48,0],[0.48,0.48,0]],
+    (
+    tail=q+#;
+    ff=InputF(tail);
+    flen=Norm3(ff);
+    if(flen>0.0001,
+      (
+        dir=ff/flen;
+        if(abs(dir_3)<0.9,helper=[0,0,1],helper=[1,0,0]);
+        side=Cross3(helper,dir);
+        side=side/Norm3(side);
+        head=tail+0.19*ff;
+        base=head-0.12*dir;
+        DrawSeg3(tail,head,[0,0.65,0],1.7);
+        DrawSeg3(head,base+0.06*side,[0,0.65,0],1.7);
+        DrawSeg3(head,base-0.06*side,[0,0.65,0],1.7);
+      )
+    );
+    )
+  );
+);
+
+
+LB.visible=false;
+SW.visible=false;
+NE.visible=false;
+M.visible=false;
+N.visible=false;
+T.visible=false;
+A.visible=false;
+K.visible=false;
+Z.visible=false;
+ZL.visible=false;
+ZR.visible=false;
+TH.visible=false;
+FI.visible=false;
+
+calcOffset=0;
+fInputY=4.05;
+inputGuideY=3.35;
+if(!showMulti & (InputNo==1 % InputNo==2), InputNo=0);
+if(showMulti,
+  (
+    fInputY=2.36;
+    inputGuideY=1.65;
+    calcOffset=-1.67;
+  )
+);
+ element("Text0").xy=[-9.45,5.0];  // P / P1
+ element("TextP2").xy=[-9.45,4.12]; // P2（3点モード）
+ element("TextP3").xy=[-9.45,3.24]; // P3（3点モード）
+ element("Text1").xy=[-9.45,fInputY]; // F は3点モードでP3の直下
+ element("TextP2").visible=showMulti;
+ element("TextP3").visible=showMulti;
+ element("Text2086").xy=[-9.45,2.65+calcOffset]; // single-point P
+ element("BtnP1Sel").xy=[-9.45,2.65+calcOffset];  // three-point P1
+ element("Text2086").visible=!showMulti;
+ element("BtnP1Sel").visible=showMulti;
+ if(showMulti,
+   (
+     element("BtnP2Sel").visible=true;
+     element("BtnP3Sel").visible=true;
+     element("BtnP2Sel").xy=[-8.65,2.65+calcOffset];
+     element("BtnP3Sel").xy=[-7.85,2.65+calcOffset];
+     element("Text2087").xy=[-7.05,2.65+calcOffset];
+   ),
+   (
+     element("BtnP2Sel").visible=false;
+     element("BtnP3Sel").visible=false;
+     element("Text2087").xy=[-8.65,2.65+calcOffset];
+   )
+ );
+ element("Text2084'").xy=[-5.85,2.65+calcOffset]; // x
+ element("Text208''").xy=[-5.00,2.65+calcOffset]; // y
+ element("Text2083").xy=[-4.15,2.65+calcOffset]; // z
+
+ element("Text2089").xy=[-9.45,1.85+calcOffset]; // 7
+ element("Text208'").xy=[-8.65,1.85+calcOffset]; // 8
+ element("Text208").xy=[-7.85,1.85+calcOffset]; // 9
+ element("Text2088").xy=[-7.05,1.85+calcOffset]; // AC
+ element("Text2078").xy=[-5.85,1.85+calcOffset]; // sin
+ element("Text2079").xy=[-5.00,1.85+calcOffset]; // cos
+  element("Text2076").xy=[-4.15,1.85+calcOffset]; // exp
+ element("Text2074").xy=[-3.30,1.85+calcOffset]; // sqrt
+
+ element("Text205").xy=[-9.45,1.05+calcOffset]; // 4
+ element("Text206").xy=[-8.65,1.05+calcOffset]; // 5
+ element("Text207").xy=[-7.85,1.05+calcOffset]; // 6
+ element("Text2085").xy=[-7.05,1.05+calcOffset]; // BS
+ element("Text2084").xy=[-5.85,1.05+calcOffset]; // +
+ element("Text2084''").xy=[-5.00,1.05+calcOffset]; // -
+ element("Text20843").xy=[-4.15,1.05+calcOffset]; // *
+ element("Text20844").xy=[-3.30,1.05+calcOffset]; // /
+
+ element("Text20''").xy=[-9.45,0.25+calcOffset]; // 1
+ element("Text203").xy=[-8.65,0.25+calcOffset]; // 2
+ element("Text204").xy=[-7.85,0.25+calcOffset]; // 3
+ element("Text20845").xy=[-5.85,0.25+calcOffset]; // ^
+ element("Text20847").xy=[-5.00,0.25+calcOffset]; //.
+ element("Text208410'").xy=[-4.15,0.25+calcOffset]; // (
+ element("Text20848").xy=[-3.30,0.25+calcOffset]; // )
+
+
+ element("Text20'").xy=[-9.45,-0.55+calcOffset]; // 0
+ element("Text20").xy=[-8.65,-0.55+calcOffset];
+ element("Text20846").xy=[-5.85,-0.55+calcOffset]; // ,
+
+
+element("BtnWindPlay").xy=[8.0,-4.72];
+element("BtnWindPause").xy=[10.35,-4.72];
+element("BtnWindStop").xy=[13.1,-4.72];
+
+ element("BtnWind").xy=[7.1,5.25];
+ element("BtnField").xy=[8.35,5.25];
+ element("BtnAxis").xy=[10.15,5.25];
+ element("BtnInfo").xy=[11.40,5.25];
+ element("BtnMeter").xy=[12.65,5.25];
+ element("BtnReset").xy=[14.70,5.25];
+ element("BtnMulti").xy=[5.30,5.25];
+
+element("BtnSampleMenu").xy=[2.70,5.25];
+if(SampleMenuOpen,
+  element("BtnSampleMenu").text="サンプル ▲",
+  element("BtnSampleMenu").text="サンプル ▼"
+);
+element("BtnSample1").xy=[-2.00,4.24];
+element("BtnSample2").xy=[1.30,4.24];
+element("BtnSample3").xy=[-2.00,3.42];
+element("BtnSample4").xy=[1.30,3.42];
+element("BtnSample1").visible=SampleMenuOpen;
+element("BtnSample2").visible=SampleMenuOpen;
+element("BtnSample3").visible=SampleMenuOpen;
+element("BtnSample4").visible=SampleMenuOpen;
+if(SampleMenuOpen,
+  drawtext([-2.00,4.95],"学習用サンプル（選択で自動入力・計算）",size->14,color->[0.15,0.26,0.55])
+);
+
+if(SampleActive>0,
+  if((showMulti!=SampleIsMulti) %
+     (element("Text1").text!=SampleF) %
+     (element("Text0").text!=SampleP1) %
+     (showMulti & ((element("TextP2").text!=SampleP2) % (element("TextP3").text!=SampleP3))),
+    SampleActive=0
+  )
+);
+if((SampleActive>0) & (!SampleMenuOpen),
+  (
+    drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
+    drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
+  )
+);
+
+
+if(Calcflg==1,
+  (
+    pstr=element("Text0").text;
+    fstr=NormalizeF(element("Text1").text);
+    InputErr="";
+    divResult="";
+    rotResult="";
+    HasResult=false;
+
+    FullwidthTarget="";
+    if(HasFullwidth(pstr),
+      if(showMulti,FullwidthTarget="P1",FullwidthTarget="P")
+    );
+    if((FullwidthTarget=="") & showMulti & HasFullwidth(element("TextP2").text),
+      FullwidthTarget="P2"
+    );
+    if((FullwidthTarget=="") & showMulti & HasFullwidth(element("TextP3").text),
+      FullwidthTarget="P3"
+    );
+    if((FullwidthTarget=="") & HasFullwidth(fstr),
+      FullwidthTarget="F"
+    );
+    if(FullwidthTarget!="",
+      InputErr="全角入力エラー（"+FullwidthTarget+"）：半角で入力してください"
+    );
+
+    if(InputErr=="",
+      (
+        BadCharTarget="";
+        if(HasUnsupportedChars(pstr),
+          if(showMulti,BadCharTarget="P1",BadCharTarget="P")
+        );
+        if((BadCharTarget=="") & showMulti & HasUnsupportedChars(element("TextP2").text),
+          BadCharTarget="P2"
+        );
+        if((BadCharTarget=="") & showMulti & HasUnsupportedChars(element("TextP3").text),
+          BadCharTarget="P3"
+        );
+        if((BadCharTarget=="") & HasUnsupportedChars(fstr),
+          BadCharTarget="F"
+        );
+        if(BadCharTarget!="",
+          InputErr="入力エラー（"+BadCharTarget+"）：使用できない文字が含まれています"
+        );
+      )
+    );
+
+    if(InputErr=="",
+      (
+        ZeroDivTarget="";
+        if(HasZeroDivision(pstr),
+          if(showMulti,ZeroDivTarget="P1",ZeroDivTarget="P")
+        );
+        if((ZeroDivTarget=="") & showMulti & HasZeroDivision(element("TextP2").text),
+          ZeroDivTarget="P2"
+        );
+        if((ZeroDivTarget=="") & showMulti & HasZeroDivision(element("TextP3").text),
+          ZeroDivTarget="P3"
+        );
+        if((ZeroDivTarget=="") & HasZeroDivision(fstr),
+          ZeroDivTarget="F"
+        );
+        if(ZeroDivTarget!="",
+          InputErr="0除算エラー（"+ZeroDivTarget+"）：0で割ることはできません"
+        );
+      )
+    );
+
+    if(InputErr=="",
+      (
+        if((length(pstr)>4) & (length(fstr)>4),
+          (
+            p=parse(pstr);
+            if(!IsPoint3(p),
+              InputErr="入力エラー（P）：座標は3つの有限な実数にしてください"
+            );
+          ),
+          InputErr="P または F を入力してください"
+        );
+      )
+    );
+    if((InputErr=="") & showMulti,
+      (
+        p2=parse(element("TextP2").text);
+        p3=parse(element("TextP3").text);
+        if(!IsPoint3(p2),
+          InputErr="入力エラー（P2）：座標は3つの有限な実数にしてください"
+        );
+        if((InputErr=="") & !IsPoint3(p3),
+          InputErr="入力エラー（P3）：座標は3つの有限な実数にしてください"
+        );
+      )
+    );
+
+    if(InputErr=="",
+      (
+        ftest=EvalInputAt(fstr,p);
+        if(!IsPoint3(ftest),
+          InputErr="計算エラー（F）：0除算や未定義の値を確認してください"
+        );
+      )
+    );
+
+    if(InputErr=="",
+      (
+        h=0.0001;
+        Fxp=EvalInputAt(fstr,p+[h,0,0]);
+        Fxm=EvalInputAt(fstr,p+[-h,0,0]);
+        Fyp=EvalInputAt(fstr,p+[0,h,0]);
+        Fym=EvalInputAt(fstr,p+[0,-h,0]);
+        Fzp=EvalInputAt(fstr,p+[0,0,h]);
+        Fzm=EvalInputAt(fstr,p+[0,0,-h]);
+        if(length(select([Fxp,Fxm,Fyp,Fym,Fzp,Fzm],IsPoint3(#)))!=6,
+          InputErr="計算エラー（F）：0除算や未定義の値を確認してください"
+        );
+      )
+    );
+    if((InputErr=="") & showMulti,
+      (
+        MultiFValid=true;
+        forall([p2,p3],qcheck,
+          (
+            if(!IsPoint3(EvalInputAt(fstr,qcheck)),MultiFValid=false);
+            if(!IsPoint3(EvalInputAt(fstr,qcheck+[h,0,0])),MultiFValid=false);
+            if(!IsPoint3(EvalInputAt(fstr,qcheck+[-h,0,0])),MultiFValid=false);
+            if(!IsPoint3(EvalInputAt(fstr,qcheck+[0,h,0])),MultiFValid=false);
+            if(!IsPoint3(EvalInputAt(fstr,qcheck+[0,-h,0])),MultiFValid=false);
+            if(!IsPoint3(EvalInputAt(fstr,qcheck+[0,0,h])),MultiFValid=false);
+            if(!IsPoint3(EvalInputAt(fstr,qcheck+[0,0,-h])),MultiFValid=false);
+          )
+        );
+        if(!MultiFValid,
+          InputErr="計算エラー（F）：P2・P3でも0除算や未定義の値を確認してください"
+        );
+      )
+    );
+
+    if(InputErr=="",
+      (
+        dFdx=(Fxp-Fxm)/(2*h);
+        dFdy=(Fyp-Fym)/(2*h);
+        dFdz=(Fzp-Fzm)/(2*h);
+        if(IsPoint3(dFdx) & IsPoint3(dFdy) & IsPoint3(dFdz),
+          (
+            divPResult=dFdx_1+dFdy_2+dFdz_3;
+            rotPResult=[
+              dFdy_3-dFdz_2,
+              dFdz_1-dFdx_3,
+              dFdx_2-dFdy_1
+            ];
+            if(IsFiniteReal(divPResult) & IsPoint3(rotPResult),
+              (
+                divPResult=round(divPResult*1000)/1000;
+                rotPResult=[
+                  round(rotPResult_1*1000)/1000,
+                  round(rotPResult_2*1000)/1000,
+                  round(rotPResult_3*1000)/1000
+                ];
+
+
+                pcalc=p;
+                fcalcstr=fstr;
+                if(showMulti,mpcalc=[p,p2,p3]);
+                HasResult=true;
+                MotionState=1;
+                htmlstarted=false;
+                multistarted=false;
+              ),
+              InputErr="計算エラー（F）：計算結果が有限な実数になりません"
+            );
+          ),
+          InputErr="計算エラー（F）：微分結果が有限な実数になりません"
+        );
+      )
+    );
+    Calcflg=0;
+  )
+);
+
+if(showMulti,
+  (
+    drawtext([-10.55,5.10],"P1 =",size->18,color->[0.95,0.18,0.14]);
+    drawtext([-10.55,4.22],"P2 =",size->16,color->[0.59,0.20,0.80]);
+    drawtext([-10.55,3.34],"P3 =",size->16,color->[0.95,0.54,0.06]);
+  ),
+  drawtext([-10.55,5.10],"P =",size->18)
+);
+drawtext([-10.55,fInputY+0.10],"F =",size->18);
+
+if(showMulti,
+  (
+    if(InputNo==0, drawtext([-10.55,inputGuideY],"入力先 : P1",size->16));
+    if(InputNo==1, drawtext([-10.55,inputGuideY],"入力先 : P2",size->16));
+    if(InputNo==2, drawtext([-10.55,inputGuideY],"入力先 : P3",size->16));
+    if(InputNo==3, drawtext([-10.55,inputGuideY],"入力先 : F",size->16));
+  ),
+  (
+    if(InputNo==0, drawtext([-10.55,inputGuideY],"入力先 : P",size->16));
+    if(InputNo==3, drawtext([-10.55,inputGuideY],"入力先 : F",size->16));
+  )
+);
+
+
+
+if(InputErr!="",
+  drawtext([-10.55,-3.10],InputErr,size->13,color->[1,0,0])
+);
+
+if(HasResult,
+  (
+    inputP=pcalc;
+    inputRotP=rotPResult;
+    inputDivP=divPResult;
+
+    p0=inputP;
+    v0=inputRotP;
+    divp=inputDivP;
+
+    rotmag=Norm3(v0);
+    speedscale=0.5;
+    rotspeed=speedscale*rotmag;
+
+    if(showMulti,
+      (
+        mrots=apply(mpcalc,CurlAt(#));
+        mmags=apply(mrots,Norm3(#));
+        mspeeds=apply(mmags,0.5*#);
+        mcolors=[[0.95,0.18,0.14],[0.59,0.20,0.80],[0.95,0.54,0.06]];
+
+        if(!multistarted,
+          (
+            resetclock();
+            mphases=[0,0,0];
+            mlasttime=seconds();
+            multistarted=true;
+            if(MotionState==1,
+              if(htmlmode,playanimation(),(Anim1.speed=1;Anim1.run=true))
+            );
+          )
+        );
+        mnow=seconds();
+        mdt=max(0,min(0.16,mnow-mlasttime));
+        if(MotionState==1,
+          mphases=apply(1..3,mphases_#+mspeeds_#*mdt)
+        );
+        mlasttime=mnow;
+        if(!htmlmode,
+          Anim1.run=(MotionState==1) & (max(mspeeds)>0.0001)
+        );
+
+        if(!htmlmode,
+          (
+            Start3d([]);
+            viewtheta=THETA;
+            viewphi=PHI;
+          )
+        );
+
+        TH.visible=true;
+        FI.visible=true;
+        TH.xy=[max(-4.45,min(4.45,TH.x)),-3.75];
+        FI.xy=[max(-4.45,min(4.45,FI.x)),-4.35];
+        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35,-3.52],"視点：上下",size->13);
+        drawtext([-4.35,-4.12],"視点：左右",size->13);
+
+        DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
+        DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
+        DrawSeg3([0,0,-5],[0,0,5],[0,0,0],1);
+        drawtext(Proj3([5,0,0])+[0.12,0.08],"x",size->13);
+        drawtext(Proj3([0,5,0])+[0.12,0.08],"y",size->13);
+        drawtext(Proj3([0,0,5])+[0.12,0.08],"z",size->13);
+        forall(1..3,
+          (
+            if(showField,DrawMultiField(mpcalc_#));
+            DrawMultiWheel(mpcalc_#,mrots_#,mphases_#,#,mcolors_#);
+          )
+        );
+      ),
+      (
+    if(rotmag>0.0001,
+      (
+        n0=v0/rotmag;
+
+        if(abs(n0_3)<0.9,
+          helper=[0,0,1],
+          helper=[1,0,0]
+        );
+
+        e1=Cross3(helper,n0);
+        e1=e1/Norm3(e1);
+
+        e2=Cross3(n0,e1);
+        e2=e2/Norm3(e2);
+
+        axislen=2.0;
+        axisend=p0+axislen*n0;
+
+        arrowback=0.30;
+        arrowwide=0.13;
+        axish1=axisend-arrowback*n0+arrowwide*e1;
+        axish2=axisend-arrowback*n0-arrowwide*e1;
+      ),
+      (
+        n0=[0,0,1];
+        e1=[1,0,0];
+        e2=[0,1,0];
+        rotspeed=0;
+        axisend=p0;
+        axish1=p0;
+        axish2=p0;
+      )
+    );
+
+    if(htmlmode,
+      (
+        if(!htmlstarted,
+          (
+            resetclock();
+            htmlphase=0;
+            htmlprevtime=seconds();
+            htmlprevspeed=rotspeed;
+            htmlstarted=true;
+            if(MotionState==1,playanimation());
+          )
+        );
+
+        hnow=seconds();
+        hdt=hnow-htmlprevtime;
+        if(hdt<0,hdt=0);
+
+        if(MotionState==1,
+          htmlphase=htmlphase+htmlprevspeed*hdt
+        );
+        htmlprevtime=hnow;
+        htmlprevspeed=rotspeed;
+
+        if(rotmag>0.0001,
+          (
+            cc=cos(htmlphase);
+            ss=sin(htmlphase);
+          ),
+          (
+            cc=1;
+            ss=0;
+          )
+        );
+      ),
+      (
+        Anim1.speed=rotspeed;
+
+        Anim1.run=(rotmag>0.0001) & (MotionState==1);
+
+        if(rotmag>0.0001,
+          (
+            rr=sqrt((T.x-M.x)^2+(T.y-M.y)^2);
+
+            if(rr>0.0001,
+              (
+                cc=(T.x-M.x)/rr;
+                ss=(T.y-M.y)/rr;
+              ),
+              (
+                cc=1;
+                ss=0;
+              )
+            );
+          ),
+          (
+            cc=1;
+            ss=0;
+          )
+        );
+      )
+    );
+
+    windR=2.7;
+    windB=0.95;
+
+    wA=p0+(windR*cc)*e1+(windR*ss)*e2;
+    wB=p0+(windR*cc-windB*ss)*e1+(windR*ss+windB*cc)*e2;
+    wC=p0+(-windR*ss)*e1+(windR*cc)*e2;
+    wD=p0+(-windB*cc-windR*ss)*e1+(-windB*ss+windR*cc)*e2;
+    wE=p0+(-windR*cc)*e1+(-windR*ss)*e2;
+    wF=p0+(-windR*cc+windB*ss)*e1+(-windR*ss-windB*cc)*e2;
+    wG=p0+(windR*ss)*e1+(-windR*cc)*e2;
+    wH=p0+(windB*cc+windR*ss)*e1+(windB*ss-windR*cc)*e2;
+
+    vscale=0.25;
+    headback=0.16;
+    headwide=0.09;
+
+    Arr(q):=(
+      ff=InputF(q);
+      flen=Norm3(ff);
+
+      if(flen>0.0001,
+        (
+          fdir=ff/flen;
+
+          if(abs(fdir_3)<0.9,
+            hhelp=[0,0,1],
+            hhelp=[1,0,0]
+          );
+
+          side=Cross3(hhelp,fdir);
+          side=side/Norm3(side);
+
+          tt=q+vscale*ff;
+          bb=tt-headback*fdir;
+
+          [q,tt,bb+headwide*side,bb-headwide*side]
+        ),
+        [q,q,q,q]
+      )
+    );
+
+    d=0.85;
+
+    s1=p0+[ d, d, d];
+    s2=p0+[-d, d, d];
+    s3=p0+[-d,-d, d];
+    s4=p0+[ d,-d, d];
+    s5=p0+[ d, d,-d];
+    s6=p0+[-d, d,-d];
+    s7=p0+[-d,-d,-d];
+    s8=p0+[ d,-d,-d];
+
+    a1=Arr(s1);
+    a2=Arr(s2);
+    a3=Arr(s3);
+    a4=Arr(s4);
+    a5=Arr(s5);
+    a6=Arr(s6);
+    a7=Arr(s7);
+    a8=Arr(s8);
+
+    if(!htmlmode,
+      (
+        Start3d([]);
+
+        TH.xy=[TH.x,-3.75];
+        FI.xy=[FI.x,-4.35];
+        TH.visible=true;
+        FI.visible=true;
+
+        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35,-3.52],"視点：上下",size->13);
+        drawtext([-4.35,-4.12],"視点：左右",size->13);
+
+        Parapt(pt):=(
+          regional(Xz,Yz);
+          Xz=-pt_1*sin(PHI)+pt_2*cos(PHI);
+          Yz=-pt_1*cos(PHI)*cos(THETA)-pt_2*sin(PHI)*cos(THETA)+pt_3*sin(THETA);
+          [Xz+2.35,Yz+0.15]
+        );
+
+        Pointdata3d("O",[0,0,0],["nodisp"]);
+        Xyzax3data("","x=[-5,5]","y=[-5,5]","z=[-5,5]");
+        Pointdata3d("P",p0,["Size=3","Color=magenta"]);
+
+        if(showAxis & (rotmag>0.0001),
+          (
+            Pointdata3d("Q",axisend,["nodisp"]);
+            Pointdata3d("Q1",axish1,["nodisp"]);
+            Pointdata3d("Q2",axish2,["nodisp"]);
+
+            Spaceline("0",[P3d,Q3d],["Color=blue","dr,2"]);
+            Spaceline("01",[Q3d,Q13d],["Color=blue","dr,2"]);
+            Spaceline("02",[Q3d,Q23d],["Color=blue","dr,2"]);
+          )
+        );
+
+        if(showWind,
+          (
+            Pointdata3d("WA",wA,["nodisp"]);
+            Pointdata3d("WB",wB,["nodisp"]);
+            Pointdata3d("WC",wC,["nodisp"]);
+            Pointdata3d("WD",wD,["nodisp"]);
+            Pointdata3d("WE",wE,["nodisp"]);
+            Pointdata3d("WF",wF,["nodisp"]);
+            Pointdata3d("WG",wG,["nodisp"]);
+            Pointdata3d("WH",wH,["nodisp"]);
+
+            Spaceline("1",[P3d,WA3d,WB3d],["Color=red","dr,3"]);
+            Spaceline("2",[P3d,WC3d,WD3d],["Color=red","dr,3"]);
+            Spaceline("3",[P3d,WE3d,WF3d],["Color=red","dr,3"]);
+            Spaceline("4",[P3d,WG3d,WH3d],["Color=red","dr,3"]);
+          )
+        );
+
+        if(showField,
+          (
+            Spaceline("11",[a1_1,a1_2],["Color=green"]);
+            Spaceline("12",[a1_2,a1_3],["Color=green"]);
+            Spaceline("13",[a1_2,a1_4],["Color=green"]);
+            Spaceline("14",[a2_1,a2_2],["Color=green"]);
+            Spaceline("15",[a2_2,a2_3],["Color=green"]);
+            Spaceline("16",[a2_2,a2_4],["Color=green"]);
+            Spaceline("17",[a3_1,a3_2],["Color=green"]);
+            Spaceline("18",[a3_2,a3_3],["Color=green"]);
+            Spaceline("19",[a3_2,a3_4],["Color=green"]);
+            Spaceline("20",[a4_1,a4_2],["Color=green"]);
+            Spaceline("21",[a4_2,a4_3],["Color=green"]);
+            Spaceline("22",[a4_2,a_4],["Color=green"]);
+            Spaceline("23",[a5_1,a5_2],["Color=green"]);
+            Spaceline("24",[a5_2,a5_3],["Color=green"]);
+            Spaceline("25",[a5_2,a5_4],["Color=green"]);
+            Spaceline("26",[a6_1,a6_2],["Color=green"]);
+            Spaceline("27",[a6_2,a6_3],["Color=green"]);
+            Spaceline("28",[a6_2,a6_4],["Color=green"]);
+            Spaceline("29",[a7_1,a7_2],["Color=green"]);
+            Spaceline("30",[a7_2,a7_3],["Color=green"]);
+            Spaceline("31",[a7_2,a7_4],["Color=green"]);
+            Spaceline("32",[a8_1,a8_2],["Color=green"]);
+            Spaceline("33",[a8_2,a8_3],["Color=green"]);
+            Spaceline("34",[a8_2,a8_4],["Color=green"]);
+          )
+        );
+
+        Windispg();
+
+        SW.visible=false;
+        NE.visible=false;
+        LB.visible=false;
+        M.visible=false;
+        N.visible=false;
+        T.visible=false;
+        A.visible=false;
+      ),
+      (
+        TH.visible=true;
+        FI.visible=true;
+        LB.visible=false;
+        SW.visible=false;
+        NE.visible=false;
+        M.visible=false;
+        N.visible=false;
+        T.visible=false;
+        A.visible=false;
+
+        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
+        drawtext([-4.35,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
+
+        DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
+        DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
+        DrawSeg3([0,0,-5],[0,0,5],[0,0,0],1);
+
+        drawtext(Proj3([5,0,0])+[0.12,0.08],"x",size->13);
+        drawtext(Proj3([0,5,0])+[0.12,0.08],"y",size->13);
+        drawtext(Proj3([0,0,5])+[0.12,0.08],"z",size->13);
+
+        DrawPt3(p0,[1,0,1],7);
+
+        if(showAxis & (rotmag>0.0001),
+          (
+            DrawSeg3(p0,axisend,[0,0,1],3);
+            DrawSeg3(axisend,axish1,[0,0,1],3);
+            DrawSeg3(axisend,axish2,[0,0,1],3);
+          )
+        );
+
+        if(showWind,
+          (
+            DrawSeg3(p0,wA,[1,0,0],4);
+            DrawSeg3(wA,wB,[1,0,0],4);
+            DrawSeg3(p0,wC,[1,0,0],4);
+            DrawSeg3(wC,wD,[1,0,0],4);
+            DrawSeg3(p0,wE,[1,0,0],4);
+            DrawSeg3(wE,wF,[1,0,0],4);
+            DrawSeg3(p0,wG,[1,0,0],4);
+            DrawSeg3(wG,wH,[1,0,0],4);
+          )
+        );
+
+        if(showField,
+          (
+            DrawSeg3(a1_1,a1_2,[0,0.7,0],2);
+            DrawSeg3(a1_2,a1_3,[0,0.7,0],2);
+            DrawSeg3(a1_2,a1_4,[0,0.7,0],2);
+            DrawSeg3(a2_1,a2_2,[0,0.7,0],2);
+            DrawSeg3(a2_2,a2_3,[0,0.7,0],2);
+            DrawSeg3(a2_2,a2_4,[0,0.7,0],2);
+            DrawSeg3(a3_1,a3_2,[0,0.7,0],2);
+            DrawSeg3(a3_2,a3_3,[0,0.7,0],2);
+            DrawSeg3(a3_2,a3_4,[0,0.7,0],2);
+            DrawSeg3(a4_1,a4_2,[0,0.7,0],2);
+            DrawSeg3(a4_2,a4_3,[0,0.7,0],2);
+            DrawSeg3(a4_2,a4_4,[0,0.7,0],2);
+            DrawSeg3(a5_1,a5_2,[0,0.7,0],2);
+            DrawSeg3(a5_2,a5_3,[0,0.7,0],2);
+            DrawSeg3(a5_2,a5_4,[0,0.7,0],2);
+            DrawSeg3(a6_1,a6_2,[0,0.7,0],2);
+            DrawSeg3(a6_2,a6_3,[0,0.7,0],2);
+            DrawSeg3(a6_2,a6_4,[0,0.7,0],2);
+            DrawSeg3(a7_1,a7_2,[0,0.7,0],2);
+            DrawSeg3(a7_2,a7_3,[0,0.7,0],2);
+            DrawSeg3(a7_2,a7_4,[0,0.7,0],2);
+            DrawSeg3(a8_1,a8_2,[0,0.7,0],2);
+            DrawSeg3(a8_2,a8_3,[0,0.7,0],2);
+            DrawSeg3(a8_2,a8_4,[0,0.7,0],2);
+          )
+        );
+      )
+    );
+      ) // showMulti=FALSE：従来の1点表示ここまで
+    );
+
+    if(showMulti,
+      (
+        resultx=8.25;
+        resulty=4.35;
+        drawtext([resultx,resulty],"3-point comparison",size->17);
+        resulty=resulty-0.60;
+        if(divResult!="",
+          (
+            drawtext([resultx,resulty],"div F = "+divResult,size->13);
+            resulty=resulty-0.50;
+          )
+        );
+        if(rotResult!="",
+          (
+            drawtext([resultx,resulty],"rot F = "+rotResult,size->13);
+            resulty=resulty-0.55;
+          )
+        );
+        forall(1..3,
+          (
+          mi=#;
+          drawtext([resultx,resulty],"P"+text(mi)+" = "+text(mpcalc_mi),size->13,color->mcolors_mi);
+          resulty=resulty-0.38;
+          if(showInfo,
+            (
+              drawtext([resultx,resulty],"rot = "+text(apply(mrots_mi,round(#*1000)/1000))+"   |rot| = "+text(round(mmags_mi*1000)/1000),size->12);
+              resulty=resulty-0.48;
+            )
+          );
+          if(showMeter,
+            (
+              mbarx=resultx+0.4;
+              mbarlen=3.3;
+              mbarfrac=min(1,mspeeds_mi/5);
+              draw([mbarx,resulty],[mbarx+mbarlen,resulty],size->2,color->[0.72,0.72,0.72]);
+              draw([mbarx,resulty],[mbarx+mbarlen*mbarfrac,resulty],size->5,color->mcolors_mi);
+              drawtext([mbarx+mbarlen+0.2,resulty-0.08],text(round(mspeeds_mi*100)/100),size->11);
+              resulty=resulty-0.45;
+            )
+          );
+          resulty=resulty-0.17;
+          )
+        );
+        drawtext([8.35,-3.05],"風車の速さ = 0.5 × |rot F(Pi)|",size->12);
+        drawtext([8.35,-3.48],"青：rot軸　 緑：ベクトル場",size->12);
+      ),
+      (
+    resultx=8.25;
+    resulty=4.35;
+
+    drawtext([resultx,resulty],"Calculation Result",size->17);
+    resulty=resulty-0.65;
+
+    if(divResult!="",
+      (
+        drawtext([resultx,resulty],"div F = "+divResult,size->14);
+        resulty=resulty-0.55;
+      )
+    );
+
+    if(rotResult!="",
+      (
+        drawtext([resultx,resulty],"rot F = "+rotResult,size->14);
+        resulty=resulty-0.55;
+      )
+    );
+
+    drawtext([resultx,resulty],"div F(P) = "+divPResult,size->14);
+    resulty=resulty-0.55;
+
+    drawtext([resultx,resulty],"rot F(P) = "+rotPResult,size->14);
+    resulty=resulty-0.55;
+
+    if(showInfo,
+      (
+        drawtext([resultx,resulty],"|rot F(P)| = "+text(rotmag),size->14);
+        resulty=resulty-0.55;
+
+        drawtext([resultx,resulty],"Rotation speed = "+text(rotspeed),size->14);
+        resulty=resulty-0.55;
+
+        if(rotmag<=0.0001,
+          drawtext([resultx,resulty],"rot F(P) = 0 : Windmill stopped",size->13,color->[1,0,0])
+        );
+      )
+    );
+
+    if(showMeter,
+      (
+        metermax=5;
+        meterratio=rotspeed/metermax;
+
+        if(meterratio>1,meterratio=1);
+        if(meterratio<0,meterratio=0);
+
+        meterx=12.55;
+        metery0=-2.5;
+        meterh=5;
+        metery=metery0+meterh*meterratio;
+
+        draw([meterx,metery0],[meterx,metery0+meterh],size->2,color->[0,0,1]);
+        draw([meterx,metery0],[meterx,metery],size->8,color->[0,0,1]);
+
+        forall(0..5,
+          draw(
+            [meterx-0.2,metery0+meterh*#/5],
+            [meterx+0.2,metery0+meterh*#/5],
+            size->2,
+            color->[0,0,1]
+          );
+          drawtext([meterx+0.3,metery0+meterh*#/5],text(#),size->11);
+        );
+
+        drawtext([meterx-0.95,metery0+meterh+0.45],"Rotation speed",size->13);
+        drawtext([meterx-0.20,metery0+meterh+0.10],text(rotspeed),size->12);
+      )
+    );
+
+    legendx=14.15;
+    legendy=2.20;
+
+    drawtext([legendx,legendy],"Legend",size->14);
+
+    draw([legendx,legendy-0.55],[legendx+0.65,legendy-0.55],size->4,color->[1,0,0]);
+    drawtext([legendx+0.8,legendy-0.55],"Windmill",size->12);
+
+    draw([legendx,legendy-1.05],[legendx+0.65,legendy-1.05],size->4,color->[0,0,1]);
+    drawtext([legendx+0.8,legendy-1.05],"rot axis",size->12);
+
+    draw([legendx,legendy-1.55],[legendx+0.65,legendy-1.55],size->4,color->[0,0.7,0]);
+    drawtext([legendx+0.8,legendy-1.55],"Vector field",size->12);
+
+    draw([legendx,legendy-2.05],size->6,color->[1,0,1]);
+    drawtext([legendx+0.8,legendy-2.05],"Point P",size->12);
+      )
+    );
+  ),
+  (
+    drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17);
+  )
+);
+
+;
+
+</script>
+    <script type="text/javascript">
+var cdy = CindyJS({
+  scripts: "cs*",
+  use: ["katex"],
+  defaultAppearance: {
+    dimDependent: 0.7,
+    fontFamily: "sans-serif",
+    lineSize: 1,
+    pointSize: 5.0,
+    textsize: 12.0
+  },
+  angleUnit: "°",
+  geometry: [
+    {name: "LB", type: "Free", pos: [-3.6666666666666665, -4.0, 0.6666666666666666], color: [1.0, 0.0, 0.0], visible: false, size: 0.0, border: true },
+    {name: "Text0", type: "EditableText", pos: [4.0, -2.1164021164021167, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.686, 0.686], fillalpha: 0.6239316239316239, minwidth: 150, text: "[0,0,1]", textsize: 18.0},
+    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.488]", textsize: 18.0},
+    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,199]", textsize: 18.0},
+    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[0,sin(2x),0]", textsize: 18.0},
+    {name: "Text5", type: "EditableText", pos: [1.3716301577866423, -4.0, 0.3698133834802243], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 0.0, 0.0], fillalpha: 1.0, visible: false, minwidth: 300, text: "rot F (P)", textsize: 18.0},
+    {name: "SW", type: "Free", pos: [4.0, 4.0, -0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
+    {name: "NE", type: "Free", pos: [4.0, 4.0, 0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
+    {name: "FI", type: "Free", pos: [1.1266918045831924, -4.0, 0.9195402298850576], color: [1.0, 0.0, 0.0], labeled: true, size: 8.5, border: true },
+    {name: "TH", type: "Free", pos: [-1.6288060342141681, -4.0, 1.0666666666666667], color: [1.0, 0.0, 0.0], labeled: true, size: 8.5, border: true },
+    {name: "M", type: "Free", pos: [4.0, 1.2726592559086733, -1.2093257745989117], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
+    {name: "N", type: "Free", pos: [4.0, 0.6312277657251566, -1.1079723382888567], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
+    {name: "A", type: "CircleMP", color: [0.0, 0.0, 1.0], args: ["M", "N"], visible: false, printname: "$C_{0, size: 3.0, border: true }$", size: 3.0, border: true },
+    {name: "T", type: "PointOnCircle", pos: [4.0, {r: 1.804186089008452, i: -1.689506524241468E-14, size: 3.0, border: true }, {r: -1.4420856435329965, i: -2.7247683900685735E-15, size: 3.0, border: true }], color: [1.0, 0.0, 0.0], args: ["A"], visible: false, labeled: false, size: 3.0, border: true },
+    {name: "Anim1", type: "AnimationAlg", color: [0.0, 0.0, 1.0], args: ["T", "A"], dock: {offset: [0.0, -0.0], size: 3.0, border: true }, size: 3.0, border: true },
+    {name: "Text20", type: "Button", pos: [4.0, 0.2543352601156069, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "Calcflg=1", text: "計算", textsize: 18.0},
+    {name: "Text20'", type: "Button", pos: [4.0, 0.23280423280423285, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"0\");", text: "0", textsize: 18.0},
+    {name: "Text20''", type: "Button", pos: [4.0, -0.10582010582010584, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"1\");", text: "1", textsize: 18.0},
+    {name: "Text203", type: "Button", pos: [4.0, -0.11560693641618497, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"2\");", text: "2", textsize: 18.0},
+    {name: "Text204", type: "Button", pos: [4.0, -0.12738853503184713, -0.5095541401273885], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"3\");", text: "3", textsize: 18.0},
+    {name: "Text205", type: "Button", pos: [4.0, -0.44444444444444453, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"4\");", text: "4", textsize: 18.0},
+    {name: "Text206", type: "Button", pos: [4.0, -0.4855491329479769, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"5\");", text: "5", textsize: 18.0},
+    {name: "Text207", type: "Button", pos: [4.0, -0.535031847133758, -0.5095541401273885], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"6\");", text: "6", textsize: 18.0},
+    {name: "Text208", type: "Button", pos: [4.0, -0.9426751592356689, -0.5095541401273885], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"9\");", text: "9", textsize: 18.0},
+    {name: "Text208'", type: "Button", pos: [4.0, -0.8554913294797688, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"8\");", text: "8", textsize: 18.0},
+    {name: "Text208''", type: "Button", pos: [4.0, -2.12, -0.8], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"y\");", text: "y", textsize: 18.0},
+    {name: "Text2083", type: "Button", pos: [4.0, -2.5542168674698793, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"z\");", text: "z", textsize: 18.0},
+    {name: "Text2074", type: "Button", pos: [4.0, -2.2424242424242427, -1.2121212121212122], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"sqrt\");", text: "√", textsize: 18.0},
+    {name: "Text2084", type: "Button", pos: [4.0, -0.7179487179487181, -0.6837606837606838], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"+\");", text: "+", textsize: 18.0},
+    {name: "Text2085", type: "Button", pos: [4.0, -0.5957446808510638, -0.5673758865248226], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "BackCurrent();", text: "BS", textsize: 18.0},
+    {name: "Text2076", type: "Button", pos: [4.0, -1.783132530120482, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"exp\");", text: "exp", textsize: 18.0},
+    {name: "Text2086", type: "Button", pos: [4.0, -1.1216931216931219, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "InputNo=0;", text: "P", textsize: 18.0},
+    {name: "BtnP1Sel", type: "Button", pos: [4.0, -1.1216931216931219, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, visible: false, script: "InputNo=0;", text: "P1", textsize: 18.0},
+    {name: "Text2087", type: "Button", pos: [4.0, -1.2254335260115605, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "InputNo=3;", text: "F", textsize: 18.0},
+    {name: "BtnP2Sel", type: "Button", pos: [4.0, -0.4531791907514451, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, visible: false, script: "InputNo=1;", text: "P2", textsize: 18.0},
+    {name: "BtnP3Sel", type: "Button", pos: [4.0, -0.49936305732484076, -0.5095541401273885], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, visible: false, script: "InputNo=2;", text: "P3", textsize: 18.0},
+    {name: "Text2078", type: "Button", pos: [4.0, -1.2649572649572651, -0.6837606837606838], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"sin(\");", text: "sin", textsize: 18.0},
+    {name: "Text2088", type: "Button", pos: [4.0, -1.049645390070922, -0.5673758865248226], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "ClearCurrent();", text: "AC", textsize: 18.0},
+    {name: "Text2079", type: "Button", pos: [4.0, -1.48, -0.8], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"cos(\");", text: "cos", textsize: 18.0},
+    {name: "Text2089", type: "Button", pos: [4.0, -0.7830687830687831, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"7\");", text: "7", textsize: 18.0},
+    {name: "Text2084'", type: "Button", pos: [4.0, -1.811965811965812, -0.6837606837606838], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"x\");", text: "x", textsize: 18.0},
+    {name: "Text2084''", type: "Button", pos: [4.0, -0.84, -0.8], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"-\");", text: "-", textsize: 18.0},
+    {name: "Text20843", type: "Button", pos: [4.0, -1.0120481927710843, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"*\");", text: "*", textsize: 18.0},
+    {name: "Text20844", type: "Button", pos: [4.0, -1.2727272727272727, -1.2121212121212122], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"/\");", text: "/", textsize: 18.0},
+    {name: "Text20845", type: "Button", pos: [4.0, -0.17094017094017094, -0.6837606837606838], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"^\");", text: "^", textsize: 18.0},
+    {name: "Text20846", type: "Button", pos: [4.0, 0.3760683760683761, -0.6837606837606838], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\",\");", text: ",", textsize: 18.0},
+    {name: "Text20847", type: "Button", pos: [4.0, -0.2, -0.8], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\".\");", text: ".", textsize: 18.0},
+    {name: "Text20848", type: "Button", pos: [4.0, -0.30303030303030304, -1.2121212121212122], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\")\");", text: ")", textsize: 18.0},
+    {name: "Text208410'", type: "Button", pos: [4.0, -0.24096385542168672, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"(\");", text: "(", textsize: 18.0},
+    {name: "BtnMulti", type: "ToggleButton", pos: [4.0, 3.9622641509433962, 0.7547169811320754], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 100, script: "showMulti=!showMulti;if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;", text: "1点／3点", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnSampleMenu", type: "ToggleButton", pos: [-2.0571428571428574, -4.0, -0.7619047619047619], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, minwidth: 110, script: "SampleMenuOpen=!SampleMenuOpen;", text: "サンプル ▼", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnSample1", type: "ToggleButton", pos: [1.8867924528301885, -4.0, -0.9433962264150942], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 115, script: "ApplySample(1);", text: "基本回転", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnSample2", type: "ToggleButton", pos: [-1.2264150943396226, -4.0, -0.9433962264150942], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(2);", text: "回転の強さ", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnSample3", type: "ToggleButton", pos: [2.339181286549708, -4.0, -1.169590643274854], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(3);", text: "回転軸の向き", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnSample4", type: "ToggleButton", pos: [-1.52046783625731, -4.0, -1.169590643274854], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(4);", text: "回転と発散", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnWind", type: "ToggleButton", pos: [4.0, 2.9577464788732395, 0.5633802816901409], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "showWind=!showWind;", text: "風車", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnField", type: "ToggleButton", pos: [4.0, 2.5149700598802394, 0.47904191616766467], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 90, script: "showField=!showField;", text: "ベクトル場", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnAxis", type: "ToggleButton", pos: [4.0, 2.068965517241379, 0.3940886699507389], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 60, script: "showAxis=!showAxis;", text: "rot 軸", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnMeter", type: "ToggleButton", pos: [4.0, 1.6600790513833994, 0.31620553359683795], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 100, script: "showMeter=!showMeter;", text: "速度メーター", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnInfo", type: "ToggleButton", pos: [4.0, 1.8421052631578947, 0.3508771929824561], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "showInfo=!showInfo;", text: "数値", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnWindPlay", type: "ToggleButton", pos: [4.0, -2.36, 0.5], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "PlayWindmill();", text: "▶ 再生", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnWindPause", type: "ToggleButton", pos: [4.0, -1.8241545893719808, 0.38647342995169087], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "PauseWindmill();", text: "Ⅱ 一時停止", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnWindStop", type: "ToggleButton", pos: [4.0, -1.4412213740458015, 0.3053435114503817], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "StopWindmill();", text: "■ 停止", textsize: 16.0, textbold: true, border: true },
+    {name: "BtnReset", type: "ToggleButton", pos: [4.0, 1.4285714285714286, 0.272108843537415], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 1.0, 1.0], fillalpha: 0.27272728085517883, minwidth: 70, script: "ResetAll();", text: "RESET", textsize: 16.0, textbold: true, border: true },
+    {name: "Text2", type: "Text", pos: [4.0, 1.5586206896551724, -0.374860296326355], color: [0.0, 0.0, 0.0], pinned: true, text: "exp：指数関数  exp(x)など", textsize: 18.0, border: true },
+    {name: "Text3", type: "Text", pos: [4.0, 1.406896551724138, -0.374860296326355], color: [0.0, 0.0, 0.0], pinned: true, text: "sin,cos：三角関数  sin(x)など", textsize: 18.0, border: true },
+    {name: "Text4", type: "Text", pos: [4.0, -2.1906412478336224, -0.37680930999876233], color: [0.0, 0.0, 0.0], pressed: true, pinned: true, text: "テンキー上部のP,Fボタンで入力先指定", size: 3.0, border: true }
+  ],
+  animation: {
+    autoplay: false,
+    controls: false,
+    speed: 0.5,
+    speedRange: [0.0, 1.0],
+    accuracy: 1
+  },
+  autoplay: false,
+  animcontrols: false,
+  ports: [{
+    width: 1600,
+    height: 663,
+    id: "CSCanvas",
+    transform: [{visibleRect: [-11.875688574005034, 7.092297359068847, 17.5605650563715, -5.10535023901843]}],
+    background: "rgb(247,247,247)"
+  }],
+  csconsole: false,
+  use: ["katex"],
+  cinderella: {build: 2125, version: [3, 0, 2125]}
+});
+    </script>
+</head>
+<body>
+    <main class="page">
+  <header class="page-header">
+    <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
+    <p class="page-subtitle">ver.49 を使ったレスポンシブ試作版｜計算・描画のCindyScriptは変更していません</p>
+  </header>
+  <section class="viewer-panel" aria-label="3D教材の表示">
+    <div class="viewer-toolbar">
+      <p class="viewer-hint">画面に合わせて自動調整。細かい操作は「拡大して操作」で確認できます。</p>
+      <div class="tool-actions" role="group" aria-label="表示倍率">
+        <button type="button" class="tool-btn" id="btnFit" aria-pressed="true">全体表示</button>
+        <button type="button" class="tool-btn" id="btnZoom" aria-pressed="false">拡大して操作</button>
+        <button type="button" class="tool-btn" id="btnScrollInput">入力へ</button>
+        <button type="button" class="tool-btn" id="btnScrollGraph">3Dへ</button>
+        <button type="button" class="tool-btn" id="btnScrollResult">結果へ</button>
+      </div>
+    </div>
+    <div id="canvasViewport" class="canvas-viewport" tabindex="0" aria-label="教材表示。拡大時は左右にスクロールできます">
+      <div id="canvasStage" class="canvas-stage">
+        <div id="CSCanvas"></div>
+      </div>
+    </div>
+    <p class="viewer-footer" id="viewerFooter">※ 画面内の視点スライダー・計算機・表示切替は従来どおり利用できます。</p>
+  </section>
+
+  <section class="mobile-panel" aria-label="小さい画面向けの操作パネル">
+    <h2 class="panel-heading">入力・操作パネル</h2>
+    <p class="panel-caption">狭い画面では、こちらから入力すると操作しやすいよ。上の図と連動します。</p>
+    <div class="mode-row"><label><input type="checkbox" id="multiMode"> 3点モードにする</label>
+      <button class="tool-btn" type="button" id="syncButton">教材から入力値を取り込む</button>
+    </div>
+    <form id="mobileForm" autocomplete="off">
+      <div class="fields">
+        <div class="field"><label for="fieldP1" id="p1Label">P</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
+        <div class="field field-p2 hidden" id="p2Wrap"><label for="fieldP2">P2</label><input id="fieldP2" type="text" value="[0,0,3.4]" spellcheck="false" autocapitalize="off"></div>
+        <div class="field field-p3 hidden" id="p3Wrap"><label for="fieldP3">P3</label><input id="fieldP3" type="text" value="[2.4,0,1]" spellcheck="false" autocapitalize="off"></div>
+        <div class="field"><label for="fieldF">F(x,y,z)</label><input id="fieldF" type="text" value="[-y*z,x*z,0]" spellcheck="false" autocapitalize="off"></div>
+      </div>
+      <div class="buttons">
+        <button type="submit" class="action-btn primary">計算して反映</button>
+        <button type="button" class="action-btn secondary" id="btnResetMobile">RESET</button>
+      </div>
+    </form>
+    <h3 class="section-title">サンプル</h3>
+    <div class="buttons" aria-label="サンプルを選択">
+      <button type="button" class="action-btn" data-sample="1">基本回転</button>
+      <button type="button" class="action-btn" data-sample="2">回転の強さ</button>
+      <button type="button" class="action-btn" data-sample="3">回転軸の向き</button>
+      <button type="button" class="action-btn" data-sample="4">回転と発散</button>
+    </div>
+    <h3 class="section-title">風車のアニメーション</h3>
+    <div class="buttons">
+      <button type="button" class="action-btn" data-command="PlayWindmill();">▶ 再生</button>
+      <button type="button" class="action-btn" data-command="PauseWindmill();">Ⅱ 一時停止</button>
+      <button type="button" class="action-btn" data-command="StopWindmill();">■ 停止</button>
+    </div>
+    <h3 class="section-title">表示の切り替え</h3>
+    <div class="toggle-grid">
+      <label><input type="checkbox" data-flag="showWind" checked>風車</label>
+      <label><input type="checkbox" data-flag="showField" checked>ベクトル場</label>
+      <label><input type="checkbox" data-flag="showAxis" checked>rot軸</label>
+      <label><input type="checkbox" data-flag="showInfo" checked>数値</label>
+      <label><input type="checkbox" data-flag="showMeter" checked>速度メーター</label>
+    </div>
+    <div class="status" id="mobileStatus" role="status" aria-live="polite">教材の読み込み後、計算して反映してください。</div>
+    <div class="result-grid" id="mobileResults" aria-label="計算結果">
+      <div><span>div F(P)</span><strong id="resultDiv">—</strong></div>
+      <div><span>rot F(P)</span><strong id="resultRot">—</strong></div>
+      <div><span>|rot F(P)|</span><strong id="resultMag">—</strong></div>
+      <div><span>回転速度</span><strong id="resultSpeed">—</strong></div>
+    </div>
+    <p class="panel-caption" style="margin:12px 0 0">3点モードの個別の速度・回転軸は上の教材の「結果へ」で確認できます。</p>
+  </section>
+</main>
+<script>
+(function () {
+  "use strict";
+  const BASE_W = 1600, BASE_H = 663;
+  const viewport = document.getElementById("canvasViewport");
+  const stage = document.getElementById("canvasStage");
+  const canvasRoot = document.getElementById("CSCanvas");
+  const btnFit = document.getElementById("btnFit");
+  const btnZoom = document.getElementById("btnZoom");
+  const multiMode = document.getElementById("multiMode");
+  const status = document.getElementById("mobileStatus");
+  let zoom = false;
+  let currentScale = 1;
+
+  // Keep the CindyJS internal 1600x663 coordinate system intact.
+  // Scaling the entire scene container also scales its HTML text inputs.
+  function layout() {
+    const available = Math.max(1, viewport.clientWidth);
+    const fitted = Math.min(1, available / BASE_W);
+    currentScale = zoom ? Math.max(fitted, .75) : fitted;
+    stage.style.width = (BASE_W * currentScale) + "px";
+    stage.style.height = (BASE_H * currentScale) + "px";
+    canvasRoot.style.transform = "scale(" + currentScale + ")";
+    btnFit.setAttribute("aria-pressed", String(!zoom));
+    btnZoom.setAttribute("aria-pressed", String(zoom));
+    document.getElementById("viewerFooter").textContent = zoom
+      ? "拡大中：左右にスクロールできます。『入力へ』『3Dへ』『結果へ』で移動できます。"
+      : "画面全体を縮小表示中。狭い画面では下の入力・操作パネルを使うと便利です。";
+  }
+  function scrollToPart(part) {
+    if (!zoom) { zoom = true; layout(); }
+    // The source HTML maps the view into 1600 pixels; the selected positions
+    // are visual navigation aids, not changes to Cinderella coordinates.
+    const sourceX = part === "input" ? 240 : part === "graph" ? 915 : 1220;
+    viewport.scrollTo({ left: Math.max(0, currentScale * sourceX - viewport.clientWidth / 2), behavior: "smooth" });
+  }
+  btnFit.addEventListener("click", () => { zoom = false; layout(); viewport.scrollLeft = 0; });
+  btnZoom.addEventListener("click", () => { zoom = true; layout(); scrollToPart("graph"); });
+  document.getElementById("btnScrollInput").addEventListener("click", () => scrollToPart("input"));
+  document.getElementById("btnScrollGraph").addEventListener("click", () => scrollToPart("graph"));
+  document.getElementById("btnScrollResult").addEventListener("click", () => scrollToPart("result"));
+  window.addEventListener("resize", layout, {passive: true});
+  layout();
+
+  function issueCS(script) {
+    if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") {
+      showStatus("CindyJSが読み込まれていません。インターネット接続を確認してください。", true);
+      return false;
+    }
+    try { cdy.evokeCS(script); return true; }
+    catch (error) { showStatus("操作に失敗しました。ブラウザーのコンソールを確認してください。", true); console.error(error); return false; }
+  }
+  function readCS(source) {
+    if (typeof cdy === "undefined" || !cdy || typeof cdy.evalcs !== "function") return null;
+    try { return cdy.evalcs(source); } catch (error) { return null; }
+  }
+  function readValue(source) {
+    const result = readCS(source);
+    return result && result.ctype !== "undefined" ? result.value : null;
+  }
+  function readText(source) {
+    const value = readValue(source);
+    return typeof value === "string" ? value : "";
+  }
+  function showStatus(message, error) {
+    status.textContent = message;
+    status.classList.toggle("error", !!error);
+  }
+  function setModeUI(isMulti) {
+    multiMode.checked = Boolean(isMulti);
+    document.getElementById("p2Wrap").classList.toggle("hidden", !isMulti);
+    document.getElementById("p3Wrap").classList.toggle("hidden", !isMulti);
+    document.getElementById("p1Label").textContent = isMulti ? "P1" : "P";
+  }
+  function syncFields() {
+    const names = {fieldP1:'Text0',fieldP2:'TextP2',fieldP3:'TextP3',fieldF:'Text1'};
+    for (const [id, name] of Object.entries(names)) {
+      const value = readText('element("' + name + '").text');
+      if (value) document.getElementById(id).value = value;
+    }
+    const isMulti = readValue("showMulti");
+    if (typeof isMulti === "boolean") setModeUI(isMulti);
+    for (const checkbox of document.querySelectorAll("[data-flag]")) {
+      const value = readValue(checkbox.dataset.flag);
+      if (typeof value === "boolean") checkbox.checked = value;
+    }
+  }
+  // Call existing CindyScript input validation, then show its message readably.
+  function updateResults() {
+    const error = readText("InputErr");
+    if (error) { showStatus(error, true); }
+    else if (readValue("HasResult") === true) { showStatus("計算結果が反映されました。", false); }
+    const hasResult = readValue("HasResult") === true;
+    const readResult = expression => hasResult ? readText("text(" + expression + ")") || "—" : "—";
+    document.getElementById("resultDiv").textContent = readResult("divPResult");
+    document.getElementById("resultRot").textContent = readResult("rotPResult");
+    document.getElementById("resultMag").textContent = readResult("rotmag");
+    document.getElementById("resultSpeed").textContent = readResult("rotspeed");
+  }
+  // Exclude characters that could break CindyScript string literals.
+  // Non-ASCII input is reported here with the same user-facing intent as ver.49.
+  const allowed = /^[A-Za-z0-9_+*\/^().,\[\]\- ]+$/;
+  document.getElementById("mobileForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const values = [
+      ["P", "fieldP1", "Text0"],
+      ["F", "fieldF", "Text1"],
+      ...(multiMode.checked ? [["P2", "fieldP2", "TextP2"], ["P3", "fieldP3", "TextP3"]] : [])
+    ];
+    for (const [label, id] of values) {
+      const value = document.getElementById(id).value.trim();
+      if (!value || !allowed.test(value)) {
+        showStatus("入力エラー（" + label + "）：使用できない文字が含まれています", true);
+        return;
+      }
+    }
+    let script = "showMulti=" + (multiMode.checked ? "true" : "false") + ";";
+    if (!multiMode.checked) script += "if(InputNo==1 % InputNo==2,InputNo=0);";
+    for (const [, id, name] of values) {
+      const value = document.getElementById(id).value.trim();
+      script += 'element("' + name + '").text=' + JSON.stringify(value) + ';';
+    }
+    script += 'InputErr="";Calcflg=1;';
+    if (issueCS(script)) { showStatus("計算を実行しています…", false); setTimeout(updateResults, 250); }
+  });
+  multiMode.addEventListener("change", () => {
+    const value = multiMode.checked;
+    setModeUI(value);
+    issueCS("showMulti=" + (value ? "true" : "false") + ";if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;");
+    setTimeout(updateResults, 250);
+  });
+  document.getElementById("btnResetMobile").addEventListener("click", () => {
+    if (issueCS("ResetAll();")) {
+      setTimeout(() => { syncFields(); updateResults(); showStatus("初期状態に戻しました。", false); }, 160);
+    }
+  });
+  document.getElementById("syncButton").addEventListener("click", () => {
+    syncFields(); updateResults(); showStatus("教材側の入力値を取り込みました。", false);
+  });
+  document.querySelectorAll("[data-sample]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (issueCS("ApplySample(" + Number(button.dataset.sample) + ");")) {
+        setTimeout(() => { syncFields(); updateResults(); }, 200);
+      }
+    });
+  });
+  document.querySelectorAll("[data-command]").forEach(button => {
+    button.addEventListener("click", () => issueCS(button.dataset.command));
+  });
+  document.querySelectorAll("[data-flag]").forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+      const name = checkbox.dataset.flag;
+      if (!["showWind","showField","showAxis","showInfo","showMeter"].includes(name)) return;
+      issueCS(name + "=" + (checkbox.checked ? "true" : "false") + ";");
+    });
+  });
+  window.addEventListener("load", () => {
+    setTimeout(() => { syncFields(); updateResults(); }, 500);
+  });
+  // Show calculation errors and results after CindyJS has advanced its draw loop.
+  setInterval(() => {
+    if (window.innerWidth <= 1100 && document.visibilityState === "visible") updateResults();
+  }, 800);
+})();
+</script>
+</body>
+</html>
