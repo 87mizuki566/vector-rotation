@@ -4645,8 +4645,16 @@ if(SampleActive>0,
 );
 if((SampleActive>0) & (!SampleMenuOpen),
   (
-    drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
-    drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
+    if(MobileLayout,
+      (
+        drawtext([5.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55],align->"center");
+        drawtext([5.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44],align->"center");
+      ),
+      (
+        drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
+        drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
+      )
+    );
   )
 );
 
@@ -5493,7 +5501,7 @@ var cdy = CindyJS({
     {name: "BtnReset", type: "ToggleButton", pos: [4.0, 1.4285714285714286, 0.272108843537415], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 1.0, 1.0], fillalpha: 0.27272728085517883, minwidth: 70, script: "ResetAll();", text: "RESET", textsize: 16.0, textbold: true, border: true },
     {name: "Text2", type: "Text", pos: [4.0, 1.5586206896551724, -0.374860296326355], color: [0.0, 0.0, 0.0], pinned: true, text: "exp：指数関数  exp(x)など", textsize: 18.0, border: true },
     {name: "Text3", type: "Text", pos: [4.0, 1.406896551724138, -0.374860296326355], color: [0.0, 0.0, 0.0], pinned: true, text: "sin,cos：三角関数  sin(x)など", textsize: 18.0, border: true },
-    {name: "Text4", type: "Text", pos: [4.0, -2.1906412478336224, -0.37680930999876233], color: [0.0, 0.0, 0.0], pressed: true, pinned: true, text: "テンキー上部のP,Fボタンで入力先指定", size: 3.0, border: true }
+    {name: "Text4", type: "Text", pos: [4.0, -2.1906412478336224, -0.37680930999876233], color: [0.0, 0.0, 0.0], pressed: true, pinned: true, text: "テンキー上部のP,Fボタンで入力先指定", textsize: 16.0, textbold: true, border: true }
   ],
   animation: {
     autoplay: false,
