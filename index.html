@@ -158,6 +158,22 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
   .keypad-target { min-height: 36px; font-size: 13px; }
 }
 
+
+/* Mobile speed meters: shown below the numerical results without resizing the 3D viewport. */
+@media (max-width: 1100px) {
+  .mobile-result-panel { display: flex; flex-direction: column; }
+  .mobile-meter-panel { margin-top: 12px; padding-top: 10px; border-top: 1px solid #dfe7f0; }
+  .mobile-meter-title { margin: 0 0 7px; font-size: 11px; font-weight: 750; color: #52657b; }
+  .mobile-meter-row { margin-top: 7px; }
+  .mobile-meter-head { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .mobile-meter-head span { font-size: 10px; font-weight: 750; color: #33465e; }
+  .mobile-meter-head strong { font-size: 10px; font-weight: 700; color: #14263e; }
+  .mobile-meter-track { width: 100%; height: 7px; margin-top: 4px; overflow: hidden; border-radius: 99px; background: #e7edf5; }
+  .mobile-meter-fill { width: 0%; height: 100%; border-radius: inherit; transition: width .18s ease; }
+  .meter-p1 { background: #ed3933; }
+  .meter-p2 { background: #9633cc; }
+  .meter-p3 { background: #ed8a16; }
+}
     </style>
     <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8.8/CindyJS.css">
     <script type="text/javascript" src="https://cindyjs.org/dist/v0.8.8/Cindy.js"></script>
@@ -4258,14 +4274,16 @@ Cross3(a,b):=[
   a_1*b_2-a_2*b_1
 ];
 
+viewSliderShift=0;
+if(MobileLayout,viewSliderShift=5);
 viewtheta=55*pi/180;
 viewphi=45*pi/180;
 if(htmlmode,
   (
-    thx=max(-4.45,min(4.45,TH.x));
-    fix=max(-4.45,min(4.45,FI.x));
-    TH.xy=[thx,-3.75];
-    FI.xy=[fix,-4.35];
+    thx=max(-4.45,min(4.45,TH.x-viewSliderShift));
+    fix=max(-4.45,min(4.45,FI.x-viewSliderShift));
+    TH.xy=[thx+viewSliderShift,-3.75];
+    FI.xy=[fix+viewSliderShift,-4.35];
 
     viewthdegree=10+160*(thx+4.45)/8.9;
     viewfidegree=360*(fix+4.45)/8.9;
@@ -4274,6 +4292,7 @@ if(htmlmode,
   )
 );
 viewscale=0.82;
+if(MobileLayout,viewscale=1.12);
 viewshift=[5.0,-0.35];
 
 Proj3(q):=viewshift+viewscale*[
@@ -4892,12 +4911,12 @@ if(HasResult,
 
         TH.visible=true;
         FI.visible=true;
-        TH.xy=[max(-4.45,min(4.45,TH.x)),-3.75];
-        FI.xy=[max(-4.45,min(4.45,FI.x)),-4.35];
-        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35,-3.52],"視点：上下",size->13);
-        drawtext([-4.35,-4.12],"視点：左右",size->13);
+        TH.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,TH.x)),-3.75];
+        FI.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,FI.x)),-4.35];
+        draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
+        drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -5079,10 +5098,10 @@ if(HasResult,
         TH.visible=true;
         FI.visible=true;
 
-        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35,-3.52],"視点：上下",size->13);
-        drawtext([-4.35,-4.12],"視点：左右",size->13);
+        draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
+        drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
 
         Parapt(pt):=(
           regional(Xz,Yz);
@@ -5175,10 +5194,10 @@ if(HasResult,
         T.visible=false;
         A.visible=false;
 
-        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
-        drawtext([-4.35,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
+        draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35+viewSliderShift,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
+        drawtext([-4.35+viewSliderShift,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -5597,8 +5616,23 @@ var cdy = CindyJS({
           <div><span>div F(P)</span><strong id="resultDiv">—</strong></div>
           <div><span>rot F(P)</span><strong id="resultRot">—</strong></div>
           <div><span>|rot F(P)|</span><strong id="resultMag">—</strong></div>
-          <div><span>回転速度</span><strong id="resultSpeed">—</strong></div>
+          <div><span id="resultSpeedLabel">回転速度</span><strong id="resultSpeed">—</strong></div>
         </div>
+        <section class="mobile-meter-panel hidden" id="mobileMeterPanel" aria-label="速度メーター">
+          <h4 class="mobile-meter-title">速度メーター（0〜5）</h4>
+          <div class="mobile-meter-row" id="meterRowP1">
+            <div class="mobile-meter-head"><span id="meterLabelP1">P</span><strong id="meterValueP1">—</strong></div>
+            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p1" id="meterFillP1"></div></div>
+          </div>
+          <div class="mobile-meter-row hidden" id="meterRowP2">
+            <div class="mobile-meter-head"><span>P2</span><strong id="meterValueP2">—</strong></div>
+            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p2" id="meterFillP2"></div></div>
+          </div>
+          <div class="mobile-meter-row hidden" id="meterRowP3">
+            <div class="mobile-meter-head"><span>P3</span><strong id="meterValueP3">—</strong></div>
+            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p3" id="meterFillP3"></div></div>
+          </div>
+        </section>
       </aside>
     </div>
     <p class="viewer-footer" id="viewerFooter">※ 画面内の視点スライダー・計算機・表示切替は従来どおり利用できます。</p>
@@ -5692,10 +5726,20 @@ var cdy = CindyJS({
   document.getElementById("btnScrollInput").addEventListener("click", () => scrollToPart("input"));
   document.getElementById("btnScrollGraph").addEventListener("click", () => scrollToPart("graph"));
   document.getElementById("btnScrollResult").addEventListener("click", () => scrollToPart("result"));
+  let appliedSceneMobileLayout = null;
   function applyResponsiveScene() {
     if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") return;
     const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
-    issueCS("MobileLayout=" + (mobileLayout ? "true" : "false") + ";");
+    const delta = appliedSceneMobileLayout === null
+      ? (mobileLayout ? 5 : 0)
+      : (mobileLayout === appliedSceneMobileLayout ? 0 : (mobileLayout ? 5 : -5));
+    let script = "";
+    if (delta !== 0) {
+      script += "TH.xy=[TH.x+(" + delta + "),-3.75];FI.xy=[FI.x+(" + delta + "),-4.35];";
+    }
+    script += "MobileLayout=" + (mobileLayout ? "true" : "false") + ";";
+    issueCS(script);
+    appliedSceneMobileLayout = mobileLayout;
   }
   let lastMobileLayout = window.matchMedia("(max-width: 1100px)").matches;
   window.addEventListener("resize", () => {
@@ -5794,6 +5838,29 @@ var cdy = CindyJS({
     document.getElementById("resultRot").textContent = readResult("rotPResult");
     document.getElementById("resultMag").textContent = readResult("rotmag");
     document.getElementById("resultSpeed").textContent = readResult("rotspeed");
+
+    const isMulti = readValue("showMulti") === true;
+    document.getElementById("resultSpeedLabel").textContent = isMulti ? "回転速度(P1)" : "回転速度";
+    const meterEnabled = readValue("showMeter") !== false;
+    const meterPanel = document.getElementById("mobileMeterPanel");
+    meterPanel.classList.toggle("hidden", !hasResult || !meterEnabled);
+    const meterSpecs = [
+      { key: "P1", source: isMulti ? "mspeeds_1" : "rotspeed", row: "meterRowP1", value: "meterValueP1", fill: "meterFillP1" },
+      { key: "P2", source: "mspeeds_2", row: "meterRowP2", value: "meterValueP2", fill: "meterFillP2" },
+      { key: "P3", source: "mspeeds_3", row: "meterRowP3", value: "meterValueP3", fill: "meterFillP3" }
+    ];
+    document.getElementById("meterLabelP1").textContent = isMulti ? "P1" : "P";
+    meterSpecs.forEach((meter, index) => {
+      const row = document.getElementById(meter.row);
+      row.classList.toggle("hidden", !isMulti && index > 0);
+      const raw = hasResult ? readText("text(" + meter.source + ")") : "";
+      const speed = Number(raw);
+      const safeSpeed = Number.isFinite(speed) ? Math.max(0, speed) : 0;
+      document.getElementById(meter.value).textContent = hasResult && raw !== ""
+        ? String(Math.round(safeSpeed * 100) / 100) : "—";
+      document.getElementById(meter.fill).style.width = hasResult && raw !== ""
+        ? (Math.max(0, Math.min(100, safeSpeed / 5 * 100)) + "%") : "0%";
+    });
   }
   // Exclude characters that could break CindyScript string literals.
   // Non-ASCII input is reported here with the same user-facing intent as ver.49.
@@ -5878,6 +5945,7 @@ var cdy = CindyJS({
       const name = checkbox.dataset.flag;
       if (!["showWind","showField","showAxis","showInfo","showMeter"].includes(name)) return;
       issueCS(name + "=" + (checkbox.checked ? "true" : "false") + ";");
+      setTimeout(updateResults, 80);
     });
   });
   window.addEventListener("load", () => {
