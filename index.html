@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>ベクトル場の回転 可視化教材｜レスポンシブ試作版</title>
+    <title>ベクトル場の回転 可視化教材｜スマホ用テンキー対応版</title>
     <style type="text/css">
         * {
             margin: 0px;
@@ -90,6 +90,72 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
   .tool-btn { padding: 7px 9px; }
   .fields, .result-grid { grid-template-columns: minmax(0,1fr); }
   .action-btn { flex: 1 0 auto; }
+}
+
+
+/* ===== Smartphone layout: HTML keypad above a cropped 3D view ===== */
+.mobile-panel, .mobile-extra-panel { display: none; }
+.mobile-display-row { display: block; }
+.mobile-graph-panel { width: 100%; min-width: 0; }
+.mobile-result-panel, .display-label { display: none; }
+.graph-view-wrap { position: relative; min-width: 0; }
+.graph-placeholder {
+  position: absolute; z-index: 2; inset: 0; display: none; align-items: center; justify-content: center;
+  padding: 12px; text-align: center; color: #52657b; font-size: 13px; pointer-events: none;
+}
+.keypad-targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin: 10px 0 8px; }
+.keypad-target {
+  min-height: 38px; border: 1px solid #9aadc4; border-radius: 8px; background: #f8fbff;
+  color: #17385f; font-weight: 750;
+}
+.keypad-target.active { background: #164b90; border-color: #164b90; color: #fff; }
+.keypad-target:disabled { opacity: .35; cursor: not-allowed; }
+.mobile-keypad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.mobile-keypad button {
+  min-width: 0; min-height: 39px; padding: 5px 2px; border: 1px solid #b5c3d3; border-radius: 8px;
+  background: #fff; color: #17385f; font-size: 14px; font-weight: 700;
+}
+.mobile-keypad button.utility { background: #edf4fc; }
+.mobile-keypad button:active, .keypad-target:active { background: #dbeafe; }
+.field.field-disabled { opacity: .52; }
+.field input:disabled { background: #f0f3f7; color: #5c6877; }
+.mobile-extra-panel { margin-top: 12px; padding: clamp(12px, 2vw, 22px); background: #fff; border: 1px solid #ccd7e5;
+                       border-radius: 13px; box-shadow: 0 2px 12px #22334812; }
+.display-label { font-size: 13px; font-weight: 750; color: #52657b; padding: 8px 10px 4px; }
+@media (max-width: 1100px) {
+  .mobile-panel { display: block; margin-top: 0; margin-bottom: 12px; }
+  .mobile-extra-panel { display: block; }
+  .viewer-toolbar, .viewer-footer { display: none; }
+  .mobile-display-row { display: flex; align-items: stretch; gap: 8px; }
+  .mobile-graph-panel { width: 69%; }
+  .mobile-result-panel { display: block; width: 31%; min-width: 0; padding: 8px 6px; background: #f8fbff;
+                         border: 1px solid #d5e0ec; border-radius: 9px; }
+  .mobile-result-panel h3 { font-size: 13px; margin: 0 0 7px; }
+  .display-label { display: block; }
+  .canvas-viewport { width: 100%; overflow: hidden; }
+  .canvas-stage { overflow: hidden; }
+  .viewer-panel { overflow: hidden; }
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .result-grid { grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 0; }
+  .result-grid > div { padding: 7px 6px; }
+  .result-grid span { font-size: 10px; line-height: 1.25; }
+  .result-grid strong { font-size: 12px; padding-top: 3px; }
+  .mobile-panel .panel-caption { margin-bottom: 10px; }
+  .mobile-panel .mode-row { margin-bottom: 10px; }
+  .mobile-panel .field label { font-size: 13px; }
+  .mobile-panel .field input { min-height: 40px; padding: 8px; font-size: 14px; }
+  .mobile-panel .buttons { margin-top: 10px; }
+  .mobile-panel .status { margin-top: 10px; }
+}
+@media (max-width: 620px) {
+  .mobile-display-row { gap: 6px; }
+  .mobile-graph-panel { width: 68%; }
+  .mobile-result-panel { width: 32%; padding: 7px 5px; }
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mobile-keypad { gap: 5px; }
+  .mobile-keypad button { min-height: 37px; font-size: 13px; }
+  .keypad-targets { gap: 5px; }
+  .keypad-target { min-height: 36px; font-size: 13px; }
 }
 
     </style>
@@ -3934,6 +4000,7 @@ Ketcindyjsscale=1;
 divPResult="";
 rotPResult="";
 InputNo=0;
+MobileLayout=false;
 HasResult=false;
 pcalc=[0,0,1];
 fcalcstr="[-y*z,x*z,0]";
@@ -4532,7 +4599,20 @@ element("BtnSample1").visible=SampleMenuOpen;
 element("BtnSample2").visible=SampleMenuOpen;
 element("BtnSample3").visible=SampleMenuOpen;
 element("BtnSample4").visible=SampleMenuOpen;
-if(SampleMenuOpen,
+
+if(MobileLayout,
+  forall([
+    "Text0","TextP2","TextP3","Text1","Text5",
+    "Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2086","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'",
+    "BtnP1Sel","BtnP2Sel","BtnP3Sel","BtnMulti","BtnSampleMenu","BtnSample1","BtnSample2","BtnSample3","BtnSample4",
+    "BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset",
+    "Text2","Text3","Text4"
+  ],
+    element(#).visible=false
+  );
+);
+
+if(SampleMenuOpen & !MobileLayout,
   drawtext([-2.00,4.95],"学習用サンプル（選択で自動入力・計算）",size->14,color->[0.15,0.26,0.55])
 );
 
@@ -5164,9 +5244,11 @@ if(HasResult,
       ) // showMulti=FALSE：従来の1点表示ここまで
     );
 
-    if(showMulti,
+    if(!MobileLayout,
       (
-        resultx=8.25;
+        if(showMulti,
+          (
+            resultx=8.25;
         resulty=4.35;
         drawtext([resultx,resulty],"3-point comparison",size->17);
         resulty=resulty-0.60;
@@ -5298,11 +5380,15 @@ if(HasResult,
 
     draw([legendx,legendy-2.05],size->6,color->[1,0,1]);
     drawtext([legendx+0.8,legendy-2.05],"Point P",size->12);
+          )
+        );
       )
     );
   ),
   (
-    drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17);
+    if(!MobileLayout,
+      drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17)
+    );
   )
 );
 
@@ -5416,8 +5502,72 @@ var cdy = CindyJS({
     <main class="page">
   <header class="page-header">
     <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
-    <p class="page-subtitle">ver.49 を使ったレスポンシブ試作版｜計算・描画のCindyScriptは変更していません</p>
+    <p class="page-subtitle">ver.49 を基に、計算処理・3D表示を維持してスマホ用レイアウトを追加</p>
   </header>
+
+  <section class="mobile-panel" aria-label="スマートフォン用入力テンキー">
+    <h2 class="panel-heading">入力テンキー</h2>
+    <p class="panel-caption">入力したい欄を選んでから、下のキーを押してください。</p>
+    <div class="mode-row">
+      <label><input type="checkbox" id="multiMode"> 3点モードにする</label>
+      <button class="tool-btn" type="button" id="syncButton">教材から入力値を取り込む</button>
+    </div>
+    <form id="mobileForm" autocomplete="off">
+      <div class="fields">
+        <div class="field"><label for="fieldP1" id="p1Label">P1</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
+        <div class="field field-p3 field-disabled" id="p3Wrap"><label for="fieldP3">P3</label><input id="fieldP3" type="text" value="[2.4,0,1]" spellcheck="false" autocapitalize="off" disabled></div>
+        <div class="field field-p2 field-disabled" id="p2Wrap"><label for="fieldP2">P2</label><input id="fieldP2" type="text" value="[0,0,3.4]" spellcheck="false" autocapitalize="off" disabled></div>
+        <div class="field"><label for="fieldF">F(x,y,z)</label><input id="fieldF" type="text" value="[-y*z,x*z,0]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
+      </div>
+      <div class="keypad-targets" aria-label="入力先の選択">
+        <button class="keypad-target active" type="button" data-target="0">P1</button>
+        <button class="keypad-target" type="button" data-target="1" disabled>P2</button>
+        <button class="keypad-target" type="button" data-target="2" disabled>P3</button>
+        <button class="keypad-target" type="button" data-target="3">F</button>
+      </div>
+      <div class="mobile-keypad" aria-label="入力キー">
+        <button class="utility" type="button" data-action="clear">AC</button>
+        <button class="utility" type="button" data-action="back">BS</button>
+        <button type="button" data-key="(">(</button>
+        <button type="button" data-key=")">)</button>
+        <button type="button" data-key=",">,</button>
+
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+        <button type="button" data-key="/">/</button>
+        <button type="button" data-key="^">^</button>
+
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+        <button type="button" data-key="*">*</button>
+        <button type="button" data-key="sqrt">√</button>
+
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+        <button type="button" data-key="-">−</button>
+        <button type="button" data-key="x">x</button>
+
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key=".">.</button>
+        <button type="button" data-key="+">+</button>
+        <button type="button" data-key="sin(">sin</button>
+        <button type="button" data-key="cos(">cos</button>
+
+        <button type="button" data-key="y">y</button>
+        <button type="button" data-key="z">z</button>
+        <button type="button" data-key="exp">exp</button>
+      </div>
+      <div class="buttons">
+        <button type="submit" class="action-btn primary">計算して反映</button>
+        <button type="button" class="action-btn secondary" id="btnResetMobile">RESET</button>
+      </div>
+    </form>
+    <div class="status" id="mobileStatus" role="status" aria-live="polite">入力後、「計算して反映」を押してください。</div>
+  </section>
+
   <section class="viewer-panel" aria-label="3D教材の表示">
     <div class="viewer-toolbar">
       <p class="viewer-hint">画面に合わせて自動調整。細かい操作は「拡大して操作」で確認できます。</p>
@@ -5429,32 +5579,33 @@ var cdy = CindyJS({
         <button type="button" class="tool-btn" id="btnScrollResult">結果へ</button>
       </div>
     </div>
-    <div id="canvasViewport" class="canvas-viewport" tabindex="0" aria-label="教材表示。拡大時は左右にスクロールできます">
-      <div id="canvasStage" class="canvas-stage">
-        <div id="CSCanvas"></div>
+    <div class="mobile-display-row">
+      <div class="mobile-graph-panel">
+        <div class="display-label">3D表示</div>
+        <div class="graph-view-wrap">
+          <div class="graph-placeholder" id="graphPlaceholder">PとFを入力して「計算して反映」を押すと、3D表示されます。</div>
+          <div id="canvasViewport" class="canvas-viewport" tabindex="0" aria-label="3D教材表示">
+            <div id="canvasStage" class="canvas-stage">
+              <div id="CSCanvas"></div>
+            </div>
+          </div>
+        </div>
       </div>
+      <aside class="mobile-result-panel" aria-label="計算結果">
+        <h3>数値</h3>
+        <div class="result-grid" id="mobileResults">
+          <div><span>div F(P)</span><strong id="resultDiv">—</strong></div>
+          <div><span>rot F(P)</span><strong id="resultRot">—</strong></div>
+          <div><span>|rot F(P)|</span><strong id="resultMag">—</strong></div>
+          <div><span>回転速度</span><strong id="resultSpeed">—</strong></div>
+        </div>
+      </aside>
     </div>
     <p class="viewer-footer" id="viewerFooter">※ 画面内の視点スライダー・計算機・表示切替は従来どおり利用できます。</p>
   </section>
 
-  <section class="mobile-panel" aria-label="小さい画面向けの操作パネル">
-    <h2 class="panel-heading">入力・操作パネル</h2>
-    <p class="panel-caption">狭い画面では、こちらから入力すると操作しやすいよ。上の図と連動します。</p>
-    <div class="mode-row"><label><input type="checkbox" id="multiMode"> 3点モードにする</label>
-      <button class="tool-btn" type="button" id="syncButton">教材から入力値を取り込む</button>
-    </div>
-    <form id="mobileForm" autocomplete="off">
-      <div class="fields">
-        <div class="field"><label for="fieldP1" id="p1Label">P</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
-        <div class="field field-p2 hidden" id="p2Wrap"><label for="fieldP2">P2</label><input id="fieldP2" type="text" value="[0,0,3.4]" spellcheck="false" autocapitalize="off"></div>
-        <div class="field field-p3 hidden" id="p3Wrap"><label for="fieldP3">P3</label><input id="fieldP3" type="text" value="[2.4,0,1]" spellcheck="false" autocapitalize="off"></div>
-        <div class="field"><label for="fieldF">F(x,y,z)</label><input id="fieldF" type="text" value="[-y*z,x*z,0]" spellcheck="false" autocapitalize="off"></div>
-      </div>
-      <div class="buttons">
-        <button type="submit" class="action-btn primary">計算して反映</button>
-        <button type="button" class="action-btn secondary" id="btnResetMobile">RESET</button>
-      </div>
-    </form>
+  <section class="mobile-extra-panel" aria-label="その他の操作">
+    <h2 class="panel-heading">その他の操作</h2>
     <h3 class="section-title">サンプル</h3>
     <div class="buttons" aria-label="サンプルを選択">
       <button type="button" class="action-btn" data-sample="1">基本回転</button>
@@ -5476,14 +5627,6 @@ var cdy = CindyJS({
       <label><input type="checkbox" data-flag="showInfo" checked>数値</label>
       <label><input type="checkbox" data-flag="showMeter" checked>速度メーター</label>
     </div>
-    <div class="status" id="mobileStatus" role="status" aria-live="polite">教材の読み込み後、計算して反映してください。</div>
-    <div class="result-grid" id="mobileResults" aria-label="計算結果">
-      <div><span>div F(P)</span><strong id="resultDiv">—</strong></div>
-      <div><span>rot F(P)</span><strong id="resultRot">—</strong></div>
-      <div><span>|rot F(P)|</span><strong id="resultMag">—</strong></div>
-      <div><span>回転速度</span><strong id="resultSpeed">—</strong></div>
-    </div>
-    <p class="panel-caption" style="margin:12px 0 0">3点モードの個別の速度・回転軸は上の教材の「結果へ」で確認できます。</p>
   </section>
 </main>
 <script>
@@ -5503,17 +5646,39 @@ var cdy = CindyJS({
   // Keep the CindyJS internal 1600x663 coordinate system intact.
   // Scaling the entire scene container also scales its HTML text inputs.
   function layout() {
-    const available = Math.max(1, viewport.clientWidth);
-    const fitted = Math.min(1, available / BASE_W);
-    currentScale = zoom ? Math.max(fitted, .75) : fitted;
-    stage.style.width = (BASE_W * currentScale) + "px";
-    stage.style.height = (BASE_H * currentScale) + "px";
-    canvasRoot.style.transform = "scale(" + currentScale + ")";
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    if (mobileLayout) {
+      zoom = false;
+      const graphWidth = Math.max(1, viewport.clientWidth);
+      currentScale = Math.min(.75, Math.max(.28, graphWidth / 640));
+      const graphCenterSourceX = 915;
+      stage.style.width = graphWidth + "px";
+      stage.style.height = (BASE_H * currentScale) + "px";
+      stage.style.overflow = "hidden";
+      canvasRoot.style.left = (graphWidth / 2 - graphCenterSourceX * currentScale) + "px";
+      canvasRoot.style.top = "0px";
+      canvasRoot.style.transform = "scale(" + currentScale + ")";
+      viewport.style.height = (BASE_H * currentScale) + "px";
+      viewport.style.overflow = "hidden";
+    } else {
+      const available = Math.max(1, viewport.clientWidth);
+      const fitted = Math.min(1, available / BASE_W);
+      currentScale = zoom ? Math.max(fitted, .75) : fitted;
+      stage.style.width = (BASE_W * currentScale) + "px";
+      stage.style.height = (BASE_H * currentScale) + "px";
+      stage.style.overflow = "visible";
+      canvasRoot.style.left = "0px";
+      canvasRoot.style.top = "0px";
+      canvasRoot.style.transform = "scale(" + currentScale + ")";
+      viewport.style.height = "auto";
+      viewport.style.overflowX = "auto";
+      viewport.style.overflowY = "hidden";
+    }
     btnFit.setAttribute("aria-pressed", String(!zoom));
     btnZoom.setAttribute("aria-pressed", String(zoom));
     document.getElementById("viewerFooter").textContent = zoom
       ? "拡大中：左右にスクロールできます。『入力へ』『3Dへ』『結果へ』で移動できます。"
-      : "画面全体を縮小表示中。狭い画面では下の入力・操作パネルを使うと便利です。";
+      : "画面全体を縮小表示中。細かい操作は拡大表示で確認できます。";
   }
   function scrollToPart(part) {
     if (!zoom) { zoom = true; layout(); }
@@ -5527,7 +5692,21 @@ var cdy = CindyJS({
   document.getElementById("btnScrollInput").addEventListener("click", () => scrollToPart("input"));
   document.getElementById("btnScrollGraph").addEventListener("click", () => scrollToPart("graph"));
   document.getElementById("btnScrollResult").addEventListener("click", () => scrollToPart("result"));
-  window.addEventListener("resize", layout, {passive: true});
+  function applyResponsiveScene() {
+    if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") return;
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    issueCS("MobileLayout=" + (mobileLayout ? "true" : "false") + ";");
+  }
+  let lastMobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+  window.addEventListener("resize", () => {
+    const mobileLayoutNow = window.matchMedia("(max-width: 1100px)").matches;
+    layout();
+    applyResponsiveScene();
+    if (mobileLayoutNow !== lastMobileLayout) {
+      lastMobileLayout = mobileLayoutNow;
+      if (mobileLayoutNow) { syncFields(); updateResults(); }
+    }
+  }, {passive: true});
   layout();
 
   function issueCS(script) {
@@ -5556,9 +5735,33 @@ var cdy = CindyJS({
   }
   function setModeUI(isMulti) {
     multiMode.checked = Boolean(isMulti);
-    document.getElementById("p2Wrap").classList.toggle("hidden", !isMulti);
-    document.getElementById("p3Wrap").classList.toggle("hidden", !isMulti);
-    document.getElementById("p1Label").textContent = isMulti ? "P1" : "P";
+    document.getElementById("p2Wrap").classList.toggle("field-disabled", !isMulti);
+    document.getElementById("p3Wrap").classList.toggle("field-disabled", !isMulti);
+    document.getElementById("fieldP2").disabled = !isMulti;
+    document.getElementById("fieldP3").disabled = !isMulti;
+    document.getElementById("p1Label").textContent = "P1";
+    document.querySelectorAll('[data-target="1"], [data-target="2"]').forEach(button => {
+      button.disabled = !isMulti;
+    });
+  }
+  let selectedTarget = 0;
+  function setSelectedTarget(target) {
+    selectedTarget = Number(target);
+    document.querySelectorAll("[data-target]").forEach(button => {
+      button.classList.toggle("active", Number(button.dataset.target) === selectedTarget);
+    });
+  }
+  function commitFieldsToCS() {
+    const values = {
+      Text0: document.getElementById("fieldP1").value,
+      TextP2: document.getElementById("fieldP2").value,
+      TextP3: document.getElementById("fieldP3").value,
+      Text1: document.getElementById("fieldF").value
+    };
+    const script = Object.entries(values).map(([name, value]) =>
+      'element("' + name + '").text=' + JSON.stringify(value) + ';'
+    ).join("");
+    return issueCS(script);
   }
   function syncFields() {
     const names = {fieldP1:'Text0',fieldP2:'TextP2',fieldP3:'TextP3',fieldF:'Text1'};
@@ -5568,6 +5771,11 @@ var cdy = CindyJS({
     }
     const isMulti = readValue("showMulti");
     if (typeof isMulti === "boolean") setModeUI(isMulti);
+    const inputNoText = readText("text(InputNo)");
+    const inputNo = Number(inputNoText);
+    if (inputNoText !== "" && Number.isInteger(inputNo) && inputNo >= 0 && inputNo <= 3) {
+      setSelectedTarget(inputNo);
+    }
     for (const checkbox of document.querySelectorAll("[data-flag]")) {
       const value = readValue(checkbox.dataset.flag);
       if (typeof value === "boolean") checkbox.checked = value;
@@ -5579,6 +5787,8 @@ var cdy = CindyJS({
     if (error) { showStatus(error, true); }
     else if (readValue("HasResult") === true) { showStatus("計算結果が反映されました。", false); }
     const hasResult = readValue("HasResult") === true;
+    const showMobilePrompt = !hasResult && window.matchMedia("(max-width: 1100px)").matches;
+    document.getElementById("graphPlaceholder").style.display = showMobilePrompt ? "flex" : "none";
     const readResult = expression => hasResult ? readText("text(" + expression + ")") || "—" : "—";
     document.getElementById("resultDiv").textContent = readResult("divPResult");
     document.getElementById("resultRot").textContent = readResult("rotPResult");
@@ -5609,13 +5819,16 @@ var cdy = CindyJS({
       script += 'element("' + name + '").text=' + JSON.stringify(value) + ';';
     }
     script += 'InputErr="";Calcflg=1;';
-    if (issueCS(script)) { showStatus("計算を実行しています…", false); setTimeout(updateResults, 250); }
+    if (issueCS(script)) {
+      showStatus("計算を実行しています…", false);
+      setTimeout(() => { syncFields(); updateResults(); }, 250);
+    }
   });
   multiMode.addEventListener("change", () => {
     const value = multiMode.checked;
     setModeUI(value);
     issueCS("showMulti=" + (value ? "true" : "false") + ";if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;");
-    setTimeout(updateResults, 250);
+    setTimeout(() => { syncFields(); updateResults(); }, 250);
   });
   document.getElementById("btnResetMobile").addEventListener("click", () => {
     if (issueCS("ResetAll();")) {
@@ -5624,6 +5837,31 @@ var cdy = CindyJS({
   });
   document.getElementById("syncButton").addEventListener("click", () => {
     syncFields(); updateResults(); showStatus("教材側の入力値を取り込みました。", false);
+  });
+  document.querySelectorAll("[data-target]").forEach(button => {
+    button.addEventListener("click", () => {
+      const target = Number(button.dataset.target);
+      if ((target === 1 || target === 2) && !multiMode.checked) return;
+      if (!commitFieldsToCS()) return;
+      if (issueCS("InputNo=" + target + ";")) setSelectedTarget(target);
+    });
+  });
+  document.querySelectorAll("[data-key]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (!commitFieldsToCS()) return;
+      const key = button.dataset.key;
+      if (issueCS("PutKey(" + JSON.stringify(key) + ");")) {
+        setTimeout(syncFields, 40);
+      }
+    });
+  });
+  document.querySelectorAll("[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (!commitFieldsToCS()) return;
+      const action = button.dataset.action;
+      const script = action === "clear" ? "ClearCurrent();" : action === "back" ? "BackCurrent();" : "";
+      if (script && issueCS(script)) setTimeout(syncFields, 40);
+    });
   });
   document.querySelectorAll("[data-sample]").forEach(button => {
     button.addEventListener("click", () => {
@@ -5643,7 +5881,12 @@ var cdy = CindyJS({
     });
   });
   window.addEventListener("load", () => {
-    setTimeout(() => { syncFields(); updateResults(); }, 500);
+    setTimeout(() => {
+      applyResponsiveScene();
+      syncFields();
+      updateResults();
+      layout();
+    }, 500);
   });
   // Show calculation errors and results after CindyJS has advanced its draw loop.
   setInterval(() => {
