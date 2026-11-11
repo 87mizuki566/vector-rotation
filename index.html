@@ -122,9 +122,42 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
 .mobile-extra-panel { margin-top: 12px; padding: clamp(12px, 2vw, 22px); background: #fff; border: 1px solid #ccd7e5;
                        border-radius: 13px; box-shadow: 0 2px 12px #22334812; }
 .display-label { font-size: 13px; font-weight: 750; color: #52657b; padding: 8px 10px 4px; }
+.mobile-view-controls {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  border-top: 1px solid #dfe7f0;
+  background: #fbfdff;
+}
+.view-slider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.view-slider-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.view-slider-field label {
+  font-size: 13px;
+  font-weight: 750;
+  color: #42566f;
+}
+.view-slider-field input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #164b90;
+}
+.view-slider-field small {
+  font-size: 12px;
+  color: #61748a;
+}
 @media (max-width: 1100px) {
   .mobile-panel { display: block; margin-top: 0; margin-bottom: 12px; }
   .mobile-extra-panel { display: block; }
+  .mobile-view-controls { display: block; }
   .viewer-toolbar, .viewer-footer { display: none; }
   .mobile-display-row { display: flex; align-items: stretch; gap: 8px; }
   .mobile-graph-panel { width: 69%; }
@@ -151,6 +184,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
   .mobile-display-row { gap: 6px; }
   .mobile-graph-panel { width: 68%; }
   .mobile-result-panel { width: 32%; padding: 7px 5px; }
+  .view-slider-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mobile-keypad { gap: 5px; }
   .mobile-keypad button { min-height: 37px; font-size: 13px; }
@@ -5658,7 +5692,6 @@ var cdy = CindyJS({
     </details>
     <div class="mode-row">
       <label><input type="checkbox" id="multiMode"> 3点モードにする</label>
-      <button class="tool-btn" type="button" id="syncButton">教材から入力値を取り込む</button>
     </div>
     <form id="mobileForm" autocomplete="off">
       <div class="fields">
@@ -5695,17 +5728,17 @@ var cdy = CindyJS({
         <button type="button" data-key="1">1</button>
         <button type="button" data-key="2">2</button>
         <button type="button" data-key="3">3</button>
-        <button type="button" data-key="-">−</button>
-        <button type="button" data-key="x">x</button>
-
-        <button type="button" data-key="0">0</button>
-        <button type="button" data-key=".">.</button>
         <button type="button" data-key="+">+</button>
+        <button type="button" data-key="-">−</button>
+
+        <button type="button" data-key="x">x</button>
+        <button type="button" data-key="y">y</button>
+        <button type="button" data-key="z">z</button>
         <button type="button" data-key="sin(">sin</button>
         <button type="button" data-key="cos(">cos</button>
 
-        <button type="button" data-key="y">y</button>
-        <button type="button" data-key="z">z</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key=".">.</button>
         <button type="button" data-key="e(">e</button>
         <button type="button" data-key="π">π</button>
       </div>
@@ -5765,6 +5798,21 @@ var cdy = CindyJS({
         </section>
       </aside>
     </div>
+    <section class="mobile-view-controls" aria-label="スマホ用視点操作">
+      <h3 class="section-title">視点操作（スマホ用）</h3>
+      <div class="view-slider-grid">
+        <div class="view-slider-field">
+          <label for="mobileYaw">左右の向き</label>
+          <input id="mobileYaw" type="range" min="0" max="100" step="1" value="50">
+          <small>左に動かすと左回り、右に動かすと右回りに視点が変わります。</small>
+        </div>
+        <div class="view-slider-field">
+          <label for="mobilePitch">上下の向き</label>
+          <input id="mobilePitch" type="range" min="0" max="100" step="1" value="50">
+          <small>左に動かすと低い位置、右に動かすと高い位置から見た視点になります。</small>
+        </div>
+      </div>
+    </section>
     <p class="viewer-footer" id="viewerFooter">※ 画面内の視点スライダー・計算機・表示切替は従来どおり利用できます。</p>
   </section>
 
@@ -5804,8 +5852,11 @@ var cdy = CindyJS({
   const btnZoom = document.getElementById("btnZoom");
   const multiMode = document.getElementById("multiMode");
   const status = document.getElementById("mobileStatus");
+  const mobileYaw = document.getElementById("mobileYaw");
+  const mobilePitch = document.getElementById("mobilePitch");
   let zoom = false;
   let currentScale = 1;
+  let syncingViewSliders = false;
 
   // Keep the CindyJS internal 1600x663 coordinate system intact.
   // Scaling the entire scene container also scales its HTML text inputs.
@@ -5907,6 +5958,38 @@ var cdy = CindyJS({
     status.textContent = message;
     status.classList.toggle("error", !!error);
   }
+  function sliderValueToPointX(value, mobileLayout) {
+    const shift = mobileLayout ? 5 : 0;
+    return (-4.45 + shift) + (8.9 * (Number(value) / 100));
+  }
+  function pointXToSliderValue(x, mobileLayout) {
+    const shift = mobileLayout ? 5 : 0;
+    return Math.max(0, Math.min(100, ((Number(x) - (-4.45 + shift)) / 8.9) * 100));
+  }
+  function syncViewSliders() {
+    if (!mobileYaw || !mobilePitch) return;
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    if (!mobileLayout) return;
+    const thx = readValue("TH.x");
+    const fix = readValue("FI.x");
+    syncingViewSliders = true;
+    if (typeof fix === "number" && Number.isFinite(fix)) mobileYaw.value = String(Math.round(pointXToSliderValue(fix, mobileLayout)));
+    if (typeof thx === "number" && Number.isFinite(thx)) mobilePitch.value = String(Math.round(pointXToSliderValue(thx, mobileLayout)));
+    syncingViewSliders = false;
+  }
+  function applyViewSlider(which) {
+    if (syncingViewSliders) return;
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    const thx = sliderValueToPointX(mobilePitch.value, mobileLayout);
+    const fix = sliderValueToPointX(mobileYaw.value, mobileLayout);
+    if (which === "yaw") {
+      issueCS("FI.xy=[" + fix + ",-4.35];");
+    } else if (which === "pitch") {
+      issueCS("TH.xy=[" + thx + ",-3.75];");
+    } else {
+      issueCS("TH.xy=[" + thx + ",-3.75];FI.xy=[" + fix + ",-4.35];");
+    }
+  }
   function setModeUI(isMulti) {
     multiMode.checked = Boolean(isMulti);
     document.getElementById("p2Wrap").classList.toggle("field-disabled", !isMulti);
@@ -5956,6 +6039,7 @@ var cdy = CindyJS({
       const value = readValue(checkbox.dataset.flag);
       if (typeof value === "boolean") checkbox.checked = value;
     }
+    syncViewSliders();
   }
   // Call existing CindyScript input validation, then show its message readably.
   function updateResults() {
@@ -6036,9 +6120,6 @@ var cdy = CindyJS({
       setTimeout(() => { syncFields(); updateResults(); showStatus("初期状態に戻しました。", false); }, 160);
     }
   });
-  document.getElementById("syncButton").addEventListener("click", () => {
-    syncFields(); updateResults(); showStatus("教材側の入力値を取り込みました。", false);
-  });
   document.querySelectorAll("[data-target]").forEach(button => {
     button.addEventListener("click", () => {
       const target = Number(button.dataset.target);
@@ -6082,17 +6163,29 @@ var cdy = CindyJS({
       setTimeout(updateResults, 80);
     });
   });
+  if (mobileYaw) {
+    mobileYaw.addEventListener("input", () => applyViewSlider("yaw"));
+    mobileYaw.addEventListener("change", () => applyViewSlider("yaw"));
+  }
+  if (mobilePitch) {
+    mobilePitch.addEventListener("input", () => applyViewSlider("pitch"));
+    mobilePitch.addEventListener("change", () => applyViewSlider("pitch"));
+  }
   window.addEventListener("load", () => {
     setTimeout(() => {
       applyResponsiveScene();
       syncFields();
       updateResults();
       layout();
+      syncViewSliders();
     }, 500);
   });
   // Show calculation errors and results after CindyJS has advanced its draw loop.
   setInterval(() => {
-    if (window.innerWidth <= 1100 && document.visibilityState === "visible") updateResults();
+    if (window.innerWidth <= 1100 && document.visibilityState === "visible") {
+      updateResults();
+      syncViewSliders();
+    }
   }, 800);
 })();
 </script>
