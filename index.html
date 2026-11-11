@@ -174,6 +174,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
   .meter-p2 { background: #9633cc; }
   .meter-p3 { background: #ed8a16; }
 }
+    .input-help { margin: 0 0 12px; border: 1px solid #a8bdd5; border-radius: 9px; background: #f8fbff; }
+    .input-help summary { cursor: pointer; padding: 10px 12px; font-weight: 700; color: #164b90; font-size: 14px; }
+    .help-content { padding: 0 12px 12px; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+    .help-content p + p { margin-top: 7px; }
+    @media (max-width: 1100px) { .mobile-graph-panel { flex: 69 1 0; width: auto; } .mobile-result-panel { flex: 31 1 0; width: auto; } }
     </style>
     <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8.8/CindyJS.css">
     <script type="text/javascript" src="https://cindyjs.org/dist/v0.8.8/Cindy.js"></script>
@@ -4013,10 +4018,14 @@ Drwxy():=(
 );
 Ketcindyjsfigure=0;
 Ketcindyjsscale=1;
+MobileLayout=false;
+Calcflg=0;
+InputErr="";
+divResult="";
+rotResult="";
 divPResult="";
 rotPResult="";
 InputNo=0;
-MobileLayout=false;
 HasResult=false;
 pcalc=[0,0,1];
 fcalcstr="[-y*z,x*z,0]";
@@ -4026,9 +4035,12 @@ htmlphase=0;
 htmlprevtime=0;
 htmlprevspeed=0;
 
+// ===== 風車の再生/一時停止/停止: CinderellaとHTMLで共通 =====
+// MotionState: 1=再生中, 2=一時停止中, 0=停止(初期角度)
 MotionState=1;
 
 PlayWindmill():=(
+  // 停止中に経過した秒数を、再開直後の回転角度に加算しない。
   MotionState=1;
   htmlprevtime=seconds();
   mlasttime=seconds();
@@ -4054,6 +4066,8 @@ StopWindmill():=(
   htmlprevtime=seconds();
   mlasttime=seconds();
   htmlprevspeed=0;
+  // stopanimation()は図形を巻き戻すため、実行を一時停止して位相を明示的に0へ戻す。
+  // 初期化スクリプトが呼び直されることによる表示崩れも防ぐ。
   if(htmlmode,
     pauseanimation(),
     Anim1.run=false
@@ -4061,15 +4075,19 @@ StopWindmill():=(
   T.xy=N.xy;
 );
 
-TH.xy=[-1.946875,-3.75]; 
-FI.xy=[-3.3375,-4.35]; 
+// HTML公開時の初期視点は従来の固定値：上下55°、左右45°。
+// HTMLでのみ有効化されるので、Cinderellaのスライダー初期状態は変更しない。
+//TH.xy=[-1.946875,-3.75]; only ketjs
+//FI.xy=[-3.3375,-4.35]; only ketjs
 
 showWind=true;
 showField=true;
 showAxis=true;
 showInfo=true;
 showMeter=true;
+InputHelpOpen=false;
 
+// 1点／3点を切り替える。P2・P3は自由入力できる。
 showMulti=false;
 mpcalc=[[0,0,1],[0,0,3.4],[2.4,0,1]];
 multistarted=false;
@@ -4127,6 +4145,7 @@ BackCurrent():=(
 
 ResetAll():=(
   SampleMenuOpen=false;
+  InputHelpOpen=false;
   SampleActive=0;
   SampleTitle="";
   SampleTip="";
@@ -4153,8 +4172,9 @@ ResetAll():=(
 
   MotionState=1; // RESET後の再計算は従来どおり自動再生
 
-//TH.xy=[-1.946875,-3.75]
-//FI.xy=[-3.3375,-4.35]
+  // RESET時はHTMLの視点も初期角度に戻す。
+  TH.xy=[-1.946875+if(MobileLayout,5,0),-3.75];
+  FI.xy=[-3.3375+if(MobileLayout,5,0),-4.35];
 
   Anim1.run=false;
   T.xy=N.xy;
@@ -4168,6 +4188,8 @@ ResetAll():=(
   Calcflg=1;
 );
 
+// ===== 学習用サンプル（4種類） =====
+// どのボタンも入力欄へのセット・モード切替・計算まで一括実行。
 SampleMenuOpen=false;
 SampleActive=0;
 SampleTitle="";
@@ -4179,6 +4201,7 @@ SampleP2="";
 SampleP3="";
 
 ApplySample(n):=(
+  // サンプル設定に合わせて表示モード・各入力欄を更新
   if(n==1,
     (
       showMulti=false;
@@ -4226,6 +4249,7 @@ ApplySample(n):=(
   SampleP2=element("TextP2").text;
   SampleP3=element("TextP3").text;
   SampleMenuOpen=false;
+  InputHelpOpen=false;
 
   InputNo=0;
   InputErr="";
@@ -4237,6 +4261,7 @@ ApplySample(n):=(
 
   MotionState=1; // サンプル選択時は最初から自動再生
 
+  // 切替前のアニメーションをリセットして再計算する
   Anim1.run=false;
   htmlstarted=false;
   htmlphase=0;
@@ -4247,6 +4272,7 @@ ApplySample(n):=(
   mlasttime=0;
   T.xy=N.xy;
 
+  // サンプルの特徴が常に見えるように表示を有効にする
   showWind=true;
   showField=true;
   showAxis=true;
@@ -4256,9 +4282,6 @@ ApplySample(n):=(
   Calcflg=1;
 );
 
-
-
-;
 
 </script>
 <script id="csdraw" type="text/x-cindyscript">
@@ -4323,6 +4346,36 @@ EvalF(q):=(
 
 InputF(q):=EvalF(q);
 
+// ===== 入力方法ガイド =====
+// 「入力方法」ボタンを押すと、計算結果欄に入力ルールを表示する。
+DrawInputHelp():=(
+  drawtext([8.25,4.35],"入力方法・入力ルール",size->18,color->[0.15,0.26,0.55]);
+
+  drawtext([8.25,3.72],"① 入力先の指定",size->14,color->[0.15,0.26,0.55]);
+  drawtext([8.25,3.32],"テンキー上部の「P」「F」ボタンで入力先を選択します。",size->12);
+  drawtext([8.25,2.92],"3点モードでは「P1」「P2」「P3」「F」から選択します。",size->12);
+
+  drawtext([8.25,2.32],"② 座標・ベクトル場の入力",size->14,color->[0.15,0.26,0.55]);
+  drawtext([8.25,1.92],"P：座標を [x,y,z] の形式で入力（例：[0,0,1]）",size->12);
+  drawtext([8.25,1.52],"F：ベクトル場を [F1,F2,F3] の形式で入力",size->12);
+  drawtext([8.25,1.12],"変数 x, y, z を使用（例：[-y*z,x*z,0]）",size->12);
+
+  drawtext([8.25,0.52],"③ 関数・演算子・数学定数",size->14,color->[0.15,0.26,0.55]);
+  drawtext([8.25,0.12],"sin, cos：三角関数（例：sin(x)）",size->12);
+  drawtext([8.25,-0.28],"e(x)：指数関数（e(1)はネイピア数）",size->12);
+  drawtext([8.25,-0.68],"+ - * /：四則演算（掛け算は * を使用）",size->12);
+  drawtext([8.25,-1.08],"^：べき乗　π：円周率　√(x)：平方根",size->12);
+
+  drawtext([8.25,-1.68],"④ 入力時の注意",size->14,color->[0.15,0.26,0.55]);
+  drawtext([8.25,-2.08],"数字・英字・記号は半角で入力してください。",size->12);
+  drawtext([8.25,-2.48],"0で割る式など、計算できない式は入力できません。",size->12);
+  drawtext([8.25,-2.88],"入力後、「計算」ボタンを押してください。",size->12);
+  drawtext([8.25,-3.38],"※ 絶対値記号 | | など、一部未対応の記号は使用できません。",size->11,color->[0.35,0.35,0.35]);
+);
+
+// ---- Fの数式入力補正：sin(2x) 等の省略乗算を 2*x に補う ----
+// CindyScript では * が乗算、^ が累乗。2**x への置換はしない。
+// すでに sin(2*x) と入力された場合はそのまま保持する。
 NormalizeF(s):=(
   regional(out,ch,prevch);
   out="";
@@ -4343,6 +4396,43 @@ NormalizeF(s):=(
   );
   out
 );
+
+// ---- 円周率：画面表示は「π」のまま、計算用文字列では "pi" に変換 ----
+// 入力欄そのものは変更せず、計算処理に渡す文字列だけを置き換える。
+NormalizePi(s):=(
+  regional(out,ch);
+  out="";
+  forall(1..length(s),
+    (
+      ch=substring(s,#-1,#);
+      if(ch=="π",
+        out=out+"pi",
+        out=out+ch
+      );
+    )
+  );
+  out
+);
+
+// ---- 平方根：画面表示は「√」、計算用文字列では "sqrt" に変換 ----
+NormalizeSqrt(s):=(
+  regional(out,ch);
+  out="";
+  forall(1..length(s),
+    (
+      ch=substring(s,#-1,#);
+      if(ch=="√",
+        out=out+"sqrt",
+        out=out+ch
+      );
+    )
+  );
+  out
+);
+
+// e(...) is the visible shorthand for exp(...). Keep existing exp(...) intact.
+NormalizeExp(s):=replace(s,"e(","exp(");
+NormalizeInput(s):=NormalizeExp(NormalizeSqrt(NormalizePi(s)));
 
 FullwidthChars="　！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝～、。・「」『』【】〜ー−×÷￥";
 HasFullwidth(s):=(
@@ -4392,7 +4482,7 @@ IsPoint3(q):=(
   ok
 );
 
-AllowedInputChars="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_+-*/^().,[] ";
+AllowedInputChars="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_+-*/^().,[] π√";
 HasUnsupportedChars(s):=(
   regional(found,ch);
   found=false;
@@ -4591,6 +4681,7 @@ if(showMulti,
  element("Text20'").xy=[-9.45,-0.55+calcOffset]; // 0
  element("Text20").xy=[-8.65,-0.55+calcOffset];
  element("Text20846").xy=[-5.85,-0.55+calcOffset]; // ,
+ element("Text2").xy=[-5.00,-0.55+calcOffset]; // π
 
 
 element("BtnWindPlay").xy=[8.0,-4.72];
@@ -4606,6 +4697,12 @@ element("BtnWindStop").xy=[13.1,-4.72];
  element("BtnMulti").xy=[5.30,5.25];
 
 element("BtnSampleMenu").xy=[2.70,5.25];
+element("BtnInputHelp").xy=[-9.45,-3.5];
+if(InputHelpOpen,
+  element("BtnInputHelp").text="入力方法 ⓘ ▲",
+  element("BtnInputHelp").text="入力方法 ⓘ ▼"
+);
+
 if(SampleMenuOpen,
   element("BtnSampleMenu").text="サンプル ▲",
   element("BtnSampleMenu").text="サンプル ▼"
@@ -4625,10 +4722,11 @@ if(MobileLayout,
     "Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2086","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'",
     "BtnP1Sel","BtnP2Sel","BtnP3Sel","BtnMulti","BtnSampleMenu","BtnSample1","BtnSample2","BtnSample3","BtnSample4",
     "BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset",
-    "Text2","Text3","Text4"
+    "Text2","Text4","BtnInputHelp"
   ],
     element(#).visible=false
-  );
+  ),
+  forall(["Text0","Text1","Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'","BtnMulti","BtnSampleMenu","BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset","Text2","BtnInputHelp","Text4"],element(#).visible=true)
 );
 
 if(SampleMenuOpen & !MobileLayout,
@@ -4661,21 +4759,26 @@ if((SampleActive>0) & (!SampleMenuOpen),
 
 if(Calcflg==1,
   (
-    pstr=element("Text0").text;
-    fstr=NormalizeF(element("Text1").text);
+    // 入力欄の表示文字は保持し、計算用の文字列だけ π を pi に変換する。
+    pstr=NormalizeInput(element("Text0").text);
+    p2str=NormalizeInput(element("TextP2").text);
+    p3str=NormalizeInput(element("TextP3").text);
+    // sin(2x) のような省略乗算は F の評価時のみ補う。
+    fstr=NormalizeF(NormalizeInput(element("Text1").text));
     InputErr="";
     divResult="";
     rotResult="";
     HasResult=false;
 
+    // 1. 全角文字は従来の専用エラーメッセージを優先する。
     FullwidthTarget="";
     if(HasFullwidth(pstr),
       if(showMulti,FullwidthTarget="P1",FullwidthTarget="P")
     );
-    if((FullwidthTarget=="") & showMulti & HasFullwidth(element("TextP2").text),
+    if((FullwidthTarget=="") & showMulti & HasFullwidth(p2str),
       FullwidthTarget="P2"
     );
-    if((FullwidthTarget=="") & showMulti & HasFullwidth(element("TextP3").text),
+    if((FullwidthTarget=="") & showMulti & HasFullwidth(p3str),
       FullwidthTarget="P3"
     );
     if((FullwidthTarget=="") & HasFullwidth(fstr),
@@ -4685,16 +4788,17 @@ if(Calcflg==1,
       InputErr="全角入力エラー（"+FullwidthTarget+"）：半角で入力してください"
     );
 
+    // 2. ひらがな等、全角チェックの対象外だった文字も検出する。
     if(InputErr=="",
       (
         BadCharTarget="";
         if(HasUnsupportedChars(pstr),
           if(showMulti,BadCharTarget="P1",BadCharTarget="P")
         );
-        if((BadCharTarget=="") & showMulti & HasUnsupportedChars(element("TextP2").text),
+        if((BadCharTarget=="") & showMulti & HasUnsupportedChars(p2str),
           BadCharTarget="P2"
         );
-        if((BadCharTarget=="") & showMulti & HasUnsupportedChars(element("TextP3").text),
+        if((BadCharTarget=="") & showMulti & HasUnsupportedChars(p3str),
           BadCharTarget="P3"
         );
         if((BadCharTarget=="") & HasUnsupportedChars(fstr),
@@ -4706,16 +4810,17 @@ if(Calcflg==1,
       )
     );
 
+    // 3. x/0、x/0.0 のような定数0除算は、評価の前に検出する。
     if(InputErr=="",
       (
         ZeroDivTarget="";
         if(HasZeroDivision(pstr),
           if(showMulti,ZeroDivTarget="P1",ZeroDivTarget="P")
         );
-        if((ZeroDivTarget=="") & showMulti & HasZeroDivision(element("TextP2").text),
+        if((ZeroDivTarget=="") & showMulti & HasZeroDivision(p2str),
           ZeroDivTarget="P2"
         );
-        if((ZeroDivTarget=="") & showMulti & HasZeroDivision(element("TextP3").text),
+        if((ZeroDivTarget=="") & showMulti & HasZeroDivision(p3str),
           ZeroDivTarget="P3"
         );
         if((ZeroDivTarget=="") & HasZeroDivision(fstr),
@@ -4727,6 +4832,7 @@ if(Calcflg==1,
       )
     );
 
+    // 4. Pの型・数値と、3点モードのP2・P3も先に検証する。
     if(InputErr=="",
       (
         if((length(pstr)>4) & (length(fstr)>4),
@@ -4742,8 +4848,8 @@ if(Calcflg==1,
     );
     if((InputErr=="") & showMulti,
       (
-        p2=parse(element("TextP2").text);
-        p3=parse(element("TextP3").text);
+        p2=parse(p2str);
+        p3=parse(p3str);
         if(!IsPoint3(p2),
           InputErr="入力エラー（P2）：座標は3つの有限な実数にしてください"
         );
@@ -4753,6 +4859,7 @@ if(Calcflg==1,
       )
     );
 
+    // 5. Fの値が実数3成分になっているかを、計算に先立って確認する。
     if(InputErr=="",
       (
         ftest=EvalInputAt(fstr,p);
@@ -4762,6 +4869,7 @@ if(Calcflg==1,
       )
     );
 
+    // 6. 数値微分に使う6点、および3点モードの各点も検証する。
     if(InputErr=="",
       (
         h=0.0001;
@@ -4796,6 +4904,7 @@ if(Calcflg==1,
       )
     );
 
+    // 7. 検証に成功した場合に限り、微分と表示値を更新する。
     if(InputErr=="",
       (
         dFdx=(Fxp-Fxm)/(2*h);
@@ -4818,6 +4927,7 @@ if(Calcflg==1,
                   round(rotPResult_3*1000)/1000
                 ];
 
+                
 
                 pcalc=p;
                 fcalcstr=fstr;
@@ -5273,6 +5383,7 @@ if(HasResult,
 
     if(!MobileLayout,
       (
+        if(InputHelpOpen,DrawInputHelp(),
         if(showMulti,
           (
             resultx=8.25;
@@ -5408,13 +5519,13 @@ if(HasResult,
     draw([legendx,legendy-2.05],size->6,color->[1,0,1]);
     drawtext([legendx+0.8,legendy-2.05],"Point P",size->12);
           )
-        );
+        ));
       )
     );
   ),
   (
     if(!MobileLayout,
-      drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17)
+      if(InputHelpOpen,DrawInputHelp(),drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17))
     );
   )
 );
@@ -5437,9 +5548,9 @@ var cdy = CindyJS({
   geometry: [
     {name: "LB", type: "Free", pos: [-3.6666666666666665, -4.0, 0.6666666666666666], color: [1.0, 0.0, 0.0], visible: false, size: 0.0, border: true },
     {name: "Text0", type: "EditableText", pos: [4.0, -2.1164021164021167, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.686, 0.686], fillalpha: 0.6239316239316239, minwidth: 150, text: "[0,0,1]", textsize: 18.0},
-    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.488]", textsize: 18.0},
-    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,199]", textsize: 18.0},
-    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[0,sin(2x),0]", textsize: 18.0},
+    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.4]", textsize: 18.0},
+    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,1]", textsize: 18.0},
+    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[-y*z,x*z,0]", textsize: 18.0},
     {name: "Text5", type: "EditableText", pos: [1.3716301577866423, -4.0, 0.3698133834802243], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 0.0, 0.0], fillalpha: 1.0, visible: false, minwidth: 300, text: "rot F (P)", textsize: 18.0},
     {name: "SW", type: "Free", pos: [4.0, 4.0, -0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
     {name: "NE", type: "Free", pos: [4.0, 4.0, 0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
@@ -5462,10 +5573,10 @@ var cdy = CindyJS({
     {name: "Text208'", type: "Button", pos: [4.0, -0.8554913294797688, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"8\");", text: "8", textsize: 18.0},
     {name: "Text208''", type: "Button", pos: [4.0, -2.12, -0.8], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"y\");", text: "y", textsize: 18.0},
     {name: "Text2083", type: "Button", pos: [4.0, -2.5542168674698793, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"z\");", text: "z", textsize: 18.0},
-    {name: "Text2074", type: "Button", pos: [4.0, -2.2424242424242427, -1.2121212121212122], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"sqrt\");", text: "√", textsize: 18.0},
+    {name: "Text2074", type: "Button", pos: [4.0, -2.2424242424242427, -1.2121212121212122], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"√(\");", text: "√", textsize: 18.0},
     {name: "Text2084", type: "Button", pos: [4.0, -0.7179487179487181, -0.6837606837606838], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"+\");", text: "+", textsize: 18.0},
     {name: "Text2085", type: "Button", pos: [4.0, -0.5957446808510638, -0.5673758865248226], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "BackCurrent();", text: "BS", textsize: 18.0},
-    {name: "Text2076", type: "Button", pos: [4.0, -1.783132530120482, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"exp\");", text: "exp", textsize: 18.0},
+    {name: "Text2076", type: "Button", pos: [4.0, -1.783132530120482, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"e(\");", text: "e", textsize: 18.0},
     {name: "Text2086", type: "Button", pos: [4.0, -1.1216931216931219, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "InputNo=0;", text: "P", textsize: 18.0},
     {name: "BtnP1Sel", type: "Button", pos: [4.0, -1.1216931216931219, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, visible: false, script: "InputNo=0;", text: "P1", textsize: 18.0},
     {name: "Text2087", type: "Button", pos: [4.0, -1.2254335260115605, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "InputNo=3;", text: "F", textsize: 18.0},
@@ -5485,7 +5596,7 @@ var cdy = CindyJS({
     {name: "Text20848", type: "Button", pos: [4.0, -0.30303030303030304, -1.2121212121212122], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\")\");", text: ")", textsize: 18.0},
     {name: "Text208410'", type: "Button", pos: [4.0, -0.24096385542168672, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"(\");", text: "(", textsize: 18.0},
     {name: "BtnMulti", type: "ToggleButton", pos: [4.0, 3.9622641509433962, 0.7547169811320754], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 100, script: "showMulti=!showMulti;if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;", text: "1点／3点", textsize: 16.0, textbold: true, border: true },
-    {name: "BtnSampleMenu", type: "ToggleButton", pos: [-2.0571428571428574, -4.0, -0.7619047619047619], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, minwidth: 110, script: "SampleMenuOpen=!SampleMenuOpen;", text: "サンプル ▼", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnSampleMenu", type: "ToggleButton", pos: [-2.0571428571428574, -4.0, -0.7619047619047619], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, minwidth: 110, script: "SampleMenuOpen=!SampleMenuOpen;InputHelpOpen=false;", text: "サンプル ▼", textsize: 15.0, textbold: true, border: true },
     {name: "BtnSample1", type: "ToggleButton", pos: [1.8867924528301885, -4.0, -0.9433962264150942], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 115, script: "ApplySample(1);", text: "基本回転", textsize: 15.0, textbold: true, border: true },
     {name: "BtnSample2", type: "ToggleButton", pos: [-1.2264150943396226, -4.0, -0.9433962264150942], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(2);", text: "回転の強さ", textsize: 15.0, textbold: true, border: true },
     {name: "BtnSample3", type: "ToggleButton", pos: [2.339181286549708, -4.0, -1.169590643274854], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(3);", text: "回転軸の向き", textsize: 15.0, textbold: true, border: true },
@@ -5499,8 +5610,8 @@ var cdy = CindyJS({
     {name: "BtnWindPause", type: "ToggleButton", pos: [4.0, -1.8241545893719808, 0.38647342995169087], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "PauseWindmill();", text: "Ⅱ 一時停止", textsize: 16.0, textbold: true, border: true },
     {name: "BtnWindStop", type: "ToggleButton", pos: [4.0, -1.4412213740458015, 0.3053435114503817], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "StopWindmill();", text: "■ 停止", textsize: 16.0, textbold: true, border: true },
     {name: "BtnReset", type: "ToggleButton", pos: [4.0, 1.4285714285714286, 0.272108843537415], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 1.0, 1.0], fillalpha: 0.27272728085517883, minwidth: 70, script: "ResetAll();", text: "RESET", textsize: 16.0, textbold: true, border: true },
-    {name: "Text2", type: "Text", pos: [4.0, 1.5586206896551724, -0.374860296326355], color: [0.0, 0.0, 0.0], pinned: true, text: "exp：指数関数  exp(x)など", textsize: 18.0, border: true },
-    {name: "Text3", type: "Text", pos: [4.0, 1.406896551724138, -0.374860296326355], color: [0.0, 0.0, 0.0], pinned: true, text: "sin,cos：三角関数  sin(x)など", textsize: 18.0, border: true },
+    {name: "Text2", type: "Button", pos: [-5,-0.55,1], color: [0,0,0], fillcolor: [1,1,1], fillalpha: 0.27272728085517883, script: "PutKey(\"π\");", text: "π", textsize: 14},
+    {name: "BtnInputHelp", type: "ToggleButton", pos: [-9.45,-3.5,1], color: [0,0,0], fillcolor: [1,0.784,0], fillalpha: 0.48, minwidth: 120, script: "InputHelpOpen=!InputHelpOpen;SampleMenuOpen=false;", text: "入力方法 ⓘ ▼", textsize: 15, textbold: true, border: true},
     {name: "Text4", type: "Text", pos: [4.0, -2.1906412478336224, -0.37680930999876233], color: [0.0, 0.0, 0.0], pressed: true, pinned: true, text: "テンキー上部のP,Fボタンで入力先指定", size: 18.0, textsize: 18.0, textbold: true, border: true }
   ],
   animation: {
@@ -5529,25 +5640,35 @@ var cdy = CindyJS({
     <main class="page">
   <header class="page-header">
     <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
-    <p class="page-subtitle">ver.49 を基に、計算処理・3D表示を維持してスマホ用レイアウトを追加</p>
+    <p class="page-subtitle">ver.52｜パソコン・スマートフォン対応</p>
   </header>
 
   <section class="mobile-panel" aria-label="スマートフォン用入力テンキー">
     <h2 class="panel-heading">入力テンキー</h2>
     <p class="panel-caption">入力したい欄を選んでから、下のキーを押してください。</p>
+    <details class="input-help" id="mobileInputHelp">
+      <summary>入力方法 ⓘ</summary>
+      <div class="help-content">
+        <p><strong>① 入力先：</strong>P（3点モードではP1・P2・P3）またはFを選びます。</p>
+        <p><strong>② 入力形式：</strong>Pは [x,y,z]（例：[0,0,1]）、Fは [F1,F2,F3]（例：[-y*z,x*z,0]）。</p>
+        <p><strong>③ 関数・定数：</strong>sin(x)、cos(x)、e(x)（指数関数）、√(x)（平方根）、π（円周率）。e(1)はネイピア数、exp(x)・sqrt(x)・piの直接入力も可能です。</p>
+        <p><strong>④ 演算：</strong>+ − * /、^（べき乗）。掛け算は * を使用してください。数字・英字・演算記号は半角で入力します。0除算や絶対値記号 | | は使用できません。</p>
+        <p>入力が終わったら「計算して反映」を押してください。</p>
+      </div>
+    </details>
     <div class="mode-row">
       <label><input type="checkbox" id="multiMode"> 3点モードにする</label>
       <button class="tool-btn" type="button" id="syncButton">教材から入力値を取り込む</button>
     </div>
     <form id="mobileForm" autocomplete="off">
       <div class="fields">
-        <div class="field"><label for="fieldP1" id="p1Label">P1</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
+        <div class="field"><label for="fieldP1" id="p1Label">P</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
         <div class="field field-p3 field-disabled" id="p3Wrap"><label for="fieldP3">P3</label><input id="fieldP3" type="text" value="[2.4,0,1]" spellcheck="false" autocapitalize="off" disabled></div>
         <div class="field field-p2 field-disabled" id="p2Wrap"><label for="fieldP2">P2</label><input id="fieldP2" type="text" value="[0,0,3.4]" spellcheck="false" autocapitalize="off" disabled></div>
         <div class="field"><label for="fieldF">F(x,y,z)</label><input id="fieldF" type="text" value="[-y*z,x*z,0]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
       </div>
       <div class="keypad-targets" aria-label="入力先の選択">
-        <button class="keypad-target active" type="button" data-target="0">P1</button>
+        <button class="keypad-target active" type="button" data-target="0">P</button>
         <button class="keypad-target" type="button" data-target="1" disabled>P2</button>
         <button class="keypad-target" type="button" data-target="2" disabled>P3</button>
         <button class="keypad-target" type="button" data-target="3">F</button>
@@ -5569,7 +5690,7 @@ var cdy = CindyJS({
         <button type="button" data-key="5">5</button>
         <button type="button" data-key="6">6</button>
         <button type="button" data-key="*">*</button>
-        <button type="button" data-key="sqrt">√</button>
+        <button type="button" data-key="√(">√</button>
 
         <button type="button" data-key="1">1</button>
         <button type="button" data-key="2">2</button>
@@ -5585,7 +5706,8 @@ var cdy = CindyJS({
 
         <button type="button" data-key="y">y</button>
         <button type="button" data-key="z">z</button>
-        <button type="button" data-key="exp">exp</button>
+        <button type="button" data-key="e(">e</button>
+        <button type="button" data-key="π">π</button>
       </div>
       <div class="buttons">
         <button type="submit" class="action-btn primary">計算して反映</button>
@@ -5791,7 +5913,8 @@ var cdy = CindyJS({
     document.getElementById("p3Wrap").classList.toggle("field-disabled", !isMulti);
     document.getElementById("fieldP2").disabled = !isMulti;
     document.getElementById("fieldP3").disabled = !isMulti;
-    document.getElementById("p1Label").textContent = "P1";
+    document.getElementById("p1Label").textContent = isMulti ? "P1" : "P";
+    document.querySelector('[data-target="0"]').textContent = isMulti ? "P1" : "P";
     document.querySelectorAll('[data-target="1"], [data-target="2"]').forEach(button => {
       button.disabled = !isMulti;
     });
@@ -5810,6 +5933,7 @@ var cdy = CindyJS({
       TextP3: document.getElementById("fieldP3").value,
       Text1: document.getElementById("fieldF").value
     };
+    if (Object.values(values).some(value => /["\\\x00-\x1f]/.test(value))) { showStatus("入力エラー：使用できない文字が含まれています", true); return false; }
     const script = Object.entries(values).map(([name, value]) =>
       'element("' + name + '").text=' + JSON.stringify(value) + ';'
     ).join("");
@@ -5819,7 +5943,7 @@ var cdy = CindyJS({
     const names = {fieldP1:'Text0',fieldP2:'TextP2',fieldP3:'TextP3',fieldF:'Text1'};
     for (const [id, name] of Object.entries(names)) {
       const value = readText('element("' + name + '").text');
-      if (value) document.getElementById(id).value = value;
+      if (typeof readValue('element("' + name + '").text') === "string") document.getElementById(id).value = value;
     }
     const isMulti = readValue("showMulti");
     if (typeof isMulti === "boolean") setModeUI(isMulti);
@@ -5849,6 +5973,7 @@ var cdy = CindyJS({
 
     const isMulti = readValue("showMulti") === true;
     document.getElementById("resultSpeedLabel").textContent = isMulti ? "回転速度(P1)" : "回転速度";
+    document.getElementById("mobileResults").classList.toggle("hidden", readValue("showInfo") === false);
     const meterEnabled = readValue("showMeter") !== false;
     const meterPanel = document.getElementById("mobileMeterPanel");
     meterPanel.classList.toggle("hidden", !hasResult || !meterEnabled);
@@ -5872,7 +5997,7 @@ var cdy = CindyJS({
   }
   // Exclude characters that could break CindyScript string literals.
   // Non-ASCII input is reported here with the same user-facing intent as ver.49.
-  const allowed = /^[A-Za-z0-9_+*\/^().,\[\]\- ]+$/;
+  const allowed = /^[A-Za-z0-9_+*\/^().,\[\]\- π√]+$/;
   document.getElementById("mobileForm").addEventListener("submit", event => {
     event.preventDefault();
     const values = [
@@ -5907,6 +6032,7 @@ var cdy = CindyJS({
   });
   document.getElementById("btnResetMobile").addEventListener("click", () => {
     if (issueCS("ResetAll();")) {
+      document.getElementById("mobileInputHelp").open = false;
       setTimeout(() => { syncFields(); updateResults(); showStatus("初期状態に戻しました。", false); }, 160);
     }
   });
