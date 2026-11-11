@@ -117,6 +117,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
 }
 .mobile-keypad button.utility { background: #edf4fc; }
 .mobile-keypad button:active, .keypad-target:active { background: #dbeafe; }
+.mobile-keypad .spacer { visibility: hidden; pointer-events: none; border: none; background: transparent; }
 .field.field-disabled { opacity: .52; }
 .field input:disabled { background: #f0f3f7; color: #5c6877; }
 .mobile-extra-panel { margin-top: 12px; padding: clamp(12px, 2vw, 22px); background: #fff; border: 1px solid #ccd7e5;
@@ -5731,14 +5732,15 @@ var cdy = CindyJS({
         <button type="button" data-key="+">+</button>
         <button type="button" data-key="-">−</button>
 
-        <button type="button" data-key="x">x</button>
-        <button type="button" data-key="y">y</button>
-        <button type="button" data-key="z">z</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key=".">.</button>
+        <span class="spacer" aria-hidden="true"></span>
         <button type="button" data-key="sin(">sin</button>
         <button type="button" data-key="cos(">cos</button>
 
-        <button type="button" data-key="0">0</button>
-        <button type="button" data-key=".">.</button>
+        <button type="button" data-key="x">x</button>
+        <button type="button" data-key="y">y</button>
+        <button type="button" data-key="z">z</button>
         <button type="button" data-key="e(">e</button>
         <button type="button" data-key="π">π</button>
       </div>
