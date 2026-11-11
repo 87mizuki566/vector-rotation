@@ -5062,14 +5062,19 @@ if(HasResult,
           )
         );
 
-        TH.visible=true;
-        FI.visible=true;
+        TH.visible=!MobileLayout;
+        FI.visible=!MobileLayout;
         TH.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,TH.x)),-3.75];
         FI.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,FI.x)),-4.35];
-        draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
-        drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
+        // The mobile HTML sliders still control TH/FI; hide only their canvas UI.
+        if(!MobileLayout,
+          (
+            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
+            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
+          )
+        );
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -5337,8 +5342,8 @@ if(HasResult,
         A.visible=false;
       ),
       (
-        TH.visible=true;
-        FI.visible=true;
+        TH.visible=!MobileLayout;
+        FI.visible=!MobileLayout;
         LB.visible=false;
         SW.visible=false;
         NE.visible=false;
@@ -5347,10 +5352,14 @@ if(HasResult,
         T.visible=false;
         A.visible=false;
 
-        draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35+viewSliderShift,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
-        drawtext([-4.35+viewSliderShift,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
+        if(!MobileLayout,
+          (
+            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
+            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
+          )
+        );
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
