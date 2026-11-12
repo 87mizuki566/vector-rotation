@@ -4397,9 +4397,9 @@ DrawInputHelp():=(
 
   drawtext([8.25,0.52],"③ 関数・演算子・数学定数",size->14,color->[0.15,0.26,0.55]);
   drawtext([8.25,0.12],"sin, cos：三角関数（例：sin(x)）",size->12);
-  drawtext([8.25,-0.28],"exp：指数関数（exp(x)など）　√：平方根",size->12);
+  drawtext([8.25,-0.28],"exp(x)：指数関数（例：exp(x)）　√：平方根",size->12);
   drawtext([8.25,-0.68],"+ - * /：四則演算（掛け算は * を使用）",size->12);
-  drawtext([8.25,-1.08],"^：べき乗（例：x^2）　π：円周率　e：ネイピア数",size->12);
+  drawtext([8.25,-1.08],"^：べき乗　π：円周率　e：ネイピア数",size->12);
 
   drawtext([8.25,-1.68],"④ 入力時の注意",size->14,color->[0.15,0.26,0.55]);
   drawtext([8.25,-2.08],"数字・英字・記号は半角で入力してください。",size->12);
@@ -4465,16 +4465,15 @@ NormalizeSqrt(s):=(
   out
 );
 
-// 入力欄には e と表示し、計算時のみ exp(1) に変換。
-// exp(...) の e は変換しない。
+// exp(...) is a function; e is Euler's constant. Keep the visible input unchanged.
+// Match ver54_1112_exp_fixed.cdy: convert e to exp(1), without altering exp(...).
 NormalizeE(s):=(
-  regional(out,ch,token);
+  regional(out,ch);
   out="";
   forall(1..length(s),
     (
       ch=substring(s,#-1,#);
-      token=substring(s,#-1,min(#+2,length(s)));
-      if((ch=="e") & (token!="exp"),
+      if((ch=="e") & (substring(s,#-1,min(length(s),#+2))!="exp"),
         out=out+"exp(1)",
         out=out+ch
       );
@@ -4732,7 +4731,7 @@ if(showMulti,
  element("Text20").xy=[-8.65,-0.55+calcOffset];
  element("Text20846").xy=[-5.85,-0.55+calcOffset]; // ,
  element("Text2").xy=[-5.00,-0.55+calcOffset]; // π
- element("Text3").xy=[-4.15,-0.55+calcOffset]; // e (Euler定数)
+ element("Text3").xy=[-4.15,-0.55+calcOffset]; // e (Euler's constant)
 
 
 element("BtnWindPlay").xy=[8.0,-4.72];
@@ -4769,15 +4768,15 @@ element("BtnSample4").visible=SampleMenuOpen;
 
 if(MobileLayout,
   forall([
-    "Text0","TextP2","TextP3","Text1","Text5","Text2","Text3",
+    "Text0","TextP2","TextP3","Text1","Text5",
     "Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2086","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'",
     "BtnP1Sel","BtnP2Sel","BtnP3Sel","BtnMulti","BtnSampleMenu","BtnSample1","BtnSample2","BtnSample3","BtnSample4",
     "BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset",
-    "Text2","Text4","BtnInputHelp"
+    "Text2","Text3","Text4","BtnInputHelp"
   ],
     element(#).visible=false
   ),
-  forall(["Text0","Text1","Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'","BtnMulti","BtnSampleMenu","BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset","Text2","BtnInputHelp","Text4"],element(#).visible=true)
+  forall(["Text0","Text1","Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'","BtnMulti","BtnSampleMenu","BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset","Text2","Text3","BtnInputHelp","Text4"],element(#).visible=true)
 );
 
 if(SampleMenuOpen & !MobileLayout,
@@ -5701,7 +5700,7 @@ var cdy = CindyJS({
     <main class="page">
   <header class="page-header">
     <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
-    <p class="page-subtitle">ver.53｜パソコン・スマートフォン対応</p>
+    <p class="page-subtitle">ver.52｜パソコン・スマートフォン対応</p>
   </header>
 
   <section class="mobile-panel" aria-label="スマートフォン用入力テンキー">
@@ -5712,7 +5711,7 @@ var cdy = CindyJS({
       <div class="help-content">
         <p><strong>① 入力先：</strong>P（3点モードではP1・P2・P3）またはFを選びます。</p>
         <p><strong>② 入力形式：</strong>Pは [x,y,z]（例：[0,0,1]）、Fは [F1,F2,F3]（例：[-y*z,x*z,0]）。</p>
-        <p><strong>③ 関数・定数：</strong>sin(x)、cos(x)、exp(x)（指数関数）、√(x)（平方根）、π（円周率）、e（ネイピア数）。入力欄の e は計算時に exp(1) として処理します。sqrt(x)・pi の直接入力も可能です。</p>
+        <p><strong>③ 関数・定数：</strong>sin(x)、cos(x)、exp(x)（指数関数）、√(x)（平方根）、π（円周率）、e（ネイピア数）。eは内部でexp(1)として扱います。sqrt(x)・piの直接入力も可能です。</p>
         <p><strong>④ 演算：</strong>+ − * /、^（べき乗）。掛け算は * を使用してください。数字・英字・演算記号は半角で入力します。0除算や絶対値記号 | | は使用できません。</p>
         <p>入力が終わったら「計算して反映」を押してください。</p>
       </div>
