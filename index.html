@@ -36,18 +36,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
 .page-subtitle { color: #526177; font-size: 13px; }
 .viewer-panel, .mobile-panel { background: white; border: 1px solid #ccd7e5;
                                 border-radius: 13px; overflow: hidden; box-shadow: 0 2px 12px #22334812; }
-.viewer-toolbar { padding: 9px 12px; display: flex; align-items: center; justify-content: space-between;
-                  gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #dfe7f0; background: #f9fbfe; }
-.viewer-hint { font-size: 13px; color: #53657a; }
-.tool-actions { display: flex; flex-wrap: wrap; gap: 7px; }
-.tool-btn { min-height: 36px; background: white; color: #13365e; border: 1px solid #a8bdd5;
-            border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 650; }
-.tool-btn[aria-pressed="true"] { background: #164b90; border-color: #164b90; color: white; }
 .canvas-viewport { overflow-x: auto; overflow-y: hidden; width: 100%; -webkit-overflow-scrolling: touch;
                   overscroll-behavior-x: contain; background: rgb(247,247,247); }
 .canvas-stage { position: relative; width: 1600px; height: 663px; }
 #CSCanvas { width: 1600px; height: 663px; position: relative; transform-origin: top left; }
-.viewer-footer { font-size: 12px; padding: 9px 12px; color: #55667d; border-top: 1px solid #dfe7f0; }
 .mobile-panel { display: none; margin-top: 14px; padding: clamp(12px, 2vw, 22px); }
 .panel-heading { font-weight: 750; font-size: 18px; margin: 0 0 4px; }
 .panel-caption { font-size: 13px; color: #52657b; margin-bottom: 16px; }
@@ -66,7 +58,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
               padding: 9px 15px; background: white; color: #15345c; font-weight: 700; }
 .action-btn.primary { background: #1553a3; color: white; border-color: #1553a3; }
 .action-btn.secondary { background: #ebf5ff; border-color: #9cc1ea; }
-.action-btn:active, .tool-btn:active { filter: brightness(.94); }
+.action-btn:active { filter: brightness(.94); }
 .section-title { margin: 19px 0 8px; font-size: 14px; font-weight: 750; }
 .toggle-grid { display: flex; flex-wrap: wrap; gap: 10px 18px; }
 .toggle-grid label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
@@ -84,10 +76,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
 @media (max-width: 620px) {
   .page { padding: 10px 6px 24px; }
   .page-subtitle { width: 100%; }
-  .viewer-toolbar { padding: 8px; }
-  .viewer-hint { width: 100%; }
-  .tool-actions { width: 100%; }
-  .tool-btn { padding: 7px 9px; }
   .fields, .result-grid { grid-template-columns: minmax(0,1fr); }
   .action-btn { flex: 1 0 auto; }
 }
@@ -159,7 +147,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
   .mobile-panel { display: block; margin-top: 0; margin-bottom: 12px; }
   .mobile-extra-panel { display: block; }
   .mobile-view-controls { display: block; }
-  .viewer-toolbar, .viewer-footer { display: none; }
   .mobile-display-row { display: flex; align-items: stretch; gap: 8px; }
   .mobile-graph-panel { width: 69%; }
   .mobile-result-panel { display: block; width: 31%; min-width: 0; padding: 8px 6px; background: #f8fbff;
@@ -5778,16 +5765,6 @@ var cdy = CindyJS({
   </section>
 
   <section class="viewer-panel" aria-label="3D教材の表示">
-    <div class="viewer-toolbar">
-      <p class="viewer-hint">画面に合わせて自動調整。細かい操作は「拡大して操作」で確認できます。</p>
-      <div class="tool-actions" role="group" aria-label="表示倍率">
-        <button type="button" class="tool-btn" id="btnFit" aria-pressed="true">全体表示</button>
-        <button type="button" class="tool-btn" id="btnZoom" aria-pressed="false">拡大して操作</button>
-        <button type="button" class="tool-btn" id="btnScrollInput">入力へ</button>
-        <button type="button" class="tool-btn" id="btnScrollGraph">3Dへ</button>
-        <button type="button" class="tool-btn" id="btnScrollResult">結果へ</button>
-      </div>
-    </div>
     <div class="mobile-display-row">
       <div class="mobile-graph-panel">
         <div class="display-label">3D表示</div>
@@ -5840,7 +5817,6 @@ var cdy = CindyJS({
         </div>
       </div>
     </section>
-    <p class="viewer-footer" id="viewerFooter">※ 画面内の視点スライダー・計算機・表示切替は従来どおり利用できます。</p>
   </section>
 
   <section class="mobile-extra-panel" aria-label="その他の操作">
@@ -5875,13 +5851,10 @@ var cdy = CindyJS({
   const viewport = document.getElementById("canvasViewport");
   const stage = document.getElementById("canvasStage");
   const canvasRoot = document.getElementById("CSCanvas");
-  const btnFit = document.getElementById("btnFit");
-  const btnZoom = document.getElementById("btnZoom");
   const multiMode = document.getElementById("multiMode");
   const status = document.getElementById("mobileStatus");
   const mobileYaw = document.getElementById("mobileYaw");
   const mobilePitch = document.getElementById("mobilePitch");
-  let zoom = false;
   let currentScale = 1;
   let syncingViewSliders = false;
 
@@ -5890,7 +5863,6 @@ var cdy = CindyJS({
   function layout() {
     const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
     if (mobileLayout) {
-      zoom = false;
       const graphWidth = Math.max(1, viewport.clientWidth);
       currentScale = Math.min(.75, Math.max(.28, graphWidth / 640));
       const graphCenterSourceX = 915;
@@ -5905,7 +5877,7 @@ var cdy = CindyJS({
     } else {
       const available = Math.max(1, viewport.clientWidth);
       const fitted = Math.min(1, available / BASE_W);
-      currentScale = zoom ? Math.max(fitted, .75) : fitted;
+      currentScale = fitted;
       stage.style.width = (BASE_W * currentScale) + "px";
       stage.style.height = (BASE_H * currentScale) + "px";
       stage.style.overflow = "visible";
@@ -5916,24 +5888,7 @@ var cdy = CindyJS({
       viewport.style.overflowX = "auto";
       viewport.style.overflowY = "hidden";
     }
-    btnFit.setAttribute("aria-pressed", String(!zoom));
-    btnZoom.setAttribute("aria-pressed", String(zoom));
-    document.getElementById("viewerFooter").textContent = zoom
-      ? "拡大中：左右にスクロールできます。『入力へ』『3Dへ』『結果へ』で移動できます。"
-      : "画面全体を縮小表示中。細かい操作は拡大表示で確認できます。";
   }
-  function scrollToPart(part) {
-    if (!zoom) { zoom = true; layout(); }
-    // The source HTML maps the view into 1600 pixels; the selected positions
-    // are visual navigation aids, not changes to Cinderella coordinates.
-    const sourceX = part === "input" ? 240 : part === "graph" ? 915 : 1220;
-    viewport.scrollTo({ left: Math.max(0, currentScale * sourceX - viewport.clientWidth / 2), behavior: "smooth" });
-  }
-  btnFit.addEventListener("click", () => { zoom = false; layout(); viewport.scrollLeft = 0; });
-  btnZoom.addEventListener("click", () => { zoom = true; layout(); scrollToPart("graph"); });
-  document.getElementById("btnScrollInput").addEventListener("click", () => scrollToPart("input"));
-  document.getElementById("btnScrollGraph").addEventListener("click", () => scrollToPart("graph"));
-  document.getElementById("btnScrollResult").addEventListener("click", () => scrollToPart("result"));
   let appliedSceneMobileLayout = null;
   function applyResponsiveScene() {
     if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") return;
