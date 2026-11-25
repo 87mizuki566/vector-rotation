@@ -2,8 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>ver66_1125.cdy</title>
+    <title>ベクトル場の回転（rot）可視化教材 | ver.66</title>
     <style type="text/css">
         * {
             margin: 0px;
@@ -19,6 +20,195 @@
             position: fixed;
             width: 100%;
         }
+
+/* ===== Responsive shell; original CindyScript remains unchanged. ===== */
+:root { color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; }
+body { min-width: 280px; margin: 0; background: #f1f5f9; color: #14263e;
+       font-family: "Noto Sans JP", "Yu Gothic", Meiryo, system-ui, sans-serif; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+.page { max-width: 1690px; margin: auto; padding: 16px clamp(8px, 2vw, 24px) 32px; }
+.page-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+               margin-bottom: 12px; flex-wrap: wrap; }
+.page-title { font-size: clamp(17px, 2vw, 24px); font-weight: 750; line-height: 1.4; }
+.page-subtitle { color: #526177; font-size: 13px; }
+.viewer-panel, .mobile-panel { background: white; border: 1px solid #ccd7e5;
+                                border-radius: 13px; overflow: hidden; box-shadow: 0 2px 12px #22334812; }
+.canvas-viewport { overflow-x: auto; overflow-y: hidden; width: 100%; -webkit-overflow-scrolling: touch;
+                  overscroll-behavior-x: contain; background: rgb(247,247,247); }
+.canvas-stage { position: relative; width: 1600px; height: 663px; }
+#CSCanvas { width: 1600px; height: 663px; position: relative; transform-origin: top left; }
+.mobile-panel { display: none; margin-top: 14px; padding: clamp(12px, 2vw, 22px); }
+.panel-heading { font-weight: 750; font-size: 18px; margin: 0 0 4px; }
+.panel-caption { font-size: 13px; color: #52657b; margin-bottom: 16px; }
+.mode-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.mode-row label { display: flex; gap: 7px; align-items: center; font-weight: 650; cursor: pointer; }
+.mode-row input[type="checkbox"], .toggle-grid input[type="checkbox"] { width: 20px; height: 20px; accent-color: #1354a1; }
+.fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field label { font-weight: 700; font-size: 14px; }
+.field input { width: 100%; min-width: 0; background: white; border: 1px solid #9daec3;
+               border-radius: 8px; padding: 10px 12px; min-height: 45px; font-size: 16px; }
+.field-p2 label { color: #7039ab; } .field-p3 label { color: #b06505; }
+.hidden { display: none !important; }
+.buttons { display: flex; flex-wrap: wrap; gap: 9px; margin: 13px 0 0; }
+.action-btn { min-height: 44px; border-radius: 9px; border: 1px solid #9baec6;
+              padding: 9px 15px; background: white; color: #15345c; font-weight: 700; }
+.action-btn.primary { background: #1553a3; color: white; border-color: #1553a3; }
+.action-btn.secondary { background: #ebf5ff; border-color: #9cc1ea; }
+.action-btn:active { filter: brightness(.94); }
+.section-title { margin: 19px 0 8px; font-size: 14px; font-weight: 750; }
+.toggle-grid { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.toggle-grid label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+.status { white-space: pre-wrap; line-height: 1.5; font-size: 14px; padding: 9px 12px;
+          margin-top: 15px; min-height: 40px; border: 1px solid #b8c8dc; background: #f6f9fd;
+          color: #263950; border-radius: 8px; }
+.status.error { color: #9c2020; border-color: #f0b3b3; background: #fff4f4; font-weight: 650; }
+.result-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+.result-grid > div { min-width:0; padding: 10px; border: 1px solid #dae3ed; border-radius: 8px; background: #fbfdff; }
+.result-grid span { display: block; font-size: 12px; color: #506780; }
+.result-grid strong { display: block; font-size: 14px; font-weight: 650; overflow-wrap: anywhere; padding-top: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+           overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 1100px) { .mobile-panel { display: block; } }
+@media (max-width: 620px) {
+  .page { padding: 10px 6px 24px; }
+  .page-subtitle { width: 100%; }
+  .fields, .result-grid { grid-template-columns: minmax(0,1fr); }
+  .action-btn { flex: 1 0 auto; }
+}
+
+
+/* ===== Smartphone layout: HTML keypad above a cropped 3D view ===== */
+.mobile-panel, .mobile-extra-panel { display: none; }
+.mobile-display-row { display: block; }
+.mobile-graph-panel { width: 100%; min-width: 0; }
+.mobile-result-panel, .display-label { display: none; }
+.graph-view-wrap { position: relative; min-width: 0; }
+.graph-placeholder {
+  position: absolute; z-index: 2; inset: 0; display: none; align-items: center; justify-content: center;
+  padding: 12px; text-align: center; color: #52657b; font-size: 13px; pointer-events: none;
+}
+.keypad-targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin: 10px 0 8px; }
+.keypad-target {
+  min-height: 38px; border: 1px solid #9aadc4; border-radius: 8px; background: #f8fbff;
+  color: #17385f; font-weight: 750;
+}
+.keypad-target.active { background: #164b90; border-color: #164b90; color: #fff; }
+.keypad-target:disabled { opacity: .35; cursor: not-allowed; }
+.mobile-keypad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.mobile-keypad button {
+  min-width: 0; min-height: 39px; padding: 5px 2px; border: 1px solid #b5c3d3; border-radius: 8px;
+  background: #fff; color: #17385f; font-size: 14px; font-weight: 700;
+}
+.mobile-keypad button.utility { background: #edf4fc; }
+.mobile-keypad button:active, .keypad-target:active { background: #dbeafe; }
+.mobile-keypad .spacer { visibility: hidden; pointer-events: none; border: none; background: transparent; }
+.field.field-disabled { opacity: .52; }
+.field input:disabled { background: #f0f3f7; color: #5c6877; }
+.mobile-extra-panel { margin-top: 12px; padding: clamp(12px, 2vw, 22px); background: #fff; border: 1px solid #ccd7e5;
+                       border-radius: 13px; box-shadow: 0 2px 12px #22334812; }
+.display-label { font-size: 13px; font-weight: 750; color: #52657b; padding: 8px 10px 4px; }
+.mobile-view-controls {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  border-top: 1px solid #dfe7f0;
+  background: #fbfdff;
+}
+.view-slider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.view-slider-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.view-slider-field label {
+  font-size: 13px;
+  font-weight: 750;
+  color: #42566f;
+}
+.view-slider-field input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #164b90;
+}
+.view-slider-field small {
+  font-size: 12px;
+  color: #61748a;
+}
+@media (max-width: 1100px) {
+  .mobile-panel { display: block; margin-top: 0; margin-bottom: 12px; }
+  .mobile-extra-panel { display: block; }
+  .mobile-view-controls { display: block; }
+  .mobile-display-row { display: flex; align-items: stretch; gap: 8px; }
+  .mobile-graph-panel { width: 69%; }
+  .mobile-result-panel { display: block; width: 31%; min-width: 0; padding: 8px 6px; background: #f8fbff;
+                         border: 1px solid #d5e0ec; border-radius: 9px; }
+  .mobile-result-panel h3 { font-size: 13px; margin: 0 0 7px; }
+  .display-label { display: block; }
+  .canvas-viewport { width: 100%; overflow: hidden; }
+  .canvas-stage { overflow: hidden; }
+  .viewer-panel { overflow: hidden; }
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .result-grid { grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 0; }
+  .result-grid > div { padding: 7px 6px; }
+  .result-grid span { font-size: 10px; line-height: 1.25; }
+  .result-grid strong { font-size: 12px; padding-top: 3px; }
+  .mobile-panel .panel-caption { margin-bottom: 10px; }
+  .mobile-panel .mode-row { margin-bottom: 10px; }
+  .mobile-panel .field label { font-size: 13px; }
+  .mobile-panel .field input { min-height: 40px; padding: 8px; font-size: 14px; }
+  .mobile-panel .buttons { margin-top: 10px; }
+  .mobile-panel .status { margin-top: 10px; }
+}
+@media (max-width: 620px) {
+  .mobile-display-row { gap: 6px; }
+  .mobile-graph-panel { width: 68%; }
+  .mobile-result-panel { width: 32%; padding: 7px 5px; }
+  .view-slider-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mobile-keypad { gap: 5px; }
+  .mobile-keypad button { min-height: 37px; font-size: 13px; }
+  .keypad-targets { gap: 5px; }
+  .keypad-target { min-height: 36px; font-size: 13px; }
+}
+
+
+/* Mobile speed meters: shown below the numerical results without resizing the 3D viewport. */
+@media (max-width: 1100px) {
+  .mobile-result-panel { display: flex; flex-direction: column; }
+  .mobile-meter-panel { margin-top: 12px; padding-top: 10px; border-top: 1px solid #dfe7f0; }
+  .mobile-meter-title { margin: 0 0 7px; font-size: 11px; font-weight: 750; color: #52657b; }
+  .mobile-meter-row { margin-top: 7px; }
+  .mobile-meter-head { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .mobile-meter-head span { font-size: 10px; font-weight: 750; color: #33465e; }
+  .mobile-meter-head strong { font-size: 10px; font-weight: 700; color: #14263e; }
+  .mobile-meter-track { width: 100%; height: 7px; margin-top: 4px; overflow: hidden; border-radius: 99px; background: #e7edf5; }
+  .mobile-meter-fill { width: 0%; height: 100%; border-radius: inherit; transition: width .18s ease; }
+  .meter-p1 { background: #ed3933; }
+  .meter-p2 { background: #9633cc; }
+  .meter-p3 { background: #ed8a16; }
+}
+    .input-help { margin: 0 0 12px; border: 1px solid #a8bdd5; border-radius: 9px; background: #f8fbff; }
+    .input-help summary { cursor: pointer; padding: 10px 12px; font-weight: 700; color: #164b90; font-size: 14px; }
+    .help-content { padding: 0 12px 12px; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+    .help-content p + p { margin-top: 7px; }
+    @media (max-width: 1100px) { .mobile-graph-panel { flex: 69 1 0; width: auto; } .mobile-result-panel { flex: 31 1 0; width: auto; } }
+    .mobile-symbolic-panel { display:none; }
+    @media (max-width:1100px) {
+      .mobile-symbolic-panel { display:block; margin-top:12px; padding:12px; border:1px solid #d5e0ec; border-radius:9px; background:#f8fbff; }
+      .symbolic-caption { color:#506780; font-size:12px; margin:4px 0 8px; }
+      .symbolic-row { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; border-top:1px solid #dce6f0; padding:8px 0; }
+      .symbolic-row span { font-size:12px; color:#506780; }
+      .symbolic-row strong { flex:1 1 150px; min-width:0; font-size:15px; color:#193d82; overflow-wrap:anywhere; }
+    }
     </style>
     <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8.8/CindyJS.css">
     <script type="text/javascript" src="https://cindyjs.org/dist/v0.8.8/Cindy.js"></script>
@@ -3858,6 +4048,11 @@ Drwxy():=(
 );
 Ketcindyjsfigure=0;
 Ketcindyjsscale=1;
+MobileLayout=false;
+Calcflg=0;
+InputErr="";
+divResult="";
+SymbolicDebug="";
 rotResult="";
 divPResult="";
 rotPResult="";
@@ -4000,8 +4195,8 @@ ResetAll():=(
 
   MotionState=1; // RESET後の再計算は従来どおり自動再生
 
-//TH.xy=[-1.946875,-3.75]
-//FI.xy=[-3.3375,-4.35]
+TH.xy=[-1.946875+if(MobileLayout,5,0),-3.75];
+  FI.xy=[-3.3375+if(MobileLayout,5,0),-4.35];
 
   Anim1.run=false;
   T.xy=N.xy;
@@ -4122,14 +4317,16 @@ Cross3(a,b):=[
   a_1*b_2-a_2*b_1
 ];
 
+viewSliderShift=0;
+if(MobileLayout,viewSliderShift=5);
 viewtheta=55*pi/180;
 viewphi=45*pi/180;
 if(htmlmode,
   (
-    thx=max(-4.45,min(4.45,TH.x));
-    fix=max(-4.45,min(4.45,FI.x));
-    TH.xy=[thx,-3.75];
-    FI.xy=[fix,-4.35];
+    thx=max(-4.45,min(4.45,TH.x-viewSliderShift));
+    fix=max(-4.45,min(4.45,FI.x-viewSliderShift));
+    TH.xy=[thx+viewSliderShift,-3.75];
+    FI.xy=[fix+viewSliderShift,-4.35];
 
     viewthdegree=10+160*(thx+4.45)/8.9;
     viewfidegree=360*(fix+4.45)/8.9;
@@ -4138,6 +4335,7 @@ if(htmlmode,
   )
 );
 viewscale=0.82;
+if(MobileLayout,viewscale=1.12);
 viewshift=[5.0,-0.35];
 
 Proj3(q):=viewshift+viewscale*[
@@ -5499,7 +5697,20 @@ element("BtnSample1").visible=SampleMenuOpen;
 element("BtnSample2").visible=SampleMenuOpen;
 element("BtnSample3").visible=SampleMenuOpen;
 element("BtnSample4").visible=SampleMenuOpen;
-if(SampleMenuOpen,
+if(MobileLayout,
+  forall([
+    "Text0","TextP2","TextP3","Text1","Text5",
+    "Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2086","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'",
+    "BtnP1Sel","BtnP2Sel","BtnP3Sel","BtnMulti","BtnSampleMenu","BtnSample1","BtnSample2","BtnSample3","BtnSample4",
+    "BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset",
+    "Text2","Text3","BtnInputHelp"
+  ],
+    element(#).visible=false
+  ),
+  forall(["Text0","Text1","Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'","BtnMulti","BtnSampleMenu","BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset","Text2","Text3","BtnInputHelp"],element(#).visible=true)
+);
+
+if(SampleMenuOpen & !MobileLayout,
   drawtext([-2.00,4.95],"学習用サンプル（選択で自動入力・計算）",size->14,color->[0.15,0.26,0.55])
 );
 
@@ -5513,8 +5724,16 @@ if(SampleActive>0,
 );
 if((SampleActive>0) & (!SampleMenuOpen),
   (
-    drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
-    drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
+    if(MobileLayout,
+      (
+        drawtext([5.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55],align->"center");
+        drawtext([5.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44],align->"center");
+      ),
+      (
+        drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
+        drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
+      )
+    );
   )
 );
 
@@ -5701,6 +5920,8 @@ if(Calcflg==1,
   )
 );
 
+if(!MobileLayout,
+  (
 if(showMulti,
   (
     drawtext([-10.55,5.10],"P1 =",size->18,color->[0.95,0.18,0.14]);
@@ -5728,6 +5949,9 @@ if(showMulti,
 
 if(InputErr!="",
   drawtext([-10.55,-3.10],InputErr,size->13,color->[1,0,0])
+);
+
+  )
 );
 
 if(HasResult,
@@ -5780,14 +6004,19 @@ if(HasResult,
           )
         );
 
-        TH.visible=true;
-        FI.visible=true;
-        TH.xy=[max(-4.45,min(4.45,TH.x)),-3.75];
-        FI.xy=[max(-4.45,min(4.45,FI.x)),-4.35];
-        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35,-3.52],"視点：上下",size->13);
-        drawtext([-4.35,-4.12],"視点：左右",size->13);
+        TH.visible=!MobileLayout;
+        FI.visible=!MobileLayout;
+        TH.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,TH.x)),-3.75];
+        FI.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,FI.x)),-4.35];
+        // The mobile HTML sliders still control TH/FI; hide only their canvas UI.
+        if(!MobileLayout,
+          (
+            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
+            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
+          )
+        );
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -6055,8 +6284,8 @@ if(HasResult,
         A.visible=false;
       ),
       (
-        TH.visible=true;
-        FI.visible=true;
+        TH.visible=!MobileLayout;
+        FI.visible=!MobileLayout;
         LB.visible=false;
         SW.visible=false;
         NE.visible=false;
@@ -6065,10 +6294,14 @@ if(HasResult,
         T.visible=false;
         A.visible=false;
 
-        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
-        drawtext([-4.35,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
+        if(!MobileLayout,
+          (
+            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
+            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
+            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
+            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
+          )
+        );
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -6134,6 +6367,8 @@ if(HasResult,
       ) // showMulti=FALSE：従来の1点表示ここまで
     );
 
+    if(!MobileLayout,
+      (
     if(InputHelpOpen,
       DrawInputHelp(),
       if(showMulti,
@@ -6272,11 +6507,12 @@ if(HasResult,
       )
       )
     );
+      )
+    );
   ),
   (
-    if(InputHelpOpen,
-      DrawInputHelp(),
-      drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17)
+    if(!MobileLayout,
+      if(InputHelpOpen,DrawInputHelp(),drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17))
     );
   )
 );
@@ -6298,10 +6534,10 @@ var cdy = CindyJS({
   angleUnit: "°",
   geometry: [
     {name: "LB", type: "Free", pos: [-3.6666666666666665, -4.0, 0.6666666666666666], color: [1.0, 0.0, 0.0], visible: false, size: 0.0, border: true },
-    {name: "Text0", type: "EditableText", pos: [4.0, -2.1164021164021167, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.686, 0.686], fillalpha: 0.6239316239316239, minwidth: 150, text: "[2,3,π]", textsize: 18.0},
-    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.488]", textsize: 18.0},
-    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,199]", textsize: 18.0},
-    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[sin(x*y),0,0]", textsize: 18.0},
+    {name: "Text0", type: "EditableText", pos: [4.0, -2.1164021164021167, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.686, 0.686], fillalpha: 0.6239316239316239, minwidth: 150, text: "[0,0,1]", textsize: 18.0},
+    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.4]", textsize: 18.0},
+    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,1]", textsize: 18.0},
+    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[-y*z,x*z,0]", textsize: 18.0},
     {name: "Text5", type: "EditableText", pos: [1.3716301577866423, -4.0, 0.3698133834802243], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 0.0, 0.0], fillalpha: 1.0, visible: false, minwidth: 300, text: "rot F (P)", textsize: 18.0},
     {name: "SW", type: "Free", pos: [4.0, 4.0, -0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
     {name: "NE", type: "Free", pos: [4.0, 4.0, 0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
@@ -6378,7 +6614,7 @@ var cdy = CindyJS({
     width: 1600,
     height: 663,
     id: "CSCanvas",
-    transform: [{visibleRect: [-12.183206920275836, 6.965883243012639, 18.062147730525307, -5.567035590413086]}],
+    transform: [{visibleRect: [-11.875688574005034, 7.092297359068847, 17.5605650563715, -5.10535023901843]}],
     background: "rgb(247,247,247)"
   }],
   csconsole: false,
@@ -6388,6 +6624,504 @@ var cdy = CindyJS({
     </script>
 </head>
 <body>
-    <div id="CSCanvas"></div>
+    <main class="page">
+  <header class="page-header">
+    <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
+    <p class="page-subtitle">ver.66｜パソコン・スマートフォン対応</p>
+  </header>
+
+  <section class="mobile-panel" aria-label="スマートフォン用入力テンキー">
+    <h2 class="panel-heading">入力テンキー</h2>
+    <p class="panel-caption">入力したい欄を選んでから、下のキーを押してください。</p>
+    <details class="input-help" id="mobileInputHelp">
+      <summary>入力方法 ⓘ</summary>
+      <div class="help-content">
+        <p><strong>① 入力先：</strong>P（3点モードではP1・P2・P3）またはFを選びます。</p>
+        <p><strong>② 入力形式：</strong>Pは [x,y,z]（例：[0,0,1]）、Fは [F1,F2,F3]（例：[-y*z,x*z,0]）。</p>
+        <p><strong>③ 関数・定数：</strong>sin(x)、cos(x)、exp(x)（指数関数）、√(x)（平方根）、π（円周率）、e（ネイピア数）。eは内部でexp(1)として扱います。sqrt(x)・piの直接入力も可能です。</p>
+        <p><strong>④ 演算：</strong>+ − * /、^（べき乗）。掛け算は * を使用してください。数字・英字・演算記号は半角で入力します。0除算や絶対値記号 | | は使用できません。</p>
+        <p>入力が終わったら「計算して反映」を押してください。</p>
+      </div>
+    </details>
+    <div class="mode-row">
+      <label><input type="checkbox" id="multiMode"> 3点モードにする</label>
+    </div>
+    <form id="mobileForm" autocomplete="off">
+      <div class="fields">
+        <div class="field"><label for="fieldP1" id="p1Label">P</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
+        <div class="field field-p3 field-disabled" id="p3Wrap"><label for="fieldP3">P3</label><input id="fieldP3" type="text" value="[2.4,0,1]" spellcheck="false" autocapitalize="off" disabled></div>
+        <div class="field field-p2 field-disabled" id="p2Wrap"><label for="fieldP2">P2</label><input id="fieldP2" type="text" value="[0,0,3.4]" spellcheck="false" autocapitalize="off" disabled></div>
+        <div class="field"><label for="fieldF">F(x,y,z)</label><input id="fieldF" type="text" value="[-y*z,x*z,0]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
+      </div>
+      <div class="keypad-targets" aria-label="入力先の選択">
+        <button class="keypad-target active" type="button" data-target="0">P</button>
+        <button class="keypad-target" type="button" data-target="1" disabled>P2</button>
+        <button class="keypad-target" type="button" data-target="2" disabled>P3</button>
+        <button class="keypad-target" type="button" data-target="3">F</button>
+      </div>
+      <div class="mobile-keypad" aria-label="入力キー">
+        <button class="utility" type="button" data-action="clear">AC</button>
+        <button class="utility" type="button" data-action="back">BS</button>
+        <button type="button" data-key="(">(</button>
+        <button type="button" data-key=")">)</button>
+        <button type="button" data-key=",">,</button>
+
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+        <button type="button" data-key="/">/</button>
+        <button type="button" data-key="^">^</button>
+
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+        <button type="button" data-key="*">*</button>
+        <button type="button" data-key="√(">√</button>
+
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+        <button type="button" data-key="+">+</button>
+        <button type="button" data-key="-">−</button>
+
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key=".">.</button>
+        <button type="button" data-key="exp(">exp</button>
+        <button type="button" data-key="sin(">sin</button>
+        <button type="button" data-key="cos(">cos</button>
+
+        <button type="button" data-key="x">x</button>
+        <button type="button" data-key="y">y</button>
+        <button type="button" data-key="z">z</button>
+        <button type="button" data-key="e">e</button>
+        <button type="button" data-key="π">π</button>
+      </div>
+      <div class="buttons">
+        <button type="submit" class="action-btn primary">計算して反映</button>
+        <button type="button" class="action-btn secondary" id="btnResetMobile">RESET</button>
+      </div>
+    </form>
+    <div class="status" id="mobileStatus" role="status" aria-live="polite">入力後、「計算して反映」を押してください。</div>
+  </section>
+
+  <section class="viewer-panel" aria-label="3D教材の表示">
+    <div class="mobile-display-row">
+      <div class="mobile-graph-panel">
+        <div class="display-label">3D表示</div>
+        <div class="graph-view-wrap">
+          <div class="graph-placeholder" id="graphPlaceholder">PとFを入力して「計算して反映」を押すと、3D表示されます。</div>
+          <div id="canvasViewport" class="canvas-viewport" tabindex="0" aria-label="3D教材表示">
+            <div id="canvasStage" class="canvas-stage">
+              <div id="CSCanvas"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="mobile-result-panel" aria-label="計算結果">
+        <h3>数値</h3>
+        <div class="result-grid" id="mobileResults">
+          <div><span>div F(P)</span><strong id="resultDiv">—</strong></div>
+          <div><span>rot F(P)</span><strong id="resultRot">—</strong></div>
+          <div><span>|rot F(P)|</span><strong id="resultMag">—</strong></div>
+          <div><span id="resultSpeedLabel">回転速度</span><strong id="resultSpeed">—</strong></div>
+        </div>
+        <section class="mobile-meter-panel hidden" id="mobileMeterPanel" aria-label="速度メーター">
+          <h4 class="mobile-meter-title">速度メーター（0〜5）</h4>
+          <div class="mobile-meter-row" id="meterRowP1">
+            <div class="mobile-meter-head"><span id="meterLabelP1">P</span><strong id="meterValueP1">—</strong></div>
+            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p1" id="meterFillP1"></div></div>
+          </div>
+          <div class="mobile-meter-row hidden" id="meterRowP2">
+            <div class="mobile-meter-head"><span>P2</span><strong id="meterValueP2">—</strong></div>
+            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p2" id="meterFillP2"></div></div>
+          </div>
+          <div class="mobile-meter-row hidden" id="meterRowP3">
+            <div class="mobile-meter-head"><span>P3</span><strong id="meterValueP3">—</strong></div>
+            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p3" id="meterFillP3"></div></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+    <section class="mobile-symbolic-panel hidden" id="mobileSymbolic" aria-label="発散・回転の厳密式">
+      <h3 class="section-title">発散・回転の厳密式</h3>
+      <p id="symbolicStatus" class="symbolic-caption">座標を代入する前の式</p>
+      <div class="symbolic-row"><span>div F(x,y,z)</span><strong id="symbolicDiv">—</strong></div>
+      <div class="symbolic-row"><span>rot F(x,y,z)</span><strong id="symbolicRot">—</strong></div>
+    </section>
+    <section class="mobile-view-controls" aria-label="スマホ用視点操作">
+      <h3 class="section-title">視点操作（スマホ用）</h3>
+      <div class="view-slider-grid">
+        <div class="view-slider-field">
+          <label for="mobileYaw">左右の向き</label>
+          <input id="mobileYaw" type="range" min="0" max="100" step="1" value="50">
+          <small>左に動かすと左回り、右に動かすと右回りに視点が変わります。</small>
+        </div>
+        <div class="view-slider-field">
+          <label for="mobilePitch">上下の向き</label>
+          <input id="mobilePitch" type="range" min="0" max="100" step="1" value="50">
+          <small>左に動かすと低い位置、右に動かすと高い位置から見た視点になります。</small>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="mobile-extra-panel" aria-label="その他の操作">
+    <h2 class="panel-heading">その他の操作</h2>
+    <h3 class="section-title">サンプル</h3>
+    <div class="buttons" aria-label="サンプルを選択">
+      <button type="button" class="action-btn" data-sample="1">基本回転</button>
+      <button type="button" class="action-btn" data-sample="2">回転の強さ</button>
+      <button type="button" class="action-btn" data-sample="3">回転軸の向き</button>
+      <button type="button" class="action-btn" data-sample="4">回転と発散</button>
+    </div>
+    <h3 class="section-title">風車のアニメーション</h3>
+    <div class="buttons">
+      <button type="button" class="action-btn" data-command="PlayWindmill();">▶ 再生</button>
+      <button type="button" class="action-btn" data-command="PauseWindmill();">Ⅱ 一時停止</button>
+      <button type="button" class="action-btn" data-command="StopWindmill();">■ 停止</button>
+    </div>
+    <h3 class="section-title">表示の切り替え</h3>
+    <div class="toggle-grid">
+      <label><input type="checkbox" data-flag="showWind" checked>風車</label>
+      <label><input type="checkbox" data-flag="showField" checked>ベクトル場</label>
+      <label><input type="checkbox" data-flag="showAxis" checked>rot軸</label>
+      <label><input type="checkbox" data-flag="showInfo" checked>数値</label>
+      <label><input type="checkbox" data-flag="showMeter" checked>速度メーター</label>
+    </div>
+  </section>
+</main>
+<script>
+(function () {
+  "use strict";
+  const BASE_W = 1600, BASE_H = 663;
+  const viewport = document.getElementById("canvasViewport");
+  const stage = document.getElementById("canvasStage");
+  const canvasRoot = document.getElementById("CSCanvas");
+  const multiMode = document.getElementById("multiMode");
+  const status = document.getElementById("mobileStatus");
+  const mobileYaw = document.getElementById("mobileYaw");
+  const mobilePitch = document.getElementById("mobilePitch");
+  let currentScale = 1;
+  let syncingViewSliders = false;
+
+  // Keep the CindyJS internal 1600x663 coordinate system intact.
+  // Scaling the entire scene container also scales its HTML text inputs.
+  function layout() {
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    if (mobileLayout) {
+      const graphWidth = Math.max(1, viewport.clientWidth);
+      currentScale = Math.min(.75, Math.max(.28, graphWidth / 640));
+      const graphCenterSourceX = 915;
+      stage.style.width = graphWidth + "px";
+      stage.style.height = (BASE_H * currentScale) + "px";
+      stage.style.overflow = "hidden";
+      canvasRoot.style.left = (graphWidth / 2 - graphCenterSourceX * currentScale) + "px";
+      canvasRoot.style.top = "0px";
+      canvasRoot.style.transform = "scale(" + currentScale + ")";
+      viewport.style.height = (BASE_H * currentScale) + "px";
+      viewport.style.overflow = "hidden";
+    } else {
+      const available = Math.max(1, viewport.clientWidth);
+      const fitted = Math.min(1, available / BASE_W);
+      currentScale = fitted;
+      stage.style.width = (BASE_W * currentScale) + "px";
+      stage.style.height = (BASE_H * currentScale) + "px";
+      stage.style.overflow = "visible";
+      canvasRoot.style.left = "0px";
+      canvasRoot.style.top = "0px";
+      canvasRoot.style.transform = "scale(" + currentScale + ")";
+      viewport.style.height = "auto";
+      viewport.style.overflowX = "auto";
+      viewport.style.overflowY = "hidden";
+    }
+  }
+  let appliedSceneMobileLayout = null;
+  function applyResponsiveScene() {
+    if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") return;
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    const delta = appliedSceneMobileLayout === null
+      ? (mobileLayout ? 5 : 0)
+      : (mobileLayout === appliedSceneMobileLayout ? 0 : (mobileLayout ? 5 : -5));
+    let script = "";
+    if (delta !== 0) {
+      script += "TH.xy=[TH.x+(" + delta + "),-3.75];FI.xy=[FI.x+(" + delta + "),-4.35];";
+    }
+    script += "MobileLayout=" + (mobileLayout ? "true" : "false") + ";";
+    if (issueCS(script)) appliedSceneMobileLayout = mobileLayout;
+  }
+  let lastMobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+  window.addEventListener("resize", () => {
+    const mobileLayoutNow = window.matchMedia("(max-width: 1100px)").matches;
+    layout();
+    applyResponsiveScene();
+    if (mobileLayoutNow !== lastMobileLayout) {
+      lastMobileLayout = mobileLayoutNow;
+      if (mobileLayoutNow) { syncFields(); updateResults(); }
+    }
+  }, {passive: true});
+  layout();
+
+  function issueCS(script) {
+    if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") {
+      showStatus("CindyJSが読み込まれていません。インターネット接続を確認してください。", true);
+      return false;
+    }
+    try { cdy.evokeCS(script); return true; }
+    catch (error) { showStatus("操作に失敗しました。ブラウザーのコンソールを確認してください。", true); console.error(error); return false; }
+  }
+  function readCS(source) {
+    if (typeof cdy === "undefined" || !cdy || typeof cdy.evalcs !== "function") return null;
+    try { return cdy.evalcs(source); } catch (error) { return null; }
+  }
+  function readValue(source) {
+    const result = readCS(source);
+    if (!result || result.ctype === "undefined") return null;
+    if (result.ctype === "number" && result.value && typeof result.value === "object") return result.value.real;
+    return result.value;
+  }
+  function readText(source) {
+    const value = readValue(source);
+    return typeof value === "string" ? value : "";
+  }
+  function showStatus(message, error) {
+    status.textContent = message;
+    status.classList.toggle("error", !!error);
+  }
+  function sliderValueToPointX(value, mobileLayout) {
+    const shift = mobileLayout ? 5 : 0;
+    return (-4.45 + shift) + (8.9 * (Number(value) / 100));
+  }
+  function pointXToSliderValue(x, mobileLayout) {
+    const shift = mobileLayout ? 5 : 0;
+    return Math.max(0, Math.min(100, ((Number(x) - (-4.45 + shift)) / 8.9) * 100));
+  }
+  function syncViewSliders() {
+    if (!mobileYaw || !mobilePitch) return;
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    if (!mobileLayout) return;
+    const thx = readValue("TH.x");
+    const fix = readValue("FI.x");
+    syncingViewSliders = true;
+    if (typeof fix === "number" && Number.isFinite(fix)) mobileYaw.value = String(Math.round(pointXToSliderValue(fix, mobileLayout)));
+    if (typeof thx === "number" && Number.isFinite(thx)) mobilePitch.value = String(Math.round(pointXToSliderValue(thx, mobileLayout)));
+    syncingViewSliders = false;
+  }
+  function applyViewSlider(which) {
+    if (syncingViewSliders) return;
+    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
+    const thx = sliderValueToPointX(mobilePitch.value, mobileLayout);
+    const fix = sliderValueToPointX(mobileYaw.value, mobileLayout);
+    if (which === "yaw") {
+      issueCS("FI.xy=[" + fix + ",-4.35];");
+    } else if (which === "pitch") {
+      issueCS("TH.xy=[" + thx + ",-3.75];");
+    } else {
+      issueCS("TH.xy=[" + thx + ",-3.75];FI.xy=[" + fix + ",-4.35];");
+    }
+  }
+  function setModeUI(isMulti) {
+    multiMode.checked = Boolean(isMulti);
+    document.getElementById("p2Wrap").classList.toggle("field-disabled", !isMulti);
+    document.getElementById("p3Wrap").classList.toggle("field-disabled", !isMulti);
+    document.getElementById("fieldP2").disabled = !isMulti;
+    document.getElementById("fieldP3").disabled = !isMulti;
+    document.getElementById("p1Label").textContent = isMulti ? "P1" : "P";
+    document.querySelector('[data-target="0"]').textContent = isMulti ? "P1" : "P";
+    document.querySelectorAll('[data-target="1"], [data-target="2"]').forEach(button => {
+      button.disabled = !isMulti;
+    });
+  }
+  let selectedTarget = 0;
+  function setSelectedTarget(target) {
+    selectedTarget = Number(target);
+    document.querySelectorAll("[data-target]").forEach(button => {
+      button.classList.toggle("active", Number(button.dataset.target) === selectedTarget);
+    });
+  }
+  function commitFieldsToCS() {
+    const values = {
+      Text0: document.getElementById("fieldP1").value,
+      TextP2: document.getElementById("fieldP2").value,
+      TextP3: document.getElementById("fieldP3").value,
+      Text1: document.getElementById("fieldF").value
+    };
+    if (Object.values(values).some(value => /["\\\x00-\x1f]/.test(value))) { showStatus("入力エラー：使用できない文字が含まれています", true); return false; }
+    const script = Object.entries(values).map(([name, value]) =>
+      'element("' + name + '").text=' + JSON.stringify(value) + ';'
+    ).join("");
+    return issueCS(script);
+  }
+  function syncFields() {
+    const names = {fieldP1:'Text0',fieldP2:'TextP2',fieldP3:'TextP3',fieldF:'Text1'};
+    for (const [id, name] of Object.entries(names)) {
+      const value = readText('element("' + name + '").text');
+      if (typeof readValue('element("' + name + '").text') === "string") document.getElementById(id).value = value;
+    }
+    const isMulti = readValue("showMulti");
+    if (typeof isMulti === "boolean") setModeUI(isMulti);
+    const inputNoText = readText("text(InputNo)");
+    const inputNo = Number(inputNoText);
+    if (inputNoText !== "" && Number.isInteger(inputNo) && inputNo >= 0 && inputNo <= 3) {
+      setSelectedTarget(inputNo);
+    }
+    for (const checkbox of document.querySelectorAll("[data-flag]")) {
+      const value = readValue(checkbox.dataset.flag);
+      if (typeof value === "boolean") checkbox.checked = value;
+    }
+    syncViewSliders();
+  }
+  // Call existing CindyScript input validation, then show its message readably.
+  function updateResults() {
+    const error = readText("InputErr");
+    if (error) { showStatus(error, true); }
+    else if (readValue("HasResult") === true) { showStatus("計算結果が反映されました。", false); }
+    const hasResult = readValue("HasResult") === true;
+    const symbolicReady = hasResult && readText("divResult") !== "" && readText("rotResult") !== "";
+    document.getElementById("symbolicDiv").textContent = symbolicReady ? readText("SymDisplayExpr(Sym64Reduce(divResult))") || "—" : "—";
+    document.getElementById("symbolicRot").textContent = symbolicReady ? readText("SymDisplayExpr(Sym64Reduce(rotResult))") || "—" : "—";
+    document.getElementById("symbolicStatus").textContent = hasResult && !symbolicReady ? "厳密式：この入力形式には未対応" : "座標を代入する前の式";
+    document.getElementById("mobileSymbolic").classList.toggle("hidden", !hasResult);
+    const showMobilePrompt = !hasResult && window.matchMedia("(max-width: 1100px)").matches;
+    document.getElementById("graphPlaceholder").style.display = showMobilePrompt ? "flex" : "none";
+    const readResult = expression => hasResult ? readText("text(" + expression + ")") || "—" : "—";
+    document.getElementById("resultDiv").textContent = readResult("divPResult");
+    document.getElementById("resultRot").textContent = readResult("rotPResult");
+    document.getElementById("resultMag").textContent = readResult("rotmag");
+    document.getElementById("resultSpeed").textContent = readResult("rotspeed");
+
+    const isMulti = readValue("showMulti") === true;
+    document.getElementById("resultSpeedLabel").textContent = isMulti ? "回転速度(P1)" : "回転速度";
+    document.getElementById("mobileResults").classList.toggle("hidden", readValue("showInfo") === false);
+    const meterEnabled = readValue("showMeter") !== false;
+    const meterPanel = document.getElementById("mobileMeterPanel");
+    meterPanel.classList.toggle("hidden", !hasResult || !meterEnabled);
+    const meterSpecs = [
+      { key: "P1", source: isMulti ? "mspeeds_1" : "rotspeed", row: "meterRowP1", value: "meterValueP1", fill: "meterFillP1" },
+      { key: "P2", source: "mspeeds_2", row: "meterRowP2", value: "meterValueP2", fill: "meterFillP2" },
+      { key: "P3", source: "mspeeds_3", row: "meterRowP3", value: "meterValueP3", fill: "meterFillP3" }
+    ];
+    document.getElementById("meterLabelP1").textContent = isMulti ? "P1" : "P";
+    meterSpecs.forEach((meter, index) => {
+      const row = document.getElementById(meter.row);
+      row.classList.toggle("hidden", !isMulti && index > 0);
+      const raw = hasResult ? readText("text(" + meter.source + ")") : "";
+      const speed = Number(raw);
+      const safeSpeed = Number.isFinite(speed) ? Math.max(0, speed) : 0;
+      document.getElementById(meter.value).textContent = hasResult && raw !== ""
+        ? String(Math.round(safeSpeed * 100) / 100) : "—";
+      document.getElementById(meter.fill).style.width = hasResult && raw !== ""
+        ? (Math.max(0, Math.min(100, safeSpeed / 5 * 100)) + "%") : "0%";
+    });
+  }
+  // Exclude characters that could break CindyScript string literals.
+  // Non-ASCII input is reported here with the same user-facing intent as ver.49.
+  const allowed = /^[A-Za-z0-9_+*\/^().,\[\]\- π√]+$/;
+  document.getElementById("mobileForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const values = [
+      ["P", "fieldP1", "Text0"],
+      ["F", "fieldF", "Text1"],
+      ...(multiMode.checked ? [["P2", "fieldP2", "TextP2"], ["P3", "fieldP3", "TextP3"]] : [])
+    ];
+    for (const [label, id] of values) {
+      const value = document.getElementById(id).value.trim();
+      if (!value || !allowed.test(value)) {
+        showStatus("入力エラー（" + label + "）：使用できない文字が含まれています", true);
+        return;
+      }
+    }
+    let script = "showMulti=" + (multiMode.checked ? "true" : "false") + ";";
+    if (!multiMode.checked) script += "if(InputNo==1 % InputNo==2,InputNo=0);";
+    for (const [, id, name] of values) {
+      const value = document.getElementById(id).value.trim();
+      script += 'element("' + name + '").text=' + JSON.stringify(value) + ';';
+    }
+    script += 'InputErr="";Calcflg=1;';
+    if (issueCS(script)) {
+      showStatus("計算を実行しています…", false);
+      setTimeout(() => { syncFields(); updateResults(); }, 250);
+    }
+  });
+  multiMode.addEventListener("change", () => {
+    const value = multiMode.checked;
+    setModeUI(value);
+    issueCS("showMulti=" + (value ? "true" : "false") + ";if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;");
+    setTimeout(() => { syncFields(); updateResults(); }, 250);
+  });
+  document.getElementById("btnResetMobile").addEventListener("click", () => {
+    if (issueCS("ResetAll();")) {
+      document.getElementById("mobileInputHelp").open = false;
+      setTimeout(() => { syncFields(); updateResults(); showStatus("初期状態に戻しました。", false); }, 160);
+    }
+  });
+  document.querySelectorAll("[data-target]").forEach(button => {
+    button.addEventListener("click", () => {
+      const target = Number(button.dataset.target);
+      if ((target === 1 || target === 2) && !multiMode.checked) return;
+      if (!commitFieldsToCS()) return;
+      if (issueCS("InputNo=" + target + ";")) setSelectedTarget(target);
+    });
+  });
+  document.querySelectorAll("[data-key]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (!commitFieldsToCS()) return;
+      const key = button.dataset.key;
+      if (issueCS("PutKey(" + JSON.stringify(key) + ");")) {
+        setTimeout(syncFields, 40);
+      }
+    });
+  });
+  document.querySelectorAll("[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (!commitFieldsToCS()) return;
+      const action = button.dataset.action;
+      const script = action === "clear" ? "ClearCurrent();" : action === "back" ? "BackCurrent();" : "";
+      if (script && issueCS(script)) setTimeout(syncFields, 40);
+    });
+  });
+  document.querySelectorAll("[data-sample]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (issueCS("ApplySample(" + Number(button.dataset.sample) + ");")) {
+        setTimeout(() => { syncFields(); updateResults(); }, 200);
+      }
+    });
+  });
+  document.querySelectorAll("[data-command]").forEach(button => {
+    button.addEventListener("click", () => issueCS(button.dataset.command));
+  });
+  document.querySelectorAll("[data-flag]").forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+      const name = checkbox.dataset.flag;
+      if (!["showWind","showField","showAxis","showInfo","showMeter"].includes(name)) return;
+      issueCS(name + "=" + (checkbox.checked ? "true" : "false") + ";");
+      setTimeout(updateResults, 80);
+    });
+  });
+  if (mobileYaw) {
+    mobileYaw.addEventListener("input", () => applyViewSlider("yaw"));
+    mobileYaw.addEventListener("change", () => applyViewSlider("yaw"));
+  }
+  if (mobilePitch) {
+    mobilePitch.addEventListener("input", () => applyViewSlider("pitch"));
+    mobilePitch.addEventListener("change", () => applyViewSlider("pitch"));
+  }
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      applyResponsiveScene();
+      syncFields();
+      updateResults();
+      layout();
+      syncViewSliders();
+    }, 500);
+  });
+  // Show calculation errors and results after CindyJS has advanced its draw loop.
+  setInterval(() => {
+    if (window.innerWidth <= 1100 && document.visibilityState === "visible") {
+      updateResults();
+      syncViewSliders();
+    }
+  }, 800);
+})();
+</script>
 </body>
 </html>
