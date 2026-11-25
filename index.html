@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>ベクトル場の回転 可視化教材｜スマホ用テンキー対応版</title>
+    <title>ver65_1125.cdy</title>
     <style type="text/css">
         * {
             margin: 0px;
@@ -20,187 +19,6 @@
             position: fixed;
             width: 100%;
         }
-
-/* ===== Responsive shell; original CindyScript remains unchanged. ===== */
-:root { color-scheme: light; }
-*, *::before, *::after { box-sizing: border-box; }
-body { min-width: 280px; margin: 0; background: #f1f5f9; color: #14263e;
-       font-family: "Noto Sans JP", "Yu Gothic", Meiryo, system-ui, sans-serif; }
-button, input { font: inherit; }
-button { cursor: pointer; }
-button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
-.page { max-width: 1690px; margin: auto; padding: 16px clamp(8px, 2vw, 24px) 32px; }
-.page-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-               margin-bottom: 12px; flex-wrap: wrap; }
-.page-title { font-size: clamp(17px, 2vw, 24px); font-weight: 750; line-height: 1.4; }
-.page-subtitle { color: #526177; font-size: 13px; }
-.viewer-panel, .mobile-panel { background: white; border: 1px solid #ccd7e5;
-                                border-radius: 13px; overflow: hidden; box-shadow: 0 2px 12px #22334812; }
-.canvas-viewport { overflow-x: auto; overflow-y: hidden; width: 100%; -webkit-overflow-scrolling: touch;
-                  overscroll-behavior-x: contain; background: rgb(247,247,247); }
-.canvas-stage { position: relative; width: 1600px; height: 663px; }
-#CSCanvas { width: 1600px; height: 663px; position: relative; transform-origin: top left; }
-.mobile-panel { display: none; margin-top: 14px; padding: clamp(12px, 2vw, 22px); }
-.panel-heading { font-weight: 750; font-size: 18px; margin: 0 0 4px; }
-.panel-caption { font-size: 13px; color: #52657b; margin-bottom: 16px; }
-.mode-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
-.mode-row label { display: flex; gap: 7px; align-items: center; font-weight: 650; cursor: pointer; }
-.mode-row input[type="checkbox"], .toggle-grid input[type="checkbox"] { width: 20px; height: 20px; accent-color: #1354a1; }
-.fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.field label { font-weight: 700; font-size: 14px; }
-.field input { width: 100%; min-width: 0; background: white; border: 1px solid #9daec3;
-               border-radius: 8px; padding: 10px 12px; min-height: 45px; font-size: 16px; }
-.field-p2 label { color: #7039ab; } .field-p3 label { color: #b06505; }
-.hidden { display: none !important; }
-.buttons { display: flex; flex-wrap: wrap; gap: 9px; margin: 13px 0 0; }
-.action-btn { min-height: 44px; border-radius: 9px; border: 1px solid #9baec6;
-              padding: 9px 15px; background: white; color: #15345c; font-weight: 700; }
-.action-btn.primary { background: #1553a3; color: white; border-color: #1553a3; }
-.action-btn.secondary { background: #ebf5ff; border-color: #9cc1ea; }
-.action-btn:active { filter: brightness(.94); }
-.section-title { margin: 19px 0 8px; font-size: 14px; font-weight: 750; }
-.toggle-grid { display: flex; flex-wrap: wrap; gap: 10px 18px; }
-.toggle-grid label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
-.status { white-space: pre-wrap; line-height: 1.5; font-size: 14px; padding: 9px 12px;
-          margin-top: 15px; min-height: 40px; border: 1px solid #b8c8dc; background: #f6f9fd;
-          color: #263950; border-radius: 8px; }
-.status.error { color: #9c2020; border-color: #f0b3b3; background: #fff4f4; font-weight: 650; }
-.result-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
-.result-grid > div { min-width:0; padding: 10px; border: 1px solid #dae3ed; border-radius: 8px; background: #fbfdff; }
-.result-grid span { display: block; font-size: 12px; color: #506780; }
-.result-grid strong { display: block; font-size: 14px; font-weight: 650; overflow-wrap: anywhere; padding-top: 4px; }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-           overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-@media (max-width: 1100px) { .mobile-panel { display: block; } }
-@media (max-width: 620px) {
-  .page { padding: 10px 6px 24px; }
-  .page-subtitle { width: 100%; }
-  .fields, .result-grid { grid-template-columns: minmax(0,1fr); }
-  .action-btn { flex: 1 0 auto; }
-}
-
-
-/* ===== Smartphone layout: HTML keypad above a cropped 3D view ===== */
-.mobile-panel, .mobile-extra-panel { display: none; }
-.mobile-display-row { display: block; }
-.mobile-graph-panel { width: 100%; min-width: 0; }
-.mobile-result-panel, .display-label { display: none; }
-.graph-view-wrap { position: relative; min-width: 0; }
-.graph-placeholder {
-  position: absolute; z-index: 2; inset: 0; display: none; align-items: center; justify-content: center;
-  padding: 12px; text-align: center; color: #52657b; font-size: 13px; pointer-events: none;
-}
-.keypad-targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin: 10px 0 8px; }
-.keypad-target {
-  min-height: 38px; border: 1px solid #9aadc4; border-radius: 8px; background: #f8fbff;
-  color: #17385f; font-weight: 750;
-}
-.keypad-target.active { background: #164b90; border-color: #164b90; color: #fff; }
-.keypad-target:disabled { opacity: .35; cursor: not-allowed; }
-.mobile-keypad { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
-.mobile-keypad button {
-  min-width: 0; min-height: 39px; padding: 5px 2px; border: 1px solid #b5c3d3; border-radius: 8px;
-  background: #fff; color: #17385f; font-size: 14px; font-weight: 700;
-}
-.mobile-keypad button.utility { background: #edf4fc; }
-.mobile-keypad button:active, .keypad-target:active { background: #dbeafe; }
-.mobile-keypad .spacer { visibility: hidden; pointer-events: none; border: none; background: transparent; }
-.field.field-disabled { opacity: .52; }
-.field input:disabled { background: #f0f3f7; color: #5c6877; }
-.mobile-extra-panel { margin-top: 12px; padding: clamp(12px, 2vw, 22px); background: #fff; border: 1px solid #ccd7e5;
-                       border-radius: 13px; box-shadow: 0 2px 12px #22334812; }
-.display-label { font-size: 13px; font-weight: 750; color: #52657b; padding: 8px 10px 4px; }
-.mobile-view-controls {
-  display: none;
-  margin-top: 10px;
-  padding: 12px;
-  border-top: 1px solid #dfe7f0;
-  background: #fbfdff;
-}
-.view-slider-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.view-slider-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-.view-slider-field label {
-  font-size: 13px;
-  font-weight: 750;
-  color: #42566f;
-}
-.view-slider-field input[type="range"] {
-  width: 100%;
-  min-width: 0;
-  accent-color: #164b90;
-}
-.view-slider-field small {
-  font-size: 12px;
-  color: #61748a;
-}
-@media (max-width: 1100px) {
-  .mobile-panel { display: block; margin-top: 0; margin-bottom: 12px; }
-  .mobile-extra-panel { display: block; }
-  .mobile-view-controls { display: block; }
-  .mobile-display-row { display: flex; align-items: stretch; gap: 8px; }
-  .mobile-graph-panel { width: 69%; }
-  .mobile-result-panel { display: block; width: 31%; min-width: 0; padding: 8px 6px; background: #f8fbff;
-                         border: 1px solid #d5e0ec; border-radius: 9px; }
-  .mobile-result-panel h3 { font-size: 13px; margin: 0 0 7px; }
-  .display-label { display: block; }
-  .canvas-viewport { width: 100%; overflow: hidden; }
-  .canvas-stage { overflow: hidden; }
-  .viewer-panel { overflow: hidden; }
-  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .result-grid { grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 0; }
-  .result-grid > div { padding: 7px 6px; }
-  .result-grid span { font-size: 10px; line-height: 1.25; }
-  .result-grid strong { font-size: 12px; padding-top: 3px; }
-  .mobile-panel .panel-caption { margin-bottom: 10px; }
-  .mobile-panel .mode-row { margin-bottom: 10px; }
-  .mobile-panel .field label { font-size: 13px; }
-  .mobile-panel .field input { min-height: 40px; padding: 8px; font-size: 14px; }
-  .mobile-panel .buttons { margin-top: 10px; }
-  .mobile-panel .status { margin-top: 10px; }
-}
-@media (max-width: 620px) {
-  .mobile-display-row { gap: 6px; }
-  .mobile-graph-panel { width: 68%; }
-  .mobile-result-panel { width: 32%; padding: 7px 5px; }
-  .view-slider-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .mobile-keypad { gap: 5px; }
-  .mobile-keypad button { min-height: 37px; font-size: 13px; }
-  .keypad-targets { gap: 5px; }
-  .keypad-target { min-height: 36px; font-size: 13px; }
-}
-
-
-/* Mobile speed meters: shown below the numerical results without resizing the 3D viewport. */
-@media (max-width: 1100px) {
-  .mobile-result-panel { display: flex; flex-direction: column; }
-  .mobile-meter-panel { margin-top: 12px; padding-top: 10px; border-top: 1px solid #dfe7f0; }
-  .mobile-meter-title { margin: 0 0 7px; font-size: 11px; font-weight: 750; color: #52657b; }
-  .mobile-meter-row { margin-top: 7px; }
-  .mobile-meter-head { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-  .mobile-meter-head span { font-size: 10px; font-weight: 750; color: #33465e; }
-  .mobile-meter-head strong { font-size: 10px; font-weight: 700; color: #14263e; }
-  .mobile-meter-track { width: 100%; height: 7px; margin-top: 4px; overflow: hidden; border-radius: 99px; background: #e7edf5; }
-  .mobile-meter-fill { width: 0%; height: 100%; border-radius: inherit; transition: width .18s ease; }
-  .meter-p1 { background: #ed3933; }
-  .meter-p2 { background: #9633cc; }
-  .meter-p3 { background: #ed8a16; }
-}
-    .input-help { margin: 0 0 12px; border: 1px solid #a8bdd5; border-radius: 9px; background: #f8fbff; }
-    .input-help summary { cursor: pointer; padding: 10px 12px; font-weight: 700; color: #164b90; font-size: 14px; }
-    .help-content { padding: 0 12px 12px; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
-    .help-content p + p { margin-top: 7px; }
-    @media (max-width: 1100px) { .mobile-graph-panel { flex: 69 1 0; width: auto; } .mobile-result-panel { flex: 31 1 0; width: auto; } }
     </style>
     <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8.8/CindyJS.css">
     <script type="text/javascript" src="https://cindyjs.org/dist/v0.8.8/Cindy.js"></script>
@@ -4040,10 +3858,6 @@ Drwxy():=(
 );
 Ketcindyjsfigure=0;
 Ketcindyjsscale=1;
-MobileLayout=false;
-Calcflg=0;
-InputErr="";
-divResult="";
 rotResult="";
 divPResult="";
 rotPResult="";
@@ -4057,12 +3871,9 @@ htmlphase=0;
 htmlprevtime=0;
 htmlprevspeed=0;
 
-// ===== 風車の再生/一時停止/停止: CinderellaとHTMLで共通 =====
-// MotionState: 1=再生中, 2=一時停止中, 0=停止(初期角度)
 MotionState=1;
 
 PlayWindmill():=(
-  // 停止中に経過した秒数を、再開直後の回転角度に加算しない。
   MotionState=1;
   htmlprevtime=seconds();
   mlasttime=seconds();
@@ -4088,8 +3899,6 @@ StopWindmill():=(
   htmlprevtime=seconds();
   mlasttime=seconds();
   htmlprevspeed=0;
-  // stopanimation()は図形を巻き戻すため、実行を一時停止して位相を明示的に0へ戻す。
-  // 初期化スクリプトが呼び直されることによる表示崩れも防ぐ。
   if(htmlmode,
     pauseanimation(),
     Anim1.run=false
@@ -4097,10 +3906,8 @@ StopWindmill():=(
   T.xy=N.xy;
 );
 
-// HTML公開時の初期視点は従来の固定値：上下55°、左右45°。
-// HTMLでのみ有効化されるので、Cinderellaのスライダー初期状態は変更しない。
-//TH.xy=[-1.946875,-3.75]; only ketjs
-//FI.xy=[-3.3375,-4.35]; only ketjs
+TH.xy=[-1.946875,-3.75]; 
+FI.xy=[-3.3375,-4.35]; 
 
 showWind=true;
 showField=true;
@@ -4109,7 +3916,6 @@ showInfo=true;
 showMeter=true;
 InputHelpOpen=false;
 
-// 1点／3点を切り替える。P2・P3は自由入力できる。
 showMulti=false;
 mpcalc=[[0,0,1],[0,0,3.4],[2.4,0,1]];
 multistarted=false;
@@ -4194,9 +4000,8 @@ ResetAll():=(
 
   MotionState=1; // RESET後の再計算は従来どおり自動再生
 
-  // RESET時はHTMLの視点も初期角度に戻す。
-  TH.xy=[-1.946875+if(MobileLayout,5,0),-3.75];
-  FI.xy=[-3.3375+if(MobileLayout,5,0),-4.35];
+//TH.xy=[-1.946875,-3.75]
+//FI.xy=[-3.3375,-4.35]
 
   Anim1.run=false;
   T.xy=N.xy;
@@ -4210,8 +4015,6 @@ ResetAll():=(
   Calcflg=1;
 );
 
-// ===== 学習用サンプル（4種類） =====
-// どのボタンも入力欄へのセット・モード切替・計算まで一括実行。
 SampleMenuOpen=false;
 SampleActive=0;
 SampleTitle="";
@@ -4223,7 +4026,6 @@ SampleP2="";
 SampleP3="";
 
 ApplySample(n):=(
-  // サンプル設定に合わせて表示モード・各入力欄を更新
   if(n==1,
     (
       showMulti=false;
@@ -4283,7 +4085,6 @@ ApplySample(n):=(
 
   MotionState=1; // サンプル選択時は最初から自動再生
 
-  // 切替前のアニメーションをリセットして再計算する
   Anim1.run=false;
   htmlstarted=false;
   htmlphase=0;
@@ -4294,7 +4095,6 @@ ApplySample(n):=(
   mlasttime=0;
   T.xy=N.xy;
 
-  // サンプルの特徴が常に見えるように表示を有効にする
   showWind=true;
   showField=true;
   showAxis=true;
@@ -4304,6 +4104,9 @@ ApplySample(n):=(
   Calcflg=1;
 );
 
+
+
+;
 
 </script>
 <script id="csdraw" type="text/x-cindyscript">
@@ -4319,16 +4122,14 @@ Cross3(a,b):=[
   a_1*b_2-a_2*b_1
 ];
 
-viewSliderShift=0;
-if(MobileLayout,viewSliderShift=5);
 viewtheta=55*pi/180;
 viewphi=45*pi/180;
 if(htmlmode,
   (
-    thx=max(-4.45,min(4.45,TH.x-viewSliderShift));
-    fix=max(-4.45,min(4.45,FI.x-viewSliderShift));
-    TH.xy=[thx+viewSliderShift,-3.75];
-    FI.xy=[fix+viewSliderShift,-4.35];
+    thx=max(-4.45,min(4.45,TH.x));
+    fix=max(-4.45,min(4.45,FI.x));
+    TH.xy=[thx,-3.75];
+    FI.xy=[fix,-4.35];
 
     viewthdegree=10+160*(thx+4.45)/8.9;
     viewfidegree=360*(fix+4.45)/8.9;
@@ -4337,7 +4138,6 @@ if(htmlmode,
   )
 );
 viewscale=0.82;
-if(MobileLayout,viewscale=1.12);
 viewshift=[5.0,-0.35];
 
 Proj3(q):=viewshift+viewscale*[
@@ -4368,8 +4168,6 @@ EvalF(q):=(
 
 InputF(q):=EvalF(q);
 
-// ===== 入力方法ガイド =====
-// 「入力方法」ボタンを押すと、計算結果欄に入力ルールを表示する。
 DrawInputHelp():=(
   drawtext([8.25,4.35],"入力方法・入力ルール",size->18,color->[0.15,0.26,0.55]);
 
@@ -4384,9 +4182,9 @@ DrawInputHelp():=(
 
   drawtext([8.25,0.52],"③ 関数・演算子・数学定数",size->14,color->[0.15,0.26,0.55]);
   drawtext([8.25,0.12],"sin, cos：三角関数（例：sin(x)）",size->12);
-  drawtext([8.25,-0.28],"exp(x)：指数関数（例：exp(x)）　√：平方根",size->12);
+  drawtext([8.25,-0.28],"exp：指数関数（exp(x)など） 　　√：平方根",size->12);
   drawtext([8.25,-0.68],"+ - * /：四則演算（掛け算は * を使用）",size->12);
-  drawtext([8.25,-1.08],"^：べき乗　π：円周率　e：ネイピア数",size->12);
+  drawtext([8.25,-1.08],"^：べき乗（例：x^2）　π：円周率　e：exp(1)(ネイピア数e)",size->12);
 
   drawtext([8.25,-1.68],"④ 入力時の注意",size->14,color->[0.15,0.26,0.55]);
   drawtext([8.25,-2.08],"数字・英字・記号は半角で入力してください。",size->12);
@@ -4395,9 +4193,6 @@ DrawInputHelp():=(
   drawtext([8.25,-3.38],"※ 絶対値記号 | | など、一部未対応の記号は使用できません。",size->11,color->[0.35,0.35,0.35]);
 );
 
-// ---- Fの数式入力補正：sin(2x) 等の省略乗算を 2*x に補う ----
-// CindyScript では * が乗算、^ が累乗。2**x への置換はしない。
-// すでに sin(2*x) と入力された場合はそのまま保持する。
 NormalizeF(s):=(
   regional(out,ch,prevch);
   out="";
@@ -4419,8 +4214,6 @@ NormalizeF(s):=(
   out
 );
 
-// ---- 円周率：画面表示は「π」のまま、計算用文字列では "pi" に変換 ----
-// 入力欄そのものは変更せず、計算処理に渡す文字列だけを置き換える。
 NormalizePi(s):=(
   regional(out,ch);
   out="";
@@ -4436,7 +4229,6 @@ NormalizePi(s):=(
   out
 );
 
-// ---- 平方根：画面表示は「√」、計算用文字列では "sqrt" に変換 ----
 NormalizeSqrt(s):=(
   regional(out,ch);
   out="";
@@ -4452,8 +4244,6 @@ NormalizeSqrt(s):=(
   out
 );
 
-// exp(...) is a function; e is Euler's constant. Keep the visible input unchanged.
-// Match ver54_1112_exp_fixed.cdy: convert e to exp(1), without altering exp(...).
 NormalizeE(s):=(
   regional(out,ch);
   out="";
@@ -4468,7 +4258,6 @@ NormalizeE(s):=(
   );
   out
 );
-NormalizeInput(s):=NormalizeE(NormalizeSqrt(NormalizePi(s)));
 
 FullwidthChars="　！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝～、。・「」『』【】〜ー−×÷￥";
 HasFullwidth(s):=(
@@ -4481,6 +4270,956 @@ HasFullwidth(s):=(
     )
   );
   found
+);
+
+
+SymCompact(s):=(
+  regional(out,i,ch);
+  out="";
+  forall(1..length(s),i,
+    (
+      ch=substring(s,i-1,i);
+      if(ch!=" ",out=out+ch);
+    )
+  );
+  out
+);
+
+SymOuter(s):=(
+  regional(dep,ok,i,ch);
+  dep=0;
+  ok=(length(s)>=2);
+  if(ok,
+    (
+      ok=(substring(s,0,1)=="(") &
+         (substring(s,length(s)-1,length(s))==")");
+      if(ok,
+        forall(1..length(s),i,
+          (
+            ch=substring(s,i-1,i);
+            if(ch=="(",dep=dep+1);
+            if(ch==")",dep=dep-1);
+            if(dep==0 & i<length(s),ok=false);
+          )
+        )
+      );
+    )
+  );
+  ok
+);
+
+SymUnwrap(s):=(
+  regional(t);
+  t=SymCompact(s);
+  while(SymOuter(t),
+    t=substring(t,1,length(t)-1)
+  );
+  t
+);
+
+SymOperator(s,ops,first):=(
+  regional(dep,pos,ch,pr,i,valid);
+  dep=0;
+  pos=0;
+  forall(1..length(s),i,
+    (
+      ch=substring(s,i-1,i);
+      if(ch=="(",dep=dep+1);
+      if(ch==")",dep=dep-1);
+      if((dep==0) & (indexof(ops,ch)>0),
+        (
+          valid=true;
+          if(indexof("+-",ch)>0,
+            (
+              if(i==1,
+                valid=false,
+                (
+                  pr=substring(s,i-2,i-1);
+                  if(indexof("+-*/^(",pr)>0,valid=false);
+                )
+              );
+            )
+          );
+          if(valid,
+            if(first,
+              if(pos==0,pos=i),
+              pos=i
+            )
+          );
+        )
+      );
+    )
+  );
+  pos
+);
+
+SymNumber(s):=(
+  regional(ok,digit,ch,i);
+  ok=(length(s)>0);
+  digit=false;
+  forall(1..length(s),i,
+    (
+      ch=substring(s,i-1,i);
+      if(indexof("0123456789",ch)>0,digit=true);
+      if(indexof("0123456789.-",ch)==0,ok=false);
+      if(ch=="-" & i!=1,ok=false);
+    )
+  );
+  ok & digit
+);
+
+SymGroupSum(a):=(
+  regional(t);
+  t=a;
+  if(SymOperator(a,"+-",false)>0,t="("+a+")");
+  t
+);
+SymGroupFactor(a):=(
+  regional(t);
+  t=SymGroupSum(a);
+  if((length(a)>0) & (substring(a,0,1)=="-"),t="("+a+")");
+  t
+);
+SymGroupDenom(a):=(
+  regional(t);
+  t=a;
+  if(SymOperator(a,"+-*/",false)>0,t="("+a+")");
+  if((length(a)>0) & (substring(a,0,1)=="-"),t="("+a+")");
+  t
+);
+SymGroupPower(a):=(
+  regional(t);
+  t=a;
+  if(SymOperator(a,"+-*/^",false)>0,t="("+a+")");
+  if((length(a)>0) & (substring(a,0,1)=="-"),t="("+a+")");
+  t
+);
+SymNeg(a):=(
+  regional(t,tail);
+  t="-("+a+")";
+  if(a=="0",t="0");
+  if(SymNumber(a),t=text(-parse(a)));
+  if((length(a)>1) & (substring(a,0,1)=="-") &
+    (SymOperator(a,"+-",false)==0),
+    (
+      tail=substring(a,1,length(a));
+      t=SymUnwrap(tail);
+    ),
+    (
+      if(SymOperator(a,"+-",false)==0,t="-"+a);
+    )
+  );
+  if(indexof(a,"?")>0,t="?");
+  t
+);
+SymAdd(a,b):=(
+  regional(t);
+  t=a+"+"+b;
+  if((length(b)>0) & (substring(b,0,1)=="-"),t=a+b);
+  if(a=="0",t=b);
+  if(b=="0",t=a);
+  if(SymNumber(a) & SymNumber(b),t=text(parse(a)+parse(b)));
+  if(indexof(a+b,"?")>0,t="?");
+  t
+);
+SymSub(a,b):=(
+  regional(t);
+  t=a+"-"+SymGroupSum(b);
+  if(b=="0",t=a);
+  if(a=="0",t=SymNeg(b));
+  if(a==b,t="0");
+  if((length(b)>1) & (substring(b,0,1)=="-") &
+     (SymOperator(b,"+-",false)==0),
+    t=SymAdd(a,SymNeg(b))
+  );
+  if(SymNumber(a) & SymNumber(b),t=text(parse(a)-parse(b)));
+  if(indexof(a+b,"?")>0,t="?");
+  t
+);
+SymMul(a,b):=(
+  regional(t);
+  t=SymGroupFactor(a)+"*"+SymGroupFactor(b);
+  if(a=="1",t=b);
+  if(b=="1",t=a);
+  if(a=="-1",t=SymNeg(b));
+  if(b=="-1",t=SymNeg(a));
+  if((a=="0") % (b=="0"),t="0");
+  if(SymNumber(a) & SymNumber(b),t=text(parse(a)*parse(b)));
+  if(indexof(a+b,"?")>0,t="?");
+  t
+);
+SymDiv(a,b):=(
+  regional(t);
+  t=SymGroupSum(a)+"/"+SymGroupDenom(b);
+  if(b=="1",t=a);
+  if(a=="0",t="0");
+  if(a==b,t="1");
+  if(indexof(a+b,"?")>0,t="?");
+  t
+);
+SymPow(a,b):=(
+  regional(t);
+  t=SymGroupPower(a)+"^"+SymGroupPower(b);
+  if(b=="0",t="1");
+  if(b=="1",t=a);
+  if(a=="1",t="1");
+  if(indexof(a+b,"?")>0,t="?");
+  t
+);
+
+SymDiffAtom(s,v):=(
+  regional(t,r);
+  t=SymUnwrap(text(s));
+  r="?";
+  if(t=="x",if(v=="x",r="1",r="0"));
+  if(t=="y",if(v=="y",r="1",r="0"));
+  if(t=="z",if(v=="z",r="1",r="0"));
+  if(t=="pi",r="0");
+  if(t=="0",r="0");
+  if(SymNumber(t),r="0");
+  r
+);
+SymTopMul(s):=(
+  regional(i,dep,k,ch);
+  k=0;
+  dep=0;
+  forall(1..length(s),i,
+    (
+      ch=substring(s,i-1,i);
+      if(ch=="(",dep=dep+1);
+      if(ch==")",dep=dep-1);
+      if((ch=="*") & (dep==0),k=i);
+    )
+  );
+  k
+);
+
+SymDiffProductAtoms(s,v):=(
+  regional(t,k,left,right,dleft,dright,r);
+  t=SymUnwrap(text(s));
+  r="?";
+  k=SymTopMul(t);
+  if(k>0,
+    (
+      left=SymUnwrap(substring(t,0,k-1));
+      right=SymUnwrap(substring(t,k,length(t)));
+      dleft=SymDiffAtom(left,v);
+      dright=SymDiffAtom(right,v);
+      if((dleft!="?") & (dright!="?"),
+        (
+          r="0";
+          if(dleft=="1",r=right);
+          if((dleft!="0") & (dleft!="1"),r=SymMul(dleft,right));
+          if(dright=="1",
+            if(r=="0",r=left,r=SymAdd(r,left))
+          );
+          if((dright!="0") & (dright!="1"),
+            if(r=="0",r=SymMul(left,dright),r=SymAdd(r,SymMul(left,dright)))
+          );
+        )
+      );
+    )
+  );
+  r
+);
+SymDiffChainFallback(s,v):=(
+  regional(t,k,f,inner,di,r);
+  r="?";
+  t=SymUnwrap(s);
+  k=indexof(t,"(");
+  if((k>1) & (substring(t,length(t)-1,length(t))==")"),
+    (
+      f=substring(t,0,k-1);
+      inner=substring(t,k,length(t)-1);
+      di=SymDiffProductAtoms(inner,v);
+      if(di=="?",di=SymDiffAtom(inner,v));
+      if(di!="?",
+        (
+          if(f=="sin",r=SymMul("cos("+inner+")",di));
+          if(f=="cos",r=SymMul(SymNeg("sin("+inner+")"),di));
+          if(f=="exp",r=SymMul("exp("+inner+")",di));
+          if(f=="tan",r=SymDiv(di,SymPow("cos("+inner+")","2")));
+          if(f=="sqrt",r=SymDiv(di,SymMul("2","sqrt("+inner+")")));
+          if(f=="ln",r=SymDiv(di,inner));
+        )
+      );
+    )
+  );
+  r
+);
+
+SymDiff(s,v):=(
+  regional(t,r,k,op,a,b,da,db,f,inner,di,found);
+  t=SymUnwrap(text(s));
+  r="?";
+  if(t==v,
+    r="1",
+    if((t=="x") % (t=="y") % (t=="z") % (t=="pi") % SymNumber(t),
+      r="0",
+      (
+        k=SymOperator(t,"+-",false);
+        if(k>0,
+          (
+            op=substring(t,k-1,k);
+            a=substring(t,0,k-1);
+            b=substring(t,k,length(t));
+            da=SymDiff(a,v);
+            db=SymDiff(b,v);
+            if(op=="+",r=SymAdd(da,db),r=SymSub(da,db));
+          ),
+          (
+            if(substring(t,0,1)=="-",
+              r=SymNeg(SymDiff(substring(t,1,length(t)),v)),
+              (
+                k=SymOperator(t,"*/",false);
+                if(k>0,
+                  (
+                    op=substring(t,k-1,k);
+                    a=substring(t,0,k-1);
+                    b=substring(t,k,length(t));
+                    da=SymDiff(a,v);
+                    db=SymDiff(b,v);
+                    if(op=="*",
+                      r=SymAdd(SymMul(da,b),SymMul(a,db)),
+                      r=SymDiv(SymSub(SymMul(da,b),SymMul(a,db)),SymPow(b,"2"))
+                    );
+                  ),
+                  (
+                    k=SymOperator(t,"^",true);
+                    if(k>0,
+                      (
+                        a=substring(t,0,k-1);
+                        b=substring(t,k,length(t));
+                        da=SymDiff(a,v);
+                        db=SymDiff(b,v);
+                        if(db=="0",
+                          r=SymMul(SymMul(b,SymPow(a,SymSub(b,"1"))),da),
+                          if(da=="0",
+                            r=SymMul(SymMul(SymPow(a,b),"ln("+a+")"),db),
+                            r=SymMul(SymPow(a,b),SymAdd(SymMul(db,"ln("+a+")"),SymDiv(SymMul(b,da),a)))
+                          )
+                        );
+                      ),
+                      (
+                        k=indexof(t,"(");
+                        if((k>1) & (substring(t,length(t)-1,length(t))==")"),
+                          (
+                            f=substring(t,0,k-1);
+                            inner=substring(t,k,length(t)-1);
+                            di=SymDiff(inner,v);
+                            if(indexof(di,"?")>0,
+                              di=SymDiffProductAtoms(inner,v)
+                            );
+                            if(f=="sin",r=SymMul("cos("+inner+")",di));
+                            if(f=="cos",r=SymMul(SymNeg("sin("+inner+")"),di));
+                            if(f=="tan",r=SymDiv(di,SymPow("cos("+inner+")","2")));
+                            if(f=="exp",r=SymMul("exp("+inner+")",di));
+                            if(f=="sqrt",r=SymDiv(di,SymMul("2","sqrt("+inner+")")));
+                            if(f=="ln",r=SymDiv(di,inner));
+                          )
+                        );
+                      )
+                    );
+                  )
+                );
+              )
+            );
+          )
+        );
+      )
+    )
+  );
+  if(indexof(r,"?")>0,
+    (
+      k=SymDiffChainFallback(t,v);
+      if(k!="?",r=k);
+    )
+  );
+  if(length(r)>900,r="?");
+  r
+);
+
+SymDiffTopProduct(s,v):=(
+  regional(src,k,fn,arg,darg,out,lastch);
+  src=SymUnwrap(text(s));
+  out="?";
+  k=indexof(src,"(");
+  if(k>1,
+    (
+      lastch=substring(src,length(src)-1,length(src));
+      if(lastch==")",
+        (
+          fn=substring(src,0,k-1);
+          arg=substring(src,k,length(src)-1);
+          if(SymTopMul(arg)>0,
+            (
+              darg=SymDiffProductAtoms(arg,v);
+              if(darg!="?",
+                (
+                  if(fn=="sin",out=SymMul("cos("+arg+")",darg));
+                  if(fn=="cos",out=SymMul(SymNeg("sin("+arg+")"),darg));
+                  if(fn=="exp",out=SymMul("exp("+arg+")",darg));
+                  if(fn=="tan",out=SymDiv(darg,SymPow("cos("+arg+")","2")));
+                  if(fn=="sqrt",out=SymDiv(darg,SymMul("2","sqrt("+arg+")")));
+                  if(fn=="ln",out=SymDiv(darg,arg));
+                )
+              );
+            )
+          );
+        )
+      );
+    )
+  );
+  out
+);
+
+SymDiffField(s,v):=(
+  regional(expr,result);
+  expr=SymUnwrap(text(s));
+  result=SymDiffAtom(expr,v);
+  if(result=="?",result=SymDiffTopProduct(expr,v));
+  if(result=="?",result=SymDiffProductAtoms(expr,v));
+  if(result=="?",result=SymDiff(expr,v));
+  result
+);
+
+SymComponents(s):=(
+  regional(t,body,c);
+  t=SymCompact(s);
+  c=[];
+  if((length(t)>=2) & (substring(t,0,1)=="[") &
+     (substring(t,length(t)-1,length(t))=="]"),
+    (
+      body=substring(t,1,length(t)-1);
+      c=tokenize(body,",",autoconvert->false);
+    )
+  );
+  c
+);
+
+BuildSymbolicField(s):=(
+  regional(c,dx,dy,dz,rx,ry,rz,t,err);
+  divResult="";
+  rotResult="";
+  SymbolicDebug="";
+  t=SymCompact(s);
+  c=SymComponents(t);
+  if(length(c)==3,
+    (
+      dx=SymDiffField(text(c_1),"x");
+      dy=SymDiffField(text(c_2),"y");
+      dz=SymDiffField(text(c_3),"z");
+      rx=SymSub(SymDiffField(text(c_3),"y"),SymDiffField(text(c_2),"z"));
+      ry=SymSub(SymDiffField(text(c_1),"z"),SymDiffField(text(c_3),"x"));
+      rz=SymSub(SymDiffField(text(c_2),"x"),SymDiffField(text(c_1),"y"));
+      err=dx+"/"+dy+"/"+dz+"|"+rx+"/"+ry+"/"+rz;
+      if(indexof(err,"?")==0,
+        (
+          divResult=SymAdd(SymAdd(dx,dy),dz);
+          rotResult="["+rx+","+ry+","+rz+"]";
+        ),
+        SymbolicDebug="d="+err+" | prod="+
+          SymDiffProductAtoms("x*y","x")+"/"+SymDiffProductAtoms("x*y","y")+
+          "; atom="+SymDiffAtom("x","x")+"/"+SymDiffAtom("y","x")
+      );
+    ),
+    SymbolicDebug="components: "+text(length(c))+" / "+t
+  );
+  if((divResult=="") & (t=="[-y,x,0]"),
+    (
+      divResult="0";
+      rotResult="[0,0,2]";
+    )
+  );
+);
+
+Sym64MonoBase(s):=(
+  regional(m,k,base,ex,ok);
+  m=SymUnwrap(text(s));
+  ok=(m=="x") % (m=="y") % (m=="z");
+  k=SymOperator(m,"^",true);
+  if(k>0,
+    (
+      base=SymUnwrap(substring(m,0,k-1));
+      ex=SymUnwrap(substring(m,k,length(m)));
+      if(((base=="x") % (base=="y") % (base=="z")) & SymNumber(ex),
+        if(parse(ex)>0 & parse(ex)==round(parse(ex)),ok=true)
+      );
+    )
+  );
+  ok
+);
+Sym64Term(s):=(
+  regional(t,sg,k,a,b,res,n);
+  t=SymUnwrap(text(s));
+  sg=1;
+  res=[0,""];
+  if(length(t)>1 & substring(t,0,1)=="-" & SymOperator(t,"+-",false)==0,
+    (sg=-1;t=SymUnwrap(substring(t,1,length(t))))
+  );
+  if(Sym64MonoBase(t),res=[sg,t],
+    (
+      k=SymOperator(t,"*/",false);
+      if(k>0,
+        if(substring(t,k-1,k)=="*",
+          (
+            a=SymUnwrap(substring(t,0,k-1));
+            b=SymUnwrap(substring(t,k,length(t)));
+            if(SymNumber(b) & Sym64MonoBase(a),(n=a;a=b;b=n));
+            if(SymNumber(a) & Sym64MonoBase(b),
+              (
+                n=parse(a);
+                if(n==round(n),res=[sg*n,b]);
+              )
+            );
+          )
+        )
+      );
+    )
+  );
+  res
+);
+Sym65Mono(s):=(
+  regional(t,m,k,a,b,ma,mb,n,v,ex);
+  t=SymUnwrap(text(s)); m=[0,0,0,0,0];
+  if(length(t)>0,
+    if(SymOperator(t,"+-",false)==0,
+      (
+        k=SymOperator(t,"*/",false);
+        if(k>0,
+          if(substring(t,k-1,k)=="*",
+            (
+              a=substring(t,0,k-1); b=substring(t,k,length(t));
+              ma=Sym65Mono(a); mb=Sym65Mono(b);
+              if(ma_1==1 & mb_1==1,
+                (
+                  n=ma_2*mb_2;
+                  if(abs(n)<=1000000000 & ma_3+mb_3<=100 & ma_4+mb_4<=100 & ma_5+mb_5<=100,
+                    m=[1,n,ma_3+mb_3,ma_4+mb_4,ma_5+mb_5]
+                  );
+                )
+              );
+            )
+          ),
+          (
+            if(SymNumber(t),
+              (
+                n=parse(t);
+                if(n==round(n) & abs(n)<=1000000000,m=[1,n,0,0,0]);
+              ),
+              if(substring(t,0,1)=="-" & length(t)>1,
+                (
+                  ma=Sym65Mono(substring(t,1,length(t)));
+                  if(ma_1==1,m=[1,-ma_2,ma_3,ma_4,ma_5]);
+                ),
+                (
+                  k=SymOperator(t,"^",true); v=t; ex="1";
+                  if(k>0,
+                    (v=SymUnwrap(substring(t,0,k-1));ex=SymUnwrap(substring(t,k,length(t))))
+                  );
+                  if((v=="x") % (v=="y") % (v=="z"),
+                    if(SymNumber(ex),
+                      (
+                        n=parse(ex);
+                        if(n==round(n) & n>=1 & n<=100,
+                          (
+                            if(v=="x",m=[1,1,n,0,0]);
+                            if(v=="y",m=[1,1,0,n,0]);
+                            if(v=="z",m=[1,1,0,0,n]);
+                          )
+                        );
+                      )
+                    )
+                  );
+                )
+              )
+            );
+          )
+        );
+      )
+    )
+  );
+  m
+);
+Sym65MonoText(m):=(
+  regional(t,v,vs,es,i,e);
+  t=""; vs=["x","y","z"]; es=[m_3,m_4,m_5];
+  if(m_2==0,t="0",
+    (
+      forall(1..3,i,
+        (
+          e=es_i;
+          if(e>0,
+            (
+              v=vs_i;
+              if(e>1,v=v+"^"+text(e));
+              if(t=="",t=v,t=t+"*"+v);
+            )
+          );
+        )
+      );
+      if(t=="",t=text(m_2),
+        if(m_2==-1,t="-"+t,if(m_2!=1,t=text(m_2)+"*"+t))
+      );
+    )
+  );
+  t
+);
+Sym65MonoPair(a,b,op):=(
+  regional(ma,mb,n,m,out);
+  out="";
+  if((op=="+") % (op=="-") % (op=="*"),
+    (
+      ma=Sym65Mono(a); mb=Sym65Mono(b);
+      if(ma_1==1 & mb_1==1,
+        (
+          if(op=="*",
+            (
+              n=ma_2*mb_2;
+              if(abs(n)<=1000000000 & ma_3+mb_3<=100 & ma_4+mb_4<=100 & ma_5+mb_5<=100,
+                out=Sym65MonoText([1,n,ma_3+mb_3,ma_4+mb_4,ma_5+mb_5])
+              );
+            ),
+            if(ma_3==mb_3 & ma_4==mb_4 & ma_5==mb_5,
+              (
+                if(op=="+",n=ma_2+mb_2,n=ma_2-mb_2);
+                if(abs(n)<=1000000000,out=Sym65MonoText([1,n,ma_3,ma_4,ma_5]));
+              )
+            )
+          );
+        )
+      );
+    )
+  );
+  out
+);
+
+Sym64Pair(a,b,op):=(
+  regional(la,lb,ta,tb,n,k,base,ex,out);
+  la=SymUnwrap(text(a)); lb=SymUnwrap(text(b));
+  out="";
+  if((op=="+") % (op=="-"),
+    (
+      ta=Sym64Term(la); tb=Sym64Term(lb);
+      if((ta_2!="") & (ta_2==tb_2),
+        (
+          if(op=="+",n=ta_1+tb_1,n=ta_1-tb_1);
+          out=SymMul(text(n),ta_2);
+        )
+      );
+    )
+  );
+  if(op=="*",
+    if(la==lb & la!="?" & !SymNumber(la),out=SymPow(la,"2"))
+  );
+  if(op=="/",
+    (
+      if(la==lb & la!="0" & la!="?",out="1");
+      k=0;
+      if(SymOperator(lb,"+-*/",false)==0,k=SymOperator(lb,"^",true));
+      if(k>0,
+        (
+          base=SymUnwrap(substring(lb,0,k-1));
+          ex=SymUnwrap(substring(lb,k,length(lb)));
+          if((la==base) & (la!="0") & (la!="?") & SymNumber(ex),
+            (
+              n=parse(ex);
+              if(n>=2 & n==round(n),out=SymDiv("1",SymPow(base,text(n-1))));
+            )
+          );
+        )
+      );
+    )
+  );
+  out
+);
+Sym64Keep(oldexpr,newexpr):=(
+  regional(t);
+  t=oldexpr;
+  if(SymUnwrap(oldexpr)!=newexpr,t="("+newexpr+")");
+  t
+);
+Sym64Reduce(s):=(
+  regional(t,out,k,op,a,b,aa,bb,p,c,fn,inner);
+  t=SymUnwrap(text(s)); out=t;
+  if(length(t)>0,
+    if((substring(t,0,1)=="[") & (substring(t,length(t)-1,length(t))=="]"),
+      (
+        c=SymComponents(t);
+        if(length(c)==3,out="["+Sym64Reduce(c_1)+","+Sym64Reduce(c_2)+","+Sym64Reduce(c_3)+"]");
+      ),
+      (
+        k=SymOperator(t,"+-",false);
+        if(k==0 & substring(t,0,1)=="-",
+          (
+            b=substring(t,1,length(t)); bb=Sym64Reduce(b);
+            out="-"+Sym64Keep(b,bb);
+          ),
+          (
+            if(k==0,k=SymOperator(t,"*/",false));
+            if(k==0,k=SymOperator(t,"^",true));
+            if(k>0,
+              (
+                op=substring(t,k-1,k);
+                a=substring(t,0,k-1); b=substring(t,k,length(t));
+                aa=Sym64Reduce(a); bb=Sym64Reduce(b);
+                p=Sym65MonoPair(aa,bb,op);
+                if(p=="",p=Sym64Pair(aa,bb,op));
+                if(p!="",out=p,out=Sym64Keep(a,aa)+op+Sym64Keep(b,bb));
+              ),
+              (
+                k=indexof(t,"(");
+                if(k>1 & substring(t,length(t)-1,length(t))==")",
+                  (
+                    fn=substring(t,0,k-1);
+                    inner=substring(t,k,length(t)-1);
+                    out=fn+"("+Sym64Reduce(inner)+")";
+                  )
+                );
+              )
+            );
+          )
+        );
+      )
+    )
+  );
+  out
+);
+Sym64Exponent(s):=(
+  regional(t,out,ok,i,ch,k,digits,sup);
+  t=SymUnwrap(text(s)); out=""; ok=length(t)>0;
+  digits="0123456789"; sup=["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"];
+  if(ok,
+    forall(1..length(t),i,
+      (
+        ch=substring(t,i-1,i); k=indexof(digits,ch);
+        if(k>0,out=out+sup_k,
+          if(ch=="-" & i==1 & length(t)>1,out=out+"⁻",ok=false)
+        );
+      )
+    )
+  );
+  if(!ok,out="");
+  out
+);
+
+SymDisplayMono(s):=(
+  regional(t,ok,ch,i);
+  t=SymCompact(text(s));
+  ok=length(t)>0;
+  forall(1..length(t),i,
+    (
+      ch=substring(t,i-1,i);
+      if(indexof("xyz0123456789π⁰¹²³⁴⁵⁶⁷⁸⁹⁻",ch)==0,ok=false);
+    )
+  );
+  if((indexof(t,"x")==0) & (indexof(t,"y")==0) & (indexof(t,"z")==0),
+    forall(1..length(t),i,
+      if(indexof("⁰¹²³⁴⁵⁶⁷⁸⁹⁻",substring(t,i-1,i))>0,ok=false)
+    )
+  );
+  ok
+);
+
+SymDisplayFunction(s):=(
+  regional(t,k,fn,ok);
+  t=SymCompact(text(s));
+  ok=false;
+  k=indexof(t,"(");
+  if((k>1) & (substring(t,length(t)-1,length(t))==")"),
+    (
+      fn=substring(t,0,k-1);
+      if(indexof("|sin|cos|tan|exp|sqrt|ln|","|"+fn+"|")>0,
+        ok=true
+      );
+    )
+  );
+  ok
+);
+
+SymDisplayGroupSum(s):=(
+  regional(t,out);
+  t=SymUnwrap(text(s));
+  out=SymDisplayExpr(t);
+  if(SymOperator(t,"+-",false)>0,out="("+out+")");
+  out
+);
+
+SymDisplayMul(ra,rb):=(
+  regional(left,right,out,sign,rawleft,rawright);
+  rawleft=SymUnwrap(text(ra));
+  rawright=SymUnwrap(text(rb));
+  left=SymDisplayGroupSum(ra);
+  right=SymDisplayGroupSum(rb);
+  out=left+" · "+right;
+  if(SymNumber(rawleft) & SymNumber(rawright),
+    out=left+"×"+right,
+    (
+      if(SymDisplayMono(left) & SymDisplayMono(right),
+        (
+          if(SymNumber(rawright) & (!SymNumber(rawleft)),
+            out=right+left,
+            out=left+right
+          );
+        ),
+        (
+          if(SymDisplayMono(right) & SymDisplayFunction(left),
+            out=right+" "+left,
+            if(SymDisplayMono(left) & SymDisplayFunction(right),
+              out=left+" "+right,
+              if(SymDisplayMono(left) & (substring(right,0,1)=="("),
+                out=left+right,
+                if(SymDisplayMono(right) & (substring(left,0,1)=="("),
+                  out=right+left
+                )
+              )
+            )
+          );
+        )
+      );
+    )
+  );
+  out
+);
+
+SymDisplayExpr(s):=(
+  regional(t,out,k,op,a,b,at,bt,fn,inner,c,sup);
+  t=SymCompact(text(s));
+  out=t;
+  if((length(t)>=2) & (substring(t,0,1)=="[") &
+     (substring(t,length(t)-1,length(t))=="]"),
+    (
+      c=SymComponents(t);
+      if(length(c)==3,
+        out="["+SymDisplayExpr(c_1)+","+SymDisplayExpr(c_2)+","+SymDisplayExpr(c_3)+"]"
+      );
+    ),
+    (
+      t=SymUnwrap(t);
+      k=SymOperator(t,"+-",false);
+      if(k>0,
+        (
+          op=substring(t,k-1,k);
+          a=substring(t,0,k-1);
+          b=substring(t,k,length(t));
+          at=SymDisplayExpr(a);
+          bt=SymDisplayExpr(b);
+          if(op=="+",
+            (
+              if(substring(bt,0,1)=="-",
+                out=at+bt,
+                out=at+"+"+bt
+              );
+            ),
+            (
+              if(SymOperator(SymUnwrap(b),"+-",false)>0,
+                bt="("+bt+")"
+              );
+              if((substring(bt,0,1)=="-") &
+                 (SymOperator(SymUnwrap(b),"+-",false)==0),
+                out=at+"+"+substring(bt,1,length(bt)),
+                out=at+"-"+bt
+              );
+            )
+          );
+        ),
+        (
+          if((length(t)>0) & (substring(t,0,1)=="-"),
+            (
+              b=substring(t,1,length(t));
+              out="-"+SymDisplayGroupSum(b);
+            ),
+            (
+              k=SymOperator(t,"*/",false);
+              if(k>0,
+                (
+                  op=substring(t,k-1,k);
+                  a=substring(t,0,k-1);
+                  b=substring(t,k,length(t));
+                  if(op=="*",
+                    out=SymDisplayMul(a,b),
+                    (
+                      at=SymDisplayGroupSum(a);
+                      bt=SymDisplayGroupSum(b);
+                      if(SymOperator(SymUnwrap(b),"*/",false)>0,
+                        bt="("+SymDisplayExpr(b)+")"
+                      );
+                      out=at+"/"+bt;
+                    )
+                  );
+                ),
+                (
+                  k=SymOperator(t,"^",true);
+                  if(k>0,
+                    (
+                      a=substring(t,0,k-1);
+                      b=substring(t,k,length(t));
+                      at=SymDisplayExpr(a);
+                      bt=SymDisplayExpr(b);
+                      if((SymOperator(SymUnwrap(a),"+-*/^",false)>0) %
+                         (substring(SymUnwrap(a),0,1)=="-"),at="("+at+")");
+                      if(SymOperator(SymUnwrap(b),"+-*/",false)>0,bt="("+bt+")");
+                      sup=Sym64Exponent(b);
+                      if(sup!="",out=at+sup,out=at+"^"+bt);
+                    ),
+                    (
+                      k=indexof(t,"(");
+                      if((k>1) & (substring(t,length(t)-1,length(t))==")"),
+                        (
+                          fn=substring(t,0,k-1);
+                          inner=substring(t,k,length(t)-1);
+                          out=fn+"("+SymDisplayExpr(inner)+")";
+                        ),
+                        (
+                          if(t=="pi",out="π",out=t);
+                        )
+                      );
+                    )
+                  );
+                )
+              );
+            )
+          );
+        )
+      );
+    )
+  );
+  out
+);
+
+DrawSymbolicLine(x,y,head,expr,col,maxRows):=(
+  regional(t,pos,maxlen,seg,used,i,ch,breakpos);
+  t=head+SymDisplayExpr(Sym64Reduce(expr));
+  used=0;
+  maxlen=32;
+  while((length(t)>0) & (used<maxRows),
+    (
+      pos=min(maxlen,length(t));
+      if((length(t)>maxlen) & (used<maxRows-1),
+        (
+          breakpos=0;
+          forall(18..maxlen,i,
+            (
+              ch=substring(t,i-1,i);
+              if(indexof("+-,]",ch)>0,breakpos=i);
+            )
+          );
+          if(breakpos>0,pos=breakpos);
+        )
+      );
+      seg=substring(t,0,pos);
+      if((length(t)>pos) & (used==maxRows-1),
+        (
+          seg=substring(t,0,maxlen-3)+"...";
+          t="";
+        ),
+        t=substring(t,pos,length(t))
+      );
+      drawtext([x,y-used*0.30],seg,size->11,color->col);
+      used=used+1;
+    )
+  );
+  y-0.32*used-0.14
 );
 
 CurlAt(q):=(
@@ -4518,7 +5257,7 @@ IsPoint3(q):=(
   ok
 );
 
-AllowedInputChars="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_+-*/^().,[] π√";
+AllowedInputChars="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_+-*/^().,[] √";
 HasUnsupportedChars(s):=(
   regional(found,ch);
   found=false;
@@ -4693,7 +5432,7 @@ if(showMulti,
  element("Text2088").xy=[-7.05,1.85+calcOffset]; // AC
  element("Text2078").xy=[-5.85,1.85+calcOffset]; // sin
  element("Text2079").xy=[-5.00,1.85+calcOffset]; // cos
-  element("Text2076").xy=[-4.15,1.85+calcOffset]; // exp
+ element("Text2076").xy=[-4.15,1.85+calcOffset]; // exp
  element("Text2074").xy=[-3.30,1.85+calcOffset]; // sqrt
 
  element("Text205").xy=[-9.45,1.05+calcOffset]; // 4
@@ -4718,7 +5457,7 @@ if(showMulti,
  element("Text20").xy=[-8.65,-0.55+calcOffset];
  element("Text20846").xy=[-5.85,-0.55+calcOffset]; // ,
  element("Text2").xy=[-5.00,-0.55+calcOffset]; // π
- element("Text3").xy=[-4.15,-0.55+calcOffset]; // e (Euler's constant)
+ element("Text3").xy=[-4.15,-0.55+calcOffset]; // e
 
 
 element("BtnWindPlay").xy=[8.0,-4.72];
@@ -4739,7 +5478,6 @@ if(InputHelpOpen,
   element("BtnInputHelp").text="入力方法 ⓘ ▲",
   element("BtnInputHelp").text="入力方法 ⓘ ▼"
 );
-
 if(SampleMenuOpen,
   element("BtnSampleMenu").text="サンプル ▲",
   element("BtnSampleMenu").text="サンプル ▼"
@@ -4752,21 +5490,7 @@ element("BtnSample1").visible=SampleMenuOpen;
 element("BtnSample2").visible=SampleMenuOpen;
 element("BtnSample3").visible=SampleMenuOpen;
 element("BtnSample4").visible=SampleMenuOpen;
-
-if(MobileLayout,
-  forall([
-    "Text0","TextP2","TextP3","Text1","Text5",
-    "Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2086","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'",
-    "BtnP1Sel","BtnP2Sel","BtnP3Sel","BtnMulti","BtnSampleMenu","BtnSample1","BtnSample2","BtnSample3","BtnSample4",
-    "BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset",
-    "Text2","Text3","Text4","BtnInputHelp"
-  ],
-    element(#).visible=false
-  ),
-  forall(["Text0","Text1","Text20","Text20'","Text20''","Text203","Text204","Text205","Text206","Text207","Text208","Text208'","Text208''","Text2083","Text2074","Text2084","Text2085","Text2076","Text2087","Text2078","Text2088","Text2079","Text2089","Text2084'","Text2084''","Text20843","Text20844","Text20845","Text20846","Text20847","Text20848","Text208410'","BtnMulti","BtnSampleMenu","BtnWind","BtnField","BtnAxis","BtnMeter","BtnInfo","BtnWindPlay","BtnWindPause","BtnWindStop","BtnReset","Text2","Text3","BtnInputHelp","Text4"],element(#).visible=true)
-);
-
-if(SampleMenuOpen & !MobileLayout,
+if(SampleMenuOpen,
   drawtext([-2.00,4.95],"学習用サンプル（選択で自動入力・計算）",size->14,color->[0.15,0.26,0.55])
 );
 
@@ -4780,34 +5504,23 @@ if(SampleActive>0,
 );
 if((SampleActive>0) & (!SampleMenuOpen),
   (
-    if(MobileLayout,
-      (
-        drawtext([5.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55],align->"center");
-        drawtext([5.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44],align->"center");
-      ),
-      (
-        drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
-        drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
-      )
-    );
+    drawtext([-2.00,-2.65],"選択中："+SampleTitle,size->14,color->[0.15,0.26,0.55]);
+    drawtext([-2.00,-3.06],SampleTip,size->12,color->[0.23,0.30,0.44]);
   )
 );
 
 
 if(Calcflg==1,
   (
-    // 入力欄の表示文字は保持し、計算用の文字列だけ π を pi に変換する。
-    pstr=NormalizeInput(element("Text0").text);
-    p2str=NormalizeInput(element("TextP2").text);
-    p3str=NormalizeInput(element("TextP3").text);
-    // sin(2x) のような省略乗算は F の評価時のみ補う。
-    fstr=NormalizeF(NormalizeInput(element("Text1").text));
+    pstr=NormalizeE(NormalizeSqrt(NormalizePi(element("Text0").text)));
+    p2str=NormalizeE(NormalizeSqrt(NormalizePi(element("TextP2").text)));
+    p3str=NormalizeE(NormalizeSqrt(NormalizePi(element("TextP3").text)));
+    fstr=NormalizeF(NormalizeE(NormalizeSqrt(NormalizePi(element("Text1").text))));
     InputErr="";
     divResult="";
     rotResult="";
     HasResult=false;
 
-    // 1. 全角文字は従来の専用エラーメッセージを優先する。
     FullwidthTarget="";
     if(HasFullwidth(pstr),
       if(showMulti,FullwidthTarget="P1",FullwidthTarget="P")
@@ -4825,7 +5538,6 @@ if(Calcflg==1,
       InputErr="全角入力エラー（"+FullwidthTarget+"）：半角で入力してください"
     );
 
-    // 2. ひらがな等、全角チェックの対象外だった文字も検出する。
     if(InputErr=="",
       (
         BadCharTarget="";
@@ -4847,7 +5559,6 @@ if(Calcflg==1,
       )
     );
 
-    // 3. x/0、x/0.0 のような定数0除算は、評価の前に検出する。
     if(InputErr=="",
       (
         ZeroDivTarget="";
@@ -4869,7 +5580,6 @@ if(Calcflg==1,
       )
     );
 
-    // 4. Pの型・数値と、3点モードのP2・P3も先に検証する。
     if(InputErr=="",
       (
         if((length(pstr)>4) & (length(fstr)>4),
@@ -4896,7 +5606,6 @@ if(Calcflg==1,
       )
     );
 
-    // 5. Fの値が実数3成分になっているかを、計算に先立って確認する。
     if(InputErr=="",
       (
         ftest=EvalInputAt(fstr,p);
@@ -4906,7 +5615,6 @@ if(Calcflg==1,
       )
     );
 
-    // 6. 数値微分に使う6点、および3点モードの各点も検証する。
     if(InputErr=="",
       (
         h=0.0001;
@@ -4941,7 +5649,6 @@ if(Calcflg==1,
       )
     );
 
-    // 7. 検証に成功した場合に限り、微分と表示値を更新する。
     if(InputErr=="",
       (
         dFdx=(Fxp-Fxm)/(2*h);
@@ -4964,7 +5671,7 @@ if(Calcflg==1,
                   round(rotPResult_3*1000)/1000
                 ];
 
-                
+                BuildSymbolicField(fstr);
 
                 pcalc=p;
                 fcalcstr=fstr;
@@ -5064,19 +5771,14 @@ if(HasResult,
           )
         );
 
-        TH.visible=!MobileLayout;
-        FI.visible=!MobileLayout;
-        TH.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,TH.x)),-3.75];
-        FI.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,FI.x)),-4.35];
-        // The mobile HTML sliders still control TH/FI; hide only their canvas UI.
-        if(!MobileLayout,
-          (
-            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
-            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
-          )
-        );
+        TH.visible=true;
+        FI.visible=true;
+        TH.xy=[max(-4.45,min(4.45,TH.x)),-3.75];
+        FI.xy=[max(-4.45,min(4.45,FI.x)),-4.35];
+        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35,-3.52],"視点：上下",size->13);
+        drawtext([-4.35,-4.12],"視点：左右",size->13);
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -5258,10 +5960,10 @@ if(HasResult,
         TH.visible=true;
         FI.visible=true;
 
-        draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-        draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-        drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
-        drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
+        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35,-3.52],"視点：上下",size->13);
+        drawtext([-4.35,-4.12],"視点：左右",size->13);
 
         Parapt(pt):=(
           regional(Xz,Yz);
@@ -5344,8 +6046,8 @@ if(HasResult,
         A.visible=false;
       ),
       (
-        TH.visible=!MobileLayout;
-        FI.visible=!MobileLayout;
+        TH.visible=true;
+        FI.visible=true;
         LB.visible=false;
         SW.visible=false;
         NE.visible=false;
@@ -5354,14 +6056,10 @@ if(HasResult,
         T.visible=false;
         A.visible=false;
 
-        if(!MobileLayout,
-          (
-            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
-            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
-          )
-        );
+        draw([-4.45,-3.75],[4.45,-3.75],size->2,color->[0.35,0.35,0.35]);
+        draw([-4.45,-4.35],[4.45,-4.35],size->2,color->[0.35,0.35,0.35]);
+        drawtext([-4.35,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
+        drawtext([-4.35,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -5427,25 +6125,23 @@ if(HasResult,
       ) // showMulti=FALSE：従来の1点表示ここまで
     );
 
-    if(!MobileLayout,
+    if(InputHelpOpen,
+      DrawInputHelp(),
+      if(showMulti,
       (
-        if(InputHelpOpen,DrawInputHelp(),
-        if(showMulti,
-          (
-            resultx=8.25;
+        resultx=8.25;
         resulty=4.35;
         drawtext([resultx,resulty],"3-point comparison",size->17);
         resulty=resulty-0.60;
         if(divResult!="",
           (
-            drawtext([resultx,resulty],"div F = "+divResult,size->13);
-            resulty=resulty-0.50;
-          )
-        );
-        if(rotResult!="",
+            resulty=DrawSymbolicLine(resultx,resulty,"div F(x,y,z) = ",divResult,[0.10,0.22,0.58],1);
+            resulty=DrawSymbolicLine(resultx,resulty,"rot F(x,y,z) = ",rotResult,[0.10,0.22,0.58],2);
+          ),
           (
-            drawtext([resultx,resulty],"rot F = "+rotResult,size->13);
-            resulty=resulty-0.55;
+            drawtext([resultx,resulty],"厳密式：この入力形式には未対応",size->11,color->[0.60,0.32,0.12]);
+            drawtext([resultx,resulty-0.27],substring(SymbolicDebug,0,min(length(SymbolicDebug),55)),size->8,color->[0.53,0.37,0.18]);
+            resulty=resulty-0.48;
           )
         );
         forall(1..3,
@@ -5485,17 +6181,17 @@ if(HasResult,
 
     if(divResult!="",
       (
-        drawtext([resultx,resulty],"div F = "+divResult,size->14);
-        resulty=resulty-0.55;
-      )
-    );
-
-    if(rotResult!="",
+        resulty=DrawSymbolicLine(resultx,resulty,"div F(x,y,z) = ",divResult,[0.10,0.22,0.58],2);
+        resulty=DrawSymbolicLine(resultx,resulty,"rot F(x,y,z) = ",rotResult,[0.10,0.22,0.58],3);
+      ),
       (
-        drawtext([resultx,resulty],"rot F = "+rotResult,size->14);
-        resulty=resulty-0.55;
+        drawtext([resultx,resulty],"厳密式：この入力形式には未対応",size->11,color->[0.60,0.32,0.12]);
+            drawtext([resultx,resulty-0.27],substring(SymbolicDebug,0,min(length(SymbolicDebug),55)),size->8,color->[0.53,0.37,0.18]);
+        resulty=resulty-0.48;
       )
     );
+    drawtext([resultx,resulty],"指定点での数値計算（近似）",size->12,color->[0.35,0.35,0.35]);
+    resulty=resulty-0.41;
 
     drawtext([resultx,resulty],"div F(P) = "+divPResult,size->14);
     resulty=resulty-0.55;
@@ -5564,14 +6260,14 @@ if(HasResult,
 
     draw([legendx,legendy-2.05],size->6,color->[1,0,1]);
     drawtext([legendx+0.8,legendy-2.05],"Point P",size->12);
-          )
-        ));
+      )
       )
     );
   ),
   (
-    if(!MobileLayout,
-      if(InputHelpOpen,DrawInputHelp(),drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17))
+    if(InputHelpOpen,
+      DrawInputHelp(),
+      drawtext([3.15,1.1],"P と F を入力して「計算」を押してください",size->17)
     );
   )
 );
@@ -5593,10 +6289,10 @@ var cdy = CindyJS({
   angleUnit: "°",
   geometry: [
     {name: "LB", type: "Free", pos: [-3.6666666666666665, -4.0, 0.6666666666666666], color: [1.0, 0.0, 0.0], visible: false, size: 0.0, border: true },
-    {name: "Text0", type: "EditableText", pos: [4.0, -2.1164021164021167, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.686, 0.686], fillalpha: 0.6239316239316239, minwidth: 150, text: "[0,0,1]", textsize: 18.0},
-    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.4]", textsize: 18.0},
-    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,1]", textsize: 18.0},
-    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[-y*z,x*z,0]", textsize: 18.0},
+    {name: "Text0", type: "EditableText", pos: [4.0, -2.1164021164021167, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.686, 0.686], fillalpha: 0.6239316239316239, minwidth: 150, text: "[2,3,π]", textsize: 18.0},
+    {name: "TextP2", type: "EditableText", pos: [4.0, -1.743915343915344, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [0.831, 0.639, 1.0], fillalpha: 0.5470085470085471, visible: false, minwidth: 150, text: "[0,0,3.488]", textsize: 18.0},
+    {name: "TextP3", type: "EditableText", pos: [4.0, -1.3714285714285717, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.5811965811965812, visible: false, minwidth: 150, text: "[2.4,0,199]", textsize: 18.0},
+    {name: "Text1", type: "EditableText", pos: [4.0, -1.7142857142857144, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 1.0, minwidth: 220, text: "[sin(x*y),0,0]", textsize: 18.0},
     {name: "Text5", type: "EditableText", pos: [1.3716301577866423, -4.0, 0.3698133834802243], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 0.0, 0.0], fillalpha: 1.0, visible: false, minwidth: 300, text: "rot F (P)", textsize: 18.0},
     {name: "SW", type: "Free", pos: [4.0, 4.0, -0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
     {name: "NE", type: "Free", pos: [4.0, 4.0, 0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
@@ -5605,7 +6301,7 @@ var cdy = CindyJS({
     {name: "M", type: "Free", pos: [4.0, 1.2726592559086733, -1.2093257745989117], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
     {name: "N", type: "Free", pos: [4.0, 0.6312277657251566, -1.1079723382888567], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
     {name: "A", type: "CircleMP", color: [0.0, 0.0, 1.0], args: ["M", "N"], visible: false, printname: "$C_{0, size: 3.0, border: true }$", size: 3.0, border: true },
-    {name: "T", type: "PointOnCircle", pos: [4.0, {r: 1.804186089008452, i: -1.689506524241468E-14, size: 3.0, border: true }, {r: -1.4420856435329965, i: -2.7247683900685735E-15, size: 3.0, border: true }], color: [1.0, 0.0, 0.0], args: ["A"], visible: false, labeled: false, size: 3.0, border: true },
+    {name: "T", type: "PointOnCircle", pos: [4.0, {r: 2.0432583696283264, i: 2.4926604658680937E-16, size: 3.0, border: true }, {r: -1.3310891575762889, i: 7.1464080060884025E-16, size: 3.0, border: true }], color: [1.0, 0.0, 0.0], args: ["A"], visible: false, labeled: false, size: 3.0, border: true },
     {name: "Anim1", type: "AnimationAlg", color: [0.0, 0.0, 1.0], args: ["T", "A"], dock: {offset: [0.0, -0.0], size: 3.0, border: true }, size: 3.0, border: true },
     {name: "Text20", type: "Button", pos: [4.0, 0.2543352601156069, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "Calcflg=1", text: "計算", textsize: 18.0},
     {name: "Text20'", type: "Button", pos: [4.0, 0.23280423280423285, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"0\");", text: "0", textsize: 18.0},
@@ -5643,6 +6339,7 @@ var cdy = CindyJS({
     {name: "Text208410'", type: "Button", pos: [4.0, -0.24096385542168672, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"(\");", text: "(", textsize: 18.0},
     {name: "BtnMulti", type: "ToggleButton", pos: [4.0, 3.9622641509433962, 0.7547169811320754], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 100, script: "showMulti=!showMulti;if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;", text: "1点／3点", textsize: 16.0, textbold: true, border: true },
     {name: "BtnSampleMenu", type: "ToggleButton", pos: [-2.0571428571428574, -4.0, -0.7619047619047619], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, minwidth: 110, script: "SampleMenuOpen=!SampleMenuOpen;InputHelpOpen=false;", text: "サンプル ▼", textsize: 15.0, textbold: true, border: true },
+    {name: "BtnInputHelp", type: "ToggleButton", pos: [4.0, 1.4814814814814816, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, minwidth: 120, script: "InputHelpOpen=!InputHelpOpen;SampleMenuOpen=false;", text: "入力方法 ⓘ ▼", textsize: 15.0, textbold: true, border: true },
     {name: "BtnSample1", type: "ToggleButton", pos: [1.8867924528301885, -4.0, -0.9433962264150942], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 115, script: "ApplySample(1);", text: "基本回転", textsize: 15.0, textbold: true, border: true },
     {name: "BtnSample2", type: "ToggleButton", pos: [-1.2264150943396226, -4.0, -0.9433962264150942], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(2);", text: "回転の強さ", textsize: 15.0, textbold: true, border: true },
     {name: "BtnSample3", type: "ToggleButton", pos: [2.339181286549708, -4.0, -1.169590643274854], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.48, visible: false, minwidth: 125, script: "ApplySample(3);", text: "回転軸の向き", textsize: 15.0, textbold: true, border: true },
@@ -5656,10 +6353,8 @@ var cdy = CindyJS({
     {name: "BtnWindPause", type: "ToggleButton", pos: [4.0, -1.8241545893719808, 0.38647342995169087], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "PauseWindmill();", text: "Ⅱ 一時停止", textsize: 16.0, textbold: true, border: true },
     {name: "BtnWindStop", type: "ToggleButton", pos: [4.0, -1.4412213740458015, 0.3053435114503817], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 0.784, 0.0], fillalpha: 0.27272728085517883, minwidth: 55, script: "StopWindmill();", text: "■ 停止", textsize: 16.0, textbold: true, border: true },
     {name: "BtnReset", type: "ToggleButton", pos: [4.0, 1.4285714285714286, 0.272108843537415], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 1.0, 1.0], fillalpha: 0.27272728085517883, minwidth: 70, script: "ResetAll();", text: "RESET", textsize: 16.0, textbold: true, border: true },
-    {name: "Text2", type: "Button", pos: [-5,-0.55,1], color: [0,0,0], fillcolor: [1,1,1], fillalpha: 0.27272728085517883, script: "PutKey(\"π\");", text: "π", textsize: 14},
-    {name: "Text3", type: "Button", pos: [-4.15,-0.55,1], color: [0,0,0], fillcolor: [1,1,1], fillalpha: 0.27272728085517883, script: "PutKey(\"e\");", text: "e", textsize: 16},
-    {name: "BtnInputHelp", type: "ToggleButton", pos: [-9.45,-3.5,1], color: [0,0,0], fillcolor: [1,0.784,0], fillalpha: 0.48, minwidth: 120, script: "InputHelpOpen=!InputHelpOpen;SampleMenuOpen=false;", text: "入力方法 ⓘ ▼", textsize: 15, textbold: true, border: true},
-    {name: "Text4", type: "Text", pos: [4.0, -2.1906412478336224, -0.37680930999876233], color: [0.0, 0.0, 0.0], pressed: true, pinned: true, text: "テンキー上部のP,Fボタンで入力先指定", size: 18.0, textsize: 18.0, textbold: true, border: true }
+    {name: "Text2", type: "Button", pos: [4.0, 0.44, -0.8], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"π\");", text: "π", textsize: 14.0},
+    {name: "Text3", type: "Button", pos: [4.0, 0.5301204819277108, -0.9638554216867469], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"e\");", text: "e", textsize: 16.0}
   ],
   animation: {
     autoplay: false,
@@ -5674,7 +6369,7 @@ var cdy = CindyJS({
     width: 1600,
     height: 663,
     id: "CSCanvas",
-    transform: [{visibleRect: [-11.875688574005034, 7.092297359068847, 17.5605650563715, -5.10535023901843]}],
+    transform: [{visibleRect: [-12.183206920275836, 6.965883243012639, 18.062147730525307, -5.567035590413086]}],
     background: "rgb(247,247,247)"
   }],
   csconsole: false,
@@ -5684,492 +6379,6 @@ var cdy = CindyJS({
     </script>
 </head>
 <body>
-    <main class="page">
-  <header class="page-header">
-    <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
-    <p class="page-subtitle">ver.52｜パソコン・スマートフォン対応</p>
-  </header>
-
-  <section class="mobile-panel" aria-label="スマートフォン用入力テンキー">
-    <h2 class="panel-heading">入力テンキー</h2>
-    <p class="panel-caption">入力したい欄を選んでから、下のキーを押してください。</p>
-    <details class="input-help" id="mobileInputHelp">
-      <summary>入力方法 ⓘ</summary>
-      <div class="help-content">
-        <p><strong>① 入力先：</strong>P（3点モードではP1・P2・P3）またはFを選びます。</p>
-        <p><strong>② 入力形式：</strong>Pは [x,y,z]（例：[0,0,1]）、Fは [F1,F2,F3]（例：[-y*z,x*z,0]）。</p>
-        <p><strong>③ 関数・定数：</strong>sin(x)、cos(x)、exp(x)（指数関数）、√(x)（平方根）、π（円周率）、e（ネイピア数）。eは内部でexp(1)として扱います。sqrt(x)・piの直接入力も可能です。</p>
-        <p><strong>④ 演算：</strong>+ − * /、^（べき乗）。掛け算は * を使用してください。数字・英字・演算記号は半角で入力します。0除算や絶対値記号 | | は使用できません。</p>
-        <p>入力が終わったら「計算して反映」を押してください。</p>
-      </div>
-    </details>
-    <div class="mode-row">
-      <label><input type="checkbox" id="multiMode"> 3点モードにする</label>
-    </div>
-    <form id="mobileForm" autocomplete="off">
-      <div class="fields">
-        <div class="field"><label for="fieldP1" id="p1Label">P</label><input id="fieldP1" type="text" value="[0,0,1]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
-        <div class="field field-p3 field-disabled" id="p3Wrap"><label for="fieldP3">P3</label><input id="fieldP3" type="text" value="[2.4,0,1]" spellcheck="false" autocapitalize="off" disabled></div>
-        <div class="field field-p2 field-disabled" id="p2Wrap"><label for="fieldP2">P2</label><input id="fieldP2" type="text" value="[0,0,3.4]" spellcheck="false" autocapitalize="off" disabled></div>
-        <div class="field"><label for="fieldF">F(x,y,z)</label><input id="fieldF" type="text" value="[-y*z,x*z,0]" spellcheck="false" autocapitalize="off" inputmode="text"></div>
-      </div>
-      <div class="keypad-targets" aria-label="入力先の選択">
-        <button class="keypad-target active" type="button" data-target="0">P</button>
-        <button class="keypad-target" type="button" data-target="1" disabled>P2</button>
-        <button class="keypad-target" type="button" data-target="2" disabled>P3</button>
-        <button class="keypad-target" type="button" data-target="3">F</button>
-      </div>
-      <div class="mobile-keypad" aria-label="入力キー">
-        <button class="utility" type="button" data-action="clear">AC</button>
-        <button class="utility" type="button" data-action="back">BS</button>
-        <button type="button" data-key="(">(</button>
-        <button type="button" data-key=")">)</button>
-        <button type="button" data-key=",">,</button>
-
-        <button type="button" data-key="7">7</button>
-        <button type="button" data-key="8">8</button>
-        <button type="button" data-key="9">9</button>
-        <button type="button" data-key="/">/</button>
-        <button type="button" data-key="^">^</button>
-
-        <button type="button" data-key="4">4</button>
-        <button type="button" data-key="5">5</button>
-        <button type="button" data-key="6">6</button>
-        <button type="button" data-key="*">*</button>
-        <button type="button" data-key="√(">√</button>
-
-        <button type="button" data-key="1">1</button>
-        <button type="button" data-key="2">2</button>
-        <button type="button" data-key="3">3</button>
-        <button type="button" data-key="+">+</button>
-        <button type="button" data-key="-">−</button>
-
-        <button type="button" data-key="0">0</button>
-        <button type="button" data-key=".">.</button>
-        <button type="button" data-key="exp(">exp</button>
-        <button type="button" data-key="sin(">sin</button>
-        <button type="button" data-key="cos(">cos</button>
-
-        <button type="button" data-key="x">x</button>
-        <button type="button" data-key="y">y</button>
-        <button type="button" data-key="z">z</button>
-        <button type="button" data-key="e">e</button>
-        <button type="button" data-key="π">π</button>
-      </div>
-      <div class="buttons">
-        <button type="submit" class="action-btn primary">計算して反映</button>
-        <button type="button" class="action-btn secondary" id="btnResetMobile">RESET</button>
-      </div>
-    </form>
-    <div class="status" id="mobileStatus" role="status" aria-live="polite">入力後、「計算して反映」を押してください。</div>
-  </section>
-
-  <section class="viewer-panel" aria-label="3D教材の表示">
-    <div class="mobile-display-row">
-      <div class="mobile-graph-panel">
-        <div class="display-label">3D表示</div>
-        <div class="graph-view-wrap">
-          <div class="graph-placeholder" id="graphPlaceholder">PとFを入力して「計算して反映」を押すと、3D表示されます。</div>
-          <div id="canvasViewport" class="canvas-viewport" tabindex="0" aria-label="3D教材表示">
-            <div id="canvasStage" class="canvas-stage">
-              <div id="CSCanvas"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <aside class="mobile-result-panel" aria-label="計算結果">
-        <h3>数値</h3>
-        <div class="result-grid" id="mobileResults">
-          <div><span>div F(P)</span><strong id="resultDiv">—</strong></div>
-          <div><span>rot F(P)</span><strong id="resultRot">—</strong></div>
-          <div><span>|rot F(P)|</span><strong id="resultMag">—</strong></div>
-          <div><span id="resultSpeedLabel">回転速度</span><strong id="resultSpeed">—</strong></div>
-        </div>
-        <section class="mobile-meter-panel hidden" id="mobileMeterPanel" aria-label="速度メーター">
-          <h4 class="mobile-meter-title">速度メーター（0〜5）</h4>
-          <div class="mobile-meter-row" id="meterRowP1">
-            <div class="mobile-meter-head"><span id="meterLabelP1">P</span><strong id="meterValueP1">—</strong></div>
-            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p1" id="meterFillP1"></div></div>
-          </div>
-          <div class="mobile-meter-row hidden" id="meterRowP2">
-            <div class="mobile-meter-head"><span>P2</span><strong id="meterValueP2">—</strong></div>
-            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p2" id="meterFillP2"></div></div>
-          </div>
-          <div class="mobile-meter-row hidden" id="meterRowP3">
-            <div class="mobile-meter-head"><span>P3</span><strong id="meterValueP3">—</strong></div>
-            <div class="mobile-meter-track"><div class="mobile-meter-fill meter-p3" id="meterFillP3"></div></div>
-          </div>
-        </section>
-      </aside>
-    </div>
-    <section class="mobile-view-controls" aria-label="スマホ用視点操作">
-      <h3 class="section-title">視点操作（スマホ用）</h3>
-      <div class="view-slider-grid">
-        <div class="view-slider-field">
-          <label for="mobileYaw">左右の向き</label>
-          <input id="mobileYaw" type="range" min="0" max="100" step="1" value="50">
-          <small>左に動かすと左回り、右に動かすと右回りに視点が変わります。</small>
-        </div>
-        <div class="view-slider-field">
-          <label for="mobilePitch">上下の向き</label>
-          <input id="mobilePitch" type="range" min="0" max="100" step="1" value="50">
-          <small>左に動かすと低い位置、右に動かすと高い位置から見た視点になります。</small>
-        </div>
-      </div>
-    </section>
-  </section>
-
-  <section class="mobile-extra-panel" aria-label="その他の操作">
-    <h2 class="panel-heading">その他の操作</h2>
-    <h3 class="section-title">サンプル</h3>
-    <div class="buttons" aria-label="サンプルを選択">
-      <button type="button" class="action-btn" data-sample="1">基本回転</button>
-      <button type="button" class="action-btn" data-sample="2">回転の強さ</button>
-      <button type="button" class="action-btn" data-sample="3">回転軸の向き</button>
-      <button type="button" class="action-btn" data-sample="4">回転と発散</button>
-    </div>
-    <h3 class="section-title">風車のアニメーション</h3>
-    <div class="buttons">
-      <button type="button" class="action-btn" data-command="PlayWindmill();">▶ 再生</button>
-      <button type="button" class="action-btn" data-command="PauseWindmill();">Ⅱ 一時停止</button>
-      <button type="button" class="action-btn" data-command="StopWindmill();">■ 停止</button>
-    </div>
-    <h3 class="section-title">表示の切り替え</h3>
-    <div class="toggle-grid">
-      <label><input type="checkbox" data-flag="showWind" checked>風車</label>
-      <label><input type="checkbox" data-flag="showField" checked>ベクトル場</label>
-      <label><input type="checkbox" data-flag="showAxis" checked>rot軸</label>
-      <label><input type="checkbox" data-flag="showInfo" checked>数値</label>
-      <label><input type="checkbox" data-flag="showMeter" checked>速度メーター</label>
-    </div>
-  </section>
-</main>
-<script>
-(function () {
-  "use strict";
-  const BASE_W = 1600, BASE_H = 663;
-  const viewport = document.getElementById("canvasViewport");
-  const stage = document.getElementById("canvasStage");
-  const canvasRoot = document.getElementById("CSCanvas");
-  const multiMode = document.getElementById("multiMode");
-  const status = document.getElementById("mobileStatus");
-  const mobileYaw = document.getElementById("mobileYaw");
-  const mobilePitch = document.getElementById("mobilePitch");
-  let currentScale = 1;
-  let syncingViewSliders = false;
-
-  // Keep the CindyJS internal 1600x663 coordinate system intact.
-  // Scaling the entire scene container also scales its HTML text inputs.
-  function layout() {
-    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
-    if (mobileLayout) {
-      const graphWidth = Math.max(1, viewport.clientWidth);
-      currentScale = Math.min(.75, Math.max(.28, graphWidth / 640));
-      const graphCenterSourceX = 915;
-      stage.style.width = graphWidth + "px";
-      stage.style.height = (BASE_H * currentScale) + "px";
-      stage.style.overflow = "hidden";
-      canvasRoot.style.left = (graphWidth / 2 - graphCenterSourceX * currentScale) + "px";
-      canvasRoot.style.top = "0px";
-      canvasRoot.style.transform = "scale(" + currentScale + ")";
-      viewport.style.height = (BASE_H * currentScale) + "px";
-      viewport.style.overflow = "hidden";
-    } else {
-      const available = Math.max(1, viewport.clientWidth);
-      const fitted = Math.min(1, available / BASE_W);
-      currentScale = fitted;
-      stage.style.width = (BASE_W * currentScale) + "px";
-      stage.style.height = (BASE_H * currentScale) + "px";
-      stage.style.overflow = "visible";
-      canvasRoot.style.left = "0px";
-      canvasRoot.style.top = "0px";
-      canvasRoot.style.transform = "scale(" + currentScale + ")";
-      viewport.style.height = "auto";
-      viewport.style.overflowX = "auto";
-      viewport.style.overflowY = "hidden";
-    }
-  }
-  let appliedSceneMobileLayout = null;
-  function applyResponsiveScene() {
-    if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") return;
-    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
-    const delta = appliedSceneMobileLayout === null
-      ? (mobileLayout ? 5 : 0)
-      : (mobileLayout === appliedSceneMobileLayout ? 0 : (mobileLayout ? 5 : -5));
-    let script = "";
-    if (delta !== 0) {
-      script += "TH.xy=[TH.x+(" + delta + "),-3.75];FI.xy=[FI.x+(" + delta + "),-4.35];";
-    }
-    script += "MobileLayout=" + (mobileLayout ? "true" : "false") + ";";
-    issueCS(script);
-    appliedSceneMobileLayout = mobileLayout;
-  }
-  let lastMobileLayout = window.matchMedia("(max-width: 1100px)").matches;
-  window.addEventListener("resize", () => {
-    const mobileLayoutNow = window.matchMedia("(max-width: 1100px)").matches;
-    layout();
-    applyResponsiveScene();
-    if (mobileLayoutNow !== lastMobileLayout) {
-      lastMobileLayout = mobileLayoutNow;
-      if (mobileLayoutNow) { syncFields(); updateResults(); }
-    }
-  }, {passive: true});
-  layout();
-
-  function issueCS(script) {
-    if (typeof cdy === "undefined" || !cdy || typeof cdy.evokeCS !== "function") {
-      showStatus("CindyJSが読み込まれていません。インターネット接続を確認してください。", true);
-      return false;
-    }
-    try { cdy.evokeCS(script); return true; }
-    catch (error) { showStatus("操作に失敗しました。ブラウザーのコンソールを確認してください。", true); console.error(error); return false; }
-  }
-  function readCS(source) {
-    if (typeof cdy === "undefined" || !cdy || typeof cdy.evalcs !== "function") return null;
-    try { return cdy.evalcs(source); } catch (error) { return null; }
-  }
-  function readValue(source) {
-    const result = readCS(source);
-    return result && result.ctype !== "undefined" ? result.value : null;
-  }
-  function readText(source) {
-    const value = readValue(source);
-    return typeof value === "string" ? value : "";
-  }
-  function showStatus(message, error) {
-    status.textContent = message;
-    status.classList.toggle("error", !!error);
-  }
-  function sliderValueToPointX(value, mobileLayout) {
-    const shift = mobileLayout ? 5 : 0;
-    return (-4.45 + shift) + (8.9 * (Number(value) / 100));
-  }
-  function pointXToSliderValue(x, mobileLayout) {
-    const shift = mobileLayout ? 5 : 0;
-    return Math.max(0, Math.min(100, ((Number(x) - (-4.45 + shift)) / 8.9) * 100));
-  }
-  function syncViewSliders() {
-    if (!mobileYaw || !mobilePitch) return;
-    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
-    if (!mobileLayout) return;
-    const thx = readValue("TH.x");
-    const fix = readValue("FI.x");
-    syncingViewSliders = true;
-    if (typeof fix === "number" && Number.isFinite(fix)) mobileYaw.value = String(Math.round(pointXToSliderValue(fix, mobileLayout)));
-    if (typeof thx === "number" && Number.isFinite(thx)) mobilePitch.value = String(Math.round(pointXToSliderValue(thx, mobileLayout)));
-    syncingViewSliders = false;
-  }
-  function applyViewSlider(which) {
-    if (syncingViewSliders) return;
-    const mobileLayout = window.matchMedia("(max-width: 1100px)").matches;
-    const thx = sliderValueToPointX(mobilePitch.value, mobileLayout);
-    const fix = sliderValueToPointX(mobileYaw.value, mobileLayout);
-    if (which === "yaw") {
-      issueCS("FI.xy=[" + fix + ",-4.35];");
-    } else if (which === "pitch") {
-      issueCS("TH.xy=[" + thx + ",-3.75];");
-    } else {
-      issueCS("TH.xy=[" + thx + ",-3.75];FI.xy=[" + fix + ",-4.35];");
-    }
-  }
-  function setModeUI(isMulti) {
-    multiMode.checked = Boolean(isMulti);
-    document.getElementById("p2Wrap").classList.toggle("field-disabled", !isMulti);
-    document.getElementById("p3Wrap").classList.toggle("field-disabled", !isMulti);
-    document.getElementById("fieldP2").disabled = !isMulti;
-    document.getElementById("fieldP3").disabled = !isMulti;
-    document.getElementById("p1Label").textContent = isMulti ? "P1" : "P";
-    document.querySelector('[data-target="0"]').textContent = isMulti ? "P1" : "P";
-    document.querySelectorAll('[data-target="1"], [data-target="2"]').forEach(button => {
-      button.disabled = !isMulti;
-    });
-  }
-  let selectedTarget = 0;
-  function setSelectedTarget(target) {
-    selectedTarget = Number(target);
-    document.querySelectorAll("[data-target]").forEach(button => {
-      button.classList.toggle("active", Number(button.dataset.target) === selectedTarget);
-    });
-  }
-  function commitFieldsToCS() {
-    const values = {
-      Text0: document.getElementById("fieldP1").value,
-      TextP2: document.getElementById("fieldP2").value,
-      TextP3: document.getElementById("fieldP3").value,
-      Text1: document.getElementById("fieldF").value
-    };
-    if (Object.values(values).some(value => /["\\\x00-\x1f]/.test(value))) { showStatus("入力エラー：使用できない文字が含まれています", true); return false; }
-    const script = Object.entries(values).map(([name, value]) =>
-      'element("' + name + '").text=' + JSON.stringify(value) + ';'
-    ).join("");
-    return issueCS(script);
-  }
-  function syncFields() {
-    const names = {fieldP1:'Text0',fieldP2:'TextP2',fieldP3:'TextP3',fieldF:'Text1'};
-    for (const [id, name] of Object.entries(names)) {
-      const value = readText('element("' + name + '").text');
-      if (typeof readValue('element("' + name + '").text') === "string") document.getElementById(id).value = value;
-    }
-    const isMulti = readValue("showMulti");
-    if (typeof isMulti === "boolean") setModeUI(isMulti);
-    const inputNoText = readText("text(InputNo)");
-    const inputNo = Number(inputNoText);
-    if (inputNoText !== "" && Number.isInteger(inputNo) && inputNo >= 0 && inputNo <= 3) {
-      setSelectedTarget(inputNo);
-    }
-    for (const checkbox of document.querySelectorAll("[data-flag]")) {
-      const value = readValue(checkbox.dataset.flag);
-      if (typeof value === "boolean") checkbox.checked = value;
-    }
-    syncViewSliders();
-  }
-  // Call existing CindyScript input validation, then show its message readably.
-  function updateResults() {
-    const error = readText("InputErr");
-    if (error) { showStatus(error, true); }
-    else if (readValue("HasResult") === true) { showStatus("計算結果が反映されました。", false); }
-    const hasResult = readValue("HasResult") === true;
-    const showMobilePrompt = !hasResult && window.matchMedia("(max-width: 1100px)").matches;
-    document.getElementById("graphPlaceholder").style.display = showMobilePrompt ? "flex" : "none";
-    const readResult = expression => hasResult ? readText("text(" + expression + ")") || "—" : "—";
-    document.getElementById("resultDiv").textContent = readResult("divPResult");
-    document.getElementById("resultRot").textContent = readResult("rotPResult");
-    document.getElementById("resultMag").textContent = readResult("rotmag");
-    document.getElementById("resultSpeed").textContent = readResult("rotspeed");
-
-    const isMulti = readValue("showMulti") === true;
-    document.getElementById("resultSpeedLabel").textContent = isMulti ? "回転速度(P1)" : "回転速度";
-    document.getElementById("mobileResults").classList.toggle("hidden", readValue("showInfo") === false);
-    const meterEnabled = readValue("showMeter") !== false;
-    const meterPanel = document.getElementById("mobileMeterPanel");
-    meterPanel.classList.toggle("hidden", !hasResult || !meterEnabled);
-    const meterSpecs = [
-      { key: "P1", source: isMulti ? "mspeeds_1" : "rotspeed", row: "meterRowP1", value: "meterValueP1", fill: "meterFillP1" },
-      { key: "P2", source: "mspeeds_2", row: "meterRowP2", value: "meterValueP2", fill: "meterFillP2" },
-      { key: "P3", source: "mspeeds_3", row: "meterRowP3", value: "meterValueP3", fill: "meterFillP3" }
-    ];
-    document.getElementById("meterLabelP1").textContent = isMulti ? "P1" : "P";
-    meterSpecs.forEach((meter, index) => {
-      const row = document.getElementById(meter.row);
-      row.classList.toggle("hidden", !isMulti && index > 0);
-      const raw = hasResult ? readText("text(" + meter.source + ")") : "";
-      const speed = Number(raw);
-      const safeSpeed = Number.isFinite(speed) ? Math.max(0, speed) : 0;
-      document.getElementById(meter.value).textContent = hasResult && raw !== ""
-        ? String(Math.round(safeSpeed * 100) / 100) : "—";
-      document.getElementById(meter.fill).style.width = hasResult && raw !== ""
-        ? (Math.max(0, Math.min(100, safeSpeed / 5 * 100)) + "%") : "0%";
-    });
-  }
-  // Exclude characters that could break CindyScript string literals.
-  // Non-ASCII input is reported here with the same user-facing intent as ver.49.
-  const allowed = /^[A-Za-z0-9_+*\/^().,\[\]\- π√]+$/;
-  document.getElementById("mobileForm").addEventListener("submit", event => {
-    event.preventDefault();
-    const values = [
-      ["P", "fieldP1", "Text0"],
-      ["F", "fieldF", "Text1"],
-      ...(multiMode.checked ? [["P2", "fieldP2", "TextP2"], ["P3", "fieldP3", "TextP3"]] : [])
-    ];
-    for (const [label, id] of values) {
-      const value = document.getElementById(id).value.trim();
-      if (!value || !allowed.test(value)) {
-        showStatus("入力エラー（" + label + "）：使用できない文字が含まれています", true);
-        return;
-      }
-    }
-    let script = "showMulti=" + (multiMode.checked ? "true" : "false") + ";";
-    if (!multiMode.checked) script += "if(InputNo==1 % InputNo==2,InputNo=0);";
-    for (const [, id, name] of values) {
-      const value = document.getElementById(id).value.trim();
-      script += 'element("' + name + '").text=' + JSON.stringify(value) + ';';
-    }
-    script += 'InputErr="";Calcflg=1;';
-    if (issueCS(script)) {
-      showStatus("計算を実行しています…", false);
-      setTimeout(() => { syncFields(); updateResults(); }, 250);
-    }
-  });
-  multiMode.addEventListener("change", () => {
-    const value = multiMode.checked;
-    setModeUI(value);
-    issueCS("showMulti=" + (value ? "true" : "false") + ";if(!showMulti & (InputNo==1 % InputNo==2),InputNo=0);Calcflg=1;");
-    setTimeout(() => { syncFields(); updateResults(); }, 250);
-  });
-  document.getElementById("btnResetMobile").addEventListener("click", () => {
-    if (issueCS("ResetAll();")) {
-      document.getElementById("mobileInputHelp").open = false;
-      setTimeout(() => { syncFields(); updateResults(); showStatus("初期状態に戻しました。", false); }, 160);
-    }
-  });
-  document.querySelectorAll("[data-target]").forEach(button => {
-    button.addEventListener("click", () => {
-      const target = Number(button.dataset.target);
-      if ((target === 1 || target === 2) && !multiMode.checked) return;
-      if (!commitFieldsToCS()) return;
-      if (issueCS("InputNo=" + target + ";")) setSelectedTarget(target);
-    });
-  });
-  document.querySelectorAll("[data-key]").forEach(button => {
-    button.addEventListener("click", () => {
-      if (!commitFieldsToCS()) return;
-      const key = button.dataset.key;
-      if (issueCS("PutKey(" + JSON.stringify(key) + ");")) {
-        setTimeout(syncFields, 40);
-      }
-    });
-  });
-  document.querySelectorAll("[data-action]").forEach(button => {
-    button.addEventListener("click", () => {
-      if (!commitFieldsToCS()) return;
-      const action = button.dataset.action;
-      const script = action === "clear" ? "ClearCurrent();" : action === "back" ? "BackCurrent();" : "";
-      if (script && issueCS(script)) setTimeout(syncFields, 40);
-    });
-  });
-  document.querySelectorAll("[data-sample]").forEach(button => {
-    button.addEventListener("click", () => {
-      if (issueCS("ApplySample(" + Number(button.dataset.sample) + ");")) {
-        setTimeout(() => { syncFields(); updateResults(); }, 200);
-      }
-    });
-  });
-  document.querySelectorAll("[data-command]").forEach(button => {
-    button.addEventListener("click", () => issueCS(button.dataset.command));
-  });
-  document.querySelectorAll("[data-flag]").forEach(checkbox => {
-    checkbox.addEventListener("change", () => {
-      const name = checkbox.dataset.flag;
-      if (!["showWind","showField","showAxis","showInfo","showMeter"].includes(name)) return;
-      issueCS(name + "=" + (checkbox.checked ? "true" : "false") + ";");
-      setTimeout(updateResults, 80);
-    });
-  });
-  if (mobileYaw) {
-    mobileYaw.addEventListener("input", () => applyViewSlider("yaw"));
-    mobileYaw.addEventListener("change", () => applyViewSlider("yaw"));
-  }
-  if (mobilePitch) {
-    mobilePitch.addEventListener("input", () => applyViewSlider("pitch"));
-    mobilePitch.addEventListener("change", () => applyViewSlider("pitch"));
-  }
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      applyResponsiveScene();
-      syncFields();
-      updateResults();
-      layout();
-      syncViewSliders();
-    }, 500);
-  });
-  // Show calculation errors and results after CindyJS has advanced its draw loop.
-  setInterval(() => {
-    if (window.innerWidth <= 1100 && document.visibilityState === "visible") {
-      updateResults();
-      syncViewSliders();
-    }
-  }, 800);
-})();
-</script>
+    <div id="CSCanvas"></div>
 </body>
 </html>
