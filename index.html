@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     
-    <title>ver65_1125.cdy</title>
+    <title>ver66_1125.cdy</title>
     <style type="text/css">
         * {
             margin: 0px;
@@ -5025,12 +5025,18 @@ SymDisplayFunction(s):=(
   regional(t,k,fn,ok);
   t=SymCompact(text(s));
   ok=false;
-  k=indexof(t,"(");
-  if((k>1) & (substring(t,length(t)-1,length(t))==")"),
+  if((length(t)>=3) & (substring(t,0,1)=="√") & (substring(t,1,2)=="(") &
+     (substring(t,length(t)-1,length(t))==")"),
+    ok=true,
     (
-      fn=substring(t,0,k-1);
-      if(indexof("|sin|cos|tan|exp|sqrt|ln|","|"+fn+"|")>0,
-        ok=true
+      k=indexof(t,"(");
+      if((k>1) & (substring(t,length(t)-1,length(t))==")"),
+        (
+          fn=substring(t,0,k-1);
+          if(indexof("|sin|cos|tan|exp|sqrt|ln|","|"+fn+"|")>0,
+            ok=true
+          );
+        )
       );
     )
   );
@@ -5168,7 +5174,10 @@ SymDisplayExpr(s):=(
                         (
                           fn=substring(t,0,k-1);
                           inner=substring(t,k,length(t)-1);
-                          out=fn+"("+SymDisplayExpr(inner)+")";
+                          if(fn=="sqrt",
+                            out="√("+SymDisplayExpr(inner)+")",
+                            out=fn+"("+SymDisplayExpr(inner)+")"
+                          );
                         ),
                         (
                           if(t=="pi",out="π",out=t);
@@ -6301,7 +6310,7 @@ var cdy = CindyJS({
     {name: "M", type: "Free", pos: [4.0, 1.2726592559086733, -1.2093257745989117], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
     {name: "N", type: "Free", pos: [4.0, 0.6312277657251566, -1.1079723382888567], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
     {name: "A", type: "CircleMP", color: [0.0, 0.0, 1.0], args: ["M", "N"], visible: false, printname: "$C_{0, size: 3.0, border: true }$", size: 3.0, border: true },
-    {name: "T", type: "PointOnCircle", pos: [4.0, {r: 2.0432583696283264, i: 2.4926604658680937E-16, size: 3.0, border: true }, {r: -1.3310891575762889, i: 7.1464080060884025E-16, size: 3.0, border: true }], color: [1.0, 0.0, 0.0], args: ["A"], visible: false, labeled: false, size: 3.0, border: true },
+    {name: "T", type: "PointOnCircle", pos: [4.0, {r: 2.0432583696283277, i: 8.717333460609962E-17, size: 3.0, border: true }, {r: -1.3310891575762887, i: 2.499242174683857E-16, size: 3.0, border: true }], color: [1.0, 0.0, 0.0], args: ["A"], visible: false, labeled: false, size: 3.0, border: true },
     {name: "Anim1", type: "AnimationAlg", color: [0.0, 0.0, 1.0], args: ["T", "A"], dock: {offset: [0.0, -0.0], size: 3.0, border: true }, size: 3.0, border: true },
     {name: "Text20", type: "Button", pos: [4.0, 0.2543352601156069, -0.4624277456647399], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "Calcflg=1", text: "計算", textsize: 18.0},
     {name: "Text20'", type: "Button", pos: [4.0, 0.23280423280423285, -0.42328042328042337], color: [0.0, 0.0, 0.0], fillcolor: [1.0, 1.0, 1.0], fillalpha: 0.27272728085517883, script: "PutKey(\"0\");", text: "0", textsize: 18.0},
