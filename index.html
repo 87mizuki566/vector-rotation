@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>ベクトル場の回転（rot）可視化教材 | ver.66</title>
+    <title>ベクトル場の回転（rot）可視化教材 | ver.68</title>
     <style type="text/css">
         * {
             margin: 0px;
@@ -209,6 +209,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid #2563eb; outline-
       .symbolic-row span { font-size:12px; color:#506780; }
       .symbolic-row strong { flex:1 1 150px; min-width:0; font-size:15px; color:#193d82; overflow-wrap:anywhere; }
     }
+    
+.desktop-view-hint { width:100%; font-size:13px; color:#526177; }
+@media (max-width:1100px) { .desktop-view-hint { display:none; } }
     </style>
     <link rel="stylesheet" href="https://cindyjs.org/dist/v0.8.8/CindyJS.css">
     <script type="text/javascript" src="https://cindyjs.org/dist/v0.8.8/Cindy.js"></script>
@@ -4895,6 +4898,50 @@ SymComponents(s):=(
   c
 );
 
+Sym68ExpNormalize(s):=(
+  regional(t,out,k,a,b,aa,bb,op,fn,inner);
+  t=SymCompact(text(s)); out=t;
+  if(length(t)>0,
+    if(SymOuter(t),
+      out="("+Sym68ExpNormalize(substring(t,1,length(t)-1))+")",
+      (
+        k=SymOperator(t,"+-",false);
+        if(k==0 & substring(t,0,1)=="-",
+          out="-"+Sym68ExpNormalize(substring(t,1,length(t))),
+          (
+            if(k==0,k=SymOperator(t,"*/",false));
+            if(k==0,k=SymOperator(t,"^",true));
+            if(k>0,
+              (
+                op=substring(t,k-1,k);
+                a=substring(t,0,k-1); b=substring(t,k,length(t));
+                aa=Sym68ExpNormalize(a); bb=Sym68ExpNormalize(b);
+                if(op=="^" & SymUnwrap(aa)=="exp(1)" & length(bb)>0,
+                  out="exp("+SymUnwrap(bb)+")",
+                  out=aa+op+bb
+                );
+              ),
+              (
+                k=indexof(t,"(");
+                if(k>1,
+                  if(SymOuter(substring(t,k-1,length(t))),
+                    (
+                      fn=substring(t,0,k-1);
+                      inner=substring(t,k,length(t)-1);
+                      out=fn+"("+Sym68ExpNormalize(inner)+")";
+                    )
+                  )
+                );
+              )
+            );
+          )
+        );
+      )
+    )
+  );
+  out
+);
+
 BuildSymbolicField(s):=(
   regional(c,dx,dy,dz,rx,ry,rz,t,err);
   divResult="";
@@ -4904,6 +4951,7 @@ BuildSymbolicField(s):=(
   c=SymComponents(t);
   if(length(c)==3,
     (
+      c=[Sym68ExpNormalize(text(c_1)),Sym68ExpNormalize(text(c_2)),Sym68ExpNormalize(text(c_3))];
       dx=SymDiffField(text(c_1),"x");
       dy=SymDiffField(text(c_2),"y");
       dz=SymDiffField(text(c_3),"z");
@@ -5003,7 +5051,7 @@ Sym65Mono(s):=(
             if(SymNumber(t),
               (
                 n=parse(t);
-                if(n==round(n) & abs(n)<=1000000000,m=[1,n,0,0,0]);
+                if(abs(n)<=1000000000,m=[1,n,0,0,0]);
               ),
               if(substring(t,0,1)=="-" & length(t)>1,
                 (
@@ -5075,13 +5123,13 @@ Sym65MonoPair(a,b,op):=(
             (
               n=ma_2*mb_2;
               if(abs(n)<=1000000000 & ma_3+mb_3<=100 & ma_4+mb_4<=100 & ma_5+mb_5<=100,
-                out=Sym65MonoText([1,n,ma_3+mb_3,ma_4+mb_4,ma_5+mb_5])
+                if(n==round(n),out=Sym65MonoText([1,n,ma_3+mb_3,ma_4+mb_4,ma_5+mb_5]))
               );
             ),
             if(ma_3==mb_3 & ma_4==mb_4 & ma_5==mb_5,
               (
                 if(op=="+",n=ma_2+mb_2,n=ma_2-mb_2);
-                if(abs(n)<=1000000000,out=Sym65MonoText([1,n,ma_3,ma_4,ma_5]));
+                if(n==round(n) & abs(n)<=1000000000,out=Sym65MonoText([1,n,ma_3,ma_4,ma_5]));
               )
             )
           );
@@ -6004,19 +6052,11 @@ if(HasResult,
           )
         );
 
-        TH.visible=!MobileLayout;
-        FI.visible=!MobileLayout;
+        TH.visible=false;
+        FI.visible=false;
         TH.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,TH.x)),-3.75];
         FI.xy=[max(-4.45+viewSliderShift,min(4.45+viewSliderShift,FI.x)),-4.35];
-        // The mobile HTML sliders still control TH/FI; hide only their canvas UI.
-        if(!MobileLayout,
-          (
-            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下",size->13);
-            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右",size->13);
-          )
-        );
+        // View controls: desktop drag / mobile HTML sliders.
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -6284,8 +6324,8 @@ if(HasResult,
         A.visible=false;
       ),
       (
-        TH.visible=!MobileLayout;
-        FI.visible=!MobileLayout;
+        TH.visible=false;
+        FI.visible=false;
         LB.visible=false;
         SW.visible=false;
         NE.visible=false;
@@ -6294,14 +6334,7 @@ if(HasResult,
         T.visible=false;
         A.visible=false;
 
-        if(!MobileLayout,
-          (
-            draw([-4.45+viewSliderShift,-3.75],[4.45+viewSliderShift,-3.75],size->2,color->[0.35,0.35,0.35]);
-            draw([-4.45+viewSliderShift,-4.35],[4.45+viewSliderShift,-4.35],size->2,color->[0.35,0.35,0.35]);
-            drawtext([-4.35+viewSliderShift,-3.52],"視点：上下 ("+text(round(viewthdegree))+"°)",size->13);
-            drawtext([-4.35+viewSliderShift,-4.12],"視点：左右 ("+text(round(viewfidegree))+"°)",size->13);
-          )
-        );
+        // View controls: desktop drag / mobile HTML sliders.
 
         DrawSeg3([-5,0,0],[5,0,0],[0,0,0],1);
         DrawSeg3([0,-5,0],[0,5,0],[0,0,0],1);
@@ -6541,8 +6574,8 @@ var cdy = CindyJS({
     {name: "Text5", type: "EditableText", pos: [1.3716301577866423, -4.0, 0.3698133834802243], color: [0.0, 0.0, 0.0], fillcolor: [0.0, 0.0, 0.0], fillalpha: 1.0, visible: false, minwidth: 300, text: "rot F (P)", textsize: 18.0},
     {name: "SW", type: "Free", pos: [4.0, 4.0, -0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
     {name: "NE", type: "Free", pos: [4.0, 4.0, 0.8], color: [1.0,1.0,1.0], visible: false, labeled: false, size: 2.0, border:false },
-    {name: "FI", type: "Free", pos: [1.1266918045831924, -4.0, 0.9195402298850576], color: [1.0, 0.0, 0.0], labeled: true, size: 8.5, border: true },
-    {name: "TH", type: "Free", pos: [-1.6288060342141681, -4.0, 1.0666666666666667], color: [1.0, 0.0, 0.0], labeled: true, size: 8.5, border: true },
+    {name: "FI", type: "Free", pos: [1.1266918045831924, -4.0, 0.9195402298850576], color: [1.0, 0.0, 0.0], visible: false, labeled: true, size: 8.5, border: true },
+    {name: "TH", type: "Free", pos: [-1.6288060342141681, -4.0, 1.0666666666666667], color: [1.0, 0.0, 0.0], visible: false, labeled: true, size: 8.5, border: true },
     {name: "M", type: "Free", pos: [4.0, 1.2726592559086733, -1.2093257745989117], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
     {name: "N", type: "Free", pos: [4.0, 0.6312277657251566, -1.1079723382888567], color: [1.0, 0.0, 0.0], visible: false, labeled: false, size: 3.0, border: true },
     {name: "A", type: "CircleMP", color: [0.0, 0.0, 1.0], args: ["M", "N"], visible: false, printname: "$C_{0, size: 3.0, border: true }$", size: 3.0, border: true },
@@ -6627,7 +6660,8 @@ var cdy = CindyJS({
     <main class="page">
   <header class="page-header">
     <h1 class="page-title">ベクトル場の回転（rot）可視化教材</h1>
-    <p class="page-subtitle">ver.66｜パソコン・スマートフォン対応</p>
+    <p class="page-subtitle">ver.68｜パソコン・スマートフォン対応</p>
+      <p class="desktop-view-hint">3D図をマウスでドラッグすると視点を変更できます。</p>
   </header>
 
   <section class="mobile-panel" aria-label="スマートフォン用入力テンキー">
@@ -6919,6 +6953,52 @@ var cdy = CindyJS({
       issueCS("TH.xy=[" + thx + ",-3.75];FI.xy=[" + fix + ",-4.35];");
     }
   }
+  // Desktop view rotation: only drags starting on the 3D drawing region.
+  // TH/FI remain the single source of truth, so paused/stopped views can also rotate.
+  let viewDrag = null;
+  const mobileQuery = window.matchMedia("(max-width: 1100px)");
+  function graphPointer(event) {
+    const rect = canvasRoot.getBoundingClientRect();
+    return {x: (event.clientX - rect.left) * BASE_W / rect.width,
+            y: (event.clientY - rect.top) * BASE_H / rect.height};
+  }
+  canvasRoot.addEventListener("pointerdown", event => {
+    if (mobileQuery.matches || event.button !== 0 || event.pointerType === "touch" ||
+        event.target.tagName.toLowerCase() !== "canvas" || readValue("HasResult") !== true) return;
+    const p = graphPointer(event);
+    if (p.x < 635 || p.x > 1110 || p.y < 105 || p.y > 570) return;
+    const th = readValue("TH.x"), fi = readValue("FI.x");
+    if (!Number.isFinite(th) || !Number.isFinite(fi)) return;
+    viewDrag = {id: event.pointerId, x: event.clientX, y: event.clientY, th, fi};
+    try { canvasRoot.setPointerCapture(event.pointerId); } catch (_) {}
+    canvasRoot.style.cursor = "grabbing";
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  canvasRoot.addEventListener("pointermove", event => {
+    if (!viewDrag || viewDrag.id !== event.pointerId) return;
+    if (mobileQuery.matches || event.buttons === 0) { endViewDrag(event); return; }
+    const dx = (event.clientX - viewDrag.x) / currentScale;
+    const dy = (event.clientY - viewDrag.y) / currentScale;
+    const clamp = x => Math.max(-4.45, Math.min(4.45, x));
+    const wrap = x => ((x + 4.45) % 8.9 + 8.9) % 8.9 - 4.45;
+    const th = clamp(viewDrag.th - dy * .018);
+    const fi = wrap(viewDrag.fi + dx * .018);
+    issueCS("TH.xy=[" + th + ",-3.75];FI.xy=[" + fi + ",-4.35];");
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  function endViewDrag(event) {
+    if (!viewDrag || (event && event.pointerId !== viewDrag.id)) return;
+    const id = viewDrag.id;
+    viewDrag = null;
+    canvasRoot.style.cursor = "";
+    if (canvasRoot.hasPointerCapture(id)) canvasRoot.releasePointerCapture(id);
+  }
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(name =>
+    canvasRoot.addEventListener(name, endViewDrag, true));
+  window.addEventListener("blur", () => endViewDrag());
+
   function setModeUI(isMulti) {
     multiMode.checked = Boolean(isMulti);
     document.getElementById("p2Wrap").classList.toggle("field-disabled", !isMulti);
